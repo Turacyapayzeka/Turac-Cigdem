@@ -86,3 +86,23 @@
 - **Steeldome görseli.** ASELSAN'ın markalı görseli olduğu için filme konmadı; katmanlı savunma fikri 07. sahnede özgün bir diyagramla anlatıldı.
 - **Ortak firmalar.** Basında tüfek ve sensör entegrasyonu için ortak firmalar anılıyor; filmde marka adı geçmiyor. İstenirse 04. sahne açıklamalarına eklenebilir.
 - **Ses.** Seslendirme için yukarıdaki metin toplam ~70 kelime/sahne hızında okunduğunda zamanlamaya oturur. Müzik önerisi: 90–100 BPM, perküsif, sinematik.
+
+---
+
+## Storyboard kareleri
+
+| 01 Açılış | 02 Tehdit |
+|---|---|
+| ![](storyboard/01-acilis.jpg) | ![](storyboard/02-tehdit.jpg) |
+
+| 03 Tespit ve takip | 04 Robotik taret |
+|---|---|
+| ![](storyboard/03-tespit.jpg) | ![](storyboard/04-taret.jpg) |
+
+| 05 Angajman | 06 Entegrasyon |
+|---|---|
+| ![](storyboard/05-angajman.jpg) | ![](storyboard/06-entegrasyon.jpg) |
+
+| 07 Katmanlı savunma | 08 Kapanış |
+|---|---|
+| ![](storyboard/07-katmanli-savunma.jpg) | ![](storyboard/08-kapanis.jpg) |
