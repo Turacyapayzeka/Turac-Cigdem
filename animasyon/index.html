@@ -62,7 +62,7 @@ body.render .bigplay,body.render .loading{display:none}
       <div class="eyebrow">Turaç · Sterling · Ürün tanıtım filmi</div>
       <h1>Drone Shield · Dron Kalkanı</h1>
     </div>
-    <div class="meta">72 sn · 1920×1080 · 30 fps · gerçek saha fotoğrafları üzerine animasyon</div>
+    <div class="meta">80 sn · 1920×1080 · 30 fps · gerçek saha fotoğrafları üzerine animasyon</div>
   </header>
 
   <div class="film" id="filmBox">
@@ -80,8 +80,8 @@ body.render .bigplay,body.render .loading{display:none}
       <span id="playLabel">OYNAT</span>
     </button>
     <div class="scrub">
-      <input type="range" id="scrub" min="0" max="72" step="0.0333" value="0" aria-label="Zaman çubuğu">
-      <span class="time" id="time">00:00 / 01:12</span>
+      <input type="range" id="scrub" min="0" max="80" step="0.0333" value="0" aria-label="Zaman çubuğu">
+      <span class="time" id="time">00:00 / 01:20</span>
     </div>
     <button class="btn" id="loopBtn" type="button" aria-pressed="true" title="Döngü">DÖNGÜ: AÇIK</button>
   </div>
@@ -89,7 +89,7 @@ body.render .bigplay,body.render .loading{display:none}
   <nav class="chapters" id="chapters" aria-label="Sahneler"></nav>
 
   <div class="notes">
-    <p><strong>Film ne anlatıyor?</strong> Dron sürüsü tehdidi, çok katmanlı sensörlerle tespit, yapay zekâ destekli takip, 150 m'de atış ve metal bulutu, Amarok üzerinde platform entegrasyonu, katmanlı savunmadaki yeri ve kapanış.</p>
+    <p><strong>Film ne anlatıyor?</strong> Dron sürüsü tehdidi, çok katmanlı sensörlerle tespit, dronu takip eden robotik taret, 150 m'de atış ve metal bulutu, araç üstü / gemi / rafineri kulesi kullanımı, havadaki savunma katmanları ve kapanış.</p>
     <p><strong>Kullanım:</strong> <kbd>Boşluk</kbd> oynat/duraklat, <kbd>←</kbd> <kbd>→</kbd> 5 sn ileri/geri, sahne çiplerine tıklayarak atlayın. Menzil ve mühimmat rakamları basına yansıyan açıklamalardan alınmıştır; yayın öncesi doğrulanmalıdır.</p>
   </div>
 </div>
@@ -97,25 +97,31 @@ body.render .bigplay,body.render .loading{display:none}
 <script>
 (function(){
 'use strict';
-const W=1920,H=1080,FPS=30,DUR=72;
+const W=1920,H=1080,FPS=30,DUR=80;
 const SCENES=[
   {id:'acilis',  n:'01',name:'Açılış',            t0:0, t1:7},
   {id:'tehdit',  n:'02',name:'Tehdit',            t0:7, t1:15},
   {id:'tespit',  n:'03',name:'Tespit ve takip',   t0:15,t1:24},
   {id:'taret',   n:'04',name:'Robotik taret',     t0:24,t1:34},
   {id:'angajman',n:'05',name:'Angajman',          t0:34,t1:48},
-  {id:'platform',n:'06',name:'Entegrasyon',       t0:48,t1:56},
-  {id:'katman',  n:'07',name:'Katmanlı savunma',  t0:56,t1:64},
-  {id:'kapanis', n:'08',name:'Kapanış',           t0:64,t1:72},
+  {id:'platform',n:'06',name:'Araç · gemi · kule',t0:48,t1:62},
+  {id:'katman',  n:'07',name:'Hava katmanları',   t0:62,t1:72},
+  {id:'kapanis', n:'08',name:'Kapanış',           t0:72,t1:80},
 ];
 const C={bg:'#0b0f14',fg:'#e8edf2',muted:'#9aa6b4',brass:'#d4a853',cyan:'#6cc7e0',red:'#ff5a5a',amber:'#ffb648'};
 const FD='"Saira Condensed","Inter","Arial Narrow",sans-serif';
 const FB='"Saira","Inter",system-ui,sans-serif';
 const FM='"JetBrains Mono","DejaVu Sans Mono",monospace';
-const SRC={yan:'assets/amarok-yan.jpg',arkaTaret:'assets/amarok-arka-taret.jpg',arkaSensor:'assets/amarok-arka-sensor.jpg',
-  taret:'assets/taret-yakin.jpg',taretBlur:'assets/taret-yakin-blur.jpg',ust:'assets/amarok-ust.jpg',on:'assets/amarok-on.jpg',
-  saha:'assets/saha-testi.jpg',logo:'assets/logo-drone-shield.png',turac:'assets/logo-turac.png',sterling:'assets/logo-sterling.png'};
+const SRC={yan:'assets/amarok-yan.jpg',yanClean:'assets/amarok-yan-clean.jpg',arkaTaret:'assets/amarok-arka-taret.jpg',arkaClean:'assets/amarok-arka-taret-clean.jpg',
+  arkaSensor:'assets/amarok-arka-sensor.jpg',taret:'assets/taret-yakin.jpg',taretBlur:'assets/taret-yakin-blur.jpg',
+  cutYan:'assets/taret-yan-cut.png',cutArka:'assets/taret-arka-cut.png',cutYakin:'assets/taret-yakin-cut.png',
+  logo:'assets/logo-drone-shield.png',turac:'assets/logo-turac.png',sterling:'assets/logo-sterling.png'};
 const IMG={};
+/* Taret kesmeleri: px,py = dönüş ekseni (pan-tilt merkezi), mx,my = namlu ucu, sx,sy = sensör; kesme piksel koordinatları. Namlu sola bakar. */
+const SPR={yan:{key:'cutYan',px:375,py:130,mx:17,my:103,sx:390,sy:30},
+  arka:{key:'cutArka',px:345,py:150,mx:17,my:142,sx:345,sy:40},
+  yakin:{key:'cutYakin',px:525,py:295,mx:12,my:105,sx:470,sy:95}};
+for(const k in SPR){const s=SPR[k];s.e0=Math.atan2(s.py-s.my,s.px-s.mx);}
 
 const canvas=document.getElementById('film');
 const ctx=canvas.getContext('2d',{alpha:false});
@@ -140,24 +146,26 @@ function wrap(s,x,y,maxW,o){const words=s.split(' ');let line='',yy=y;const lh=o
   if(line)txt(line,x,yy,o);return yy+lh;}
 function line(x1,y1,x2,y2){ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();}
 function circle(x,y,r,fill,stroke){ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);if(fill)ctx.fill();if(stroke)ctx.stroke();}
+function ellipse(x,y,rx,ry,fill,stroke){ctx.beginPath();ctx.ellipse(x,y,rx,ry,0,0,Math.PI*2);if(fill)ctx.fill();if(stroke)ctx.stroke();}
 function rr(x,y,w,h,r){r=Math.min(r,w/2,h/2);ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();}
+function poly(pts){ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.closePath();}
 function corners(x,y,w,h,L){ctx.beginPath();
   ctx.moveTo(x,y+L);ctx.lineTo(x,y);ctx.lineTo(x+L,y);ctx.moveTo(x+w-L,y);ctx.lineTo(x+w,y);ctx.lineTo(x+w,y+L);
   ctx.moveTo(x+w,y+h-L);ctx.lineTo(x+w,y+h);ctx.lineTo(x+w-L,y+h);ctx.moveTo(x+L,y+h);ctx.lineTo(x,y+h);ctx.lineTo(x,y+h-L);ctx.stroke();}
 function tc(t){const s=Math.floor(t),f=Math.floor((t-s)*FPS);return `00:${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}:${String(f).padStart(2,'0')}`;}
+const STARS=(()=>{const r=rng(7),a=[];for(let i=0;i<170;i++)a.push({x:r()*W,y:r(),r:1+r()*1.4,f:0.8+r()*2.2,p:r()*6.283});return a;})();
 const PELLETS=(()=>{const r=rng(99),a=[];for(let i=0;i<160;i++){const v=(r()+r()+r())/3-0.5;a.push({u:r()-0.5,v:v*2,w:r()});}return a;})();
 const FRAG=(()=>{const r=rng(5),a=[];for(let i=0;i<10;i++)a.push({vx:(r()-0.5)*520,vy:-r()*320,w:(r()-0.5)*12,l:8+r()*16});return a;})();
 const NOISE=(()=>{const c=document.createElement('canvas');c.width=c.height=256;const x=c.getContext('2d');const id=x.createImageData(256,256);const r=rng(3);
   for(let i=0;i<id.data.length;i+=4){const v=90+r()*120|0;id.data[i]=id.data[i+1]=id.data[i+2]=v;id.data[i+3]=255;}x.putImageData(id,0,0);return c;})();
 
-/* ---------- photographic plates ---------- */
-/* crop: source rect (16:9). k: zoom >=1 about focus (fx,fy in 0..1 of the frame). Returns a mapper from source px to frame px. */
+/* ---------- fotoğraf plakaları ---------- */
 function plate(img,crop,k,fx,fy,o){o=o||{};const s=W/crop.w*k,dw=crop.w*s,dh=crop.h*s,dx=fx*W-fx*dw+(o.ox||0),dy=fy*H-fy*dh+(o.oy||0);
   ctx.save();if(hasFilter&&o.filter!==false)ctx.filter=o.filter||'contrast(1.07) saturate(0.78) brightness(0.95)';ctx.globalAlpha=o.alpha==null?1:o.alpha;
   ctx.drawImage(img,crop.x,crop.y,crop.w,crop.h,dx,dy,dw,dh);ctx.restore();
-  return (ix,iy)=>({x:dx+(ix-crop.x)*s,y:dy+(iy-crop.y)*s});}
+  return {s,map:(ix,iy)=>({x:dx+(ix-crop.x)*s,y:dy+(iy-crop.y)*s})};}
 function grade(strength){const g=strength==null?1:strength;ctx.save();
-  ctx.globalCompositeOperation='multiply';ctx.fillStyle=`rgba(214,224,240,${0.95})`;ctx.fillRect(0,0,W,H);
+  ctx.globalCompositeOperation='multiply';ctx.fillStyle='rgba(214,224,240,0.95)';ctx.fillRect(0,0,W,H);
   ctx.globalCompositeOperation='overlay';ctx.fillStyle=`rgba(255,170,90,${0.22*g})`;ctx.fillRect(0,0,W,H);
   ctx.globalCompositeOperation='soft-light';ctx.fillStyle=`rgba(8,18,38,${0.4*g})`;ctx.fillRect(0,0,W,H);
   ctx.restore();}
@@ -168,10 +176,10 @@ function scrim(a,from){const g=ctx.createLinearGradient(0,H*(from==null?0.5:from
 function topScrim(){const g=ctx.createLinearGradient(0,0,0,220);g.addColorStop(0,'rgba(6,9,13,0.55)');g.addColorStop(1,'rgba(6,9,13,0)');ctx.fillStyle=g;ctx.fillRect(0,0,W,220);}
 function finish(t,o){o=o||{};grade(o.grade);vignette(o.vig);grain(t,o.grain);}
 
-/* ---------- drone (silhouette for photo plates) ---------- */
+/* ---------- dron silueti ---------- */
 function drone(x,y,s,t,o){o=o||{};ctx.save();ctx.translate(x,y);ctx.scale(s,s);ctx.rotate(o.rot||0);ctx.globalAlpha*=(o.alpha==null?1:o.alpha);
   const body=o.body||'#1d2228',edge=o.edge||'#39414c';
-  ctx.shadowColor='rgba(0,0,0,0.5)';ctx.shadowBlur=10/s;
+  ctx.shadowColor='rgba(0,0,0,0.5)';ctx.shadowBlur=Math.min(30,10/s);
   const arms=[[-54,-24],[54,-24],[-54,24],[54,24]];
   ctx.strokeStyle=edge;ctx.lineWidth=6;ctx.lineCap='round';for(const a of arms)line(0,0,a[0],a[1]);
   for(let i=0;i<4;i++){const a=arms[i];ctx.save();ctx.translate(a[0],a[1]);ctx.scale(1,0.36);
@@ -186,6 +194,7 @@ function drone(x,y,s,t,o){o=o||{};ctx.save();ctx.translate(x,y);ctx.scale(s,s);c
   if(o.blink!==false&&!o.hot&&Math.sin(t*9+(o.phase||0))>0.3){ctx.fillStyle=C.red;ctx.shadowColor=C.red;ctx.shadowBlur=14;circle(24,-6,3.2,true);}
   ctx.restore();}
 
+/* ---------- atış efektleri ---------- */
 function flash(x,y,r,a){ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=a;
   const g=ctx.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,'rgba(255,245,215,1)');g.addColorStop(0.3,'rgba(255,190,80,0.85)');g.addColorStop(1,'rgba(255,120,40,0)');
   ctx.fillStyle=g;circle(x,y,r,true);
@@ -200,9 +209,44 @@ function wreck(x,y,s,t,th){const dt=t-th;if(dt<0)return;const g=620;ctx.save();
   for(const f of FRAG){const px=x+f.vx*dt*s,py=y+f.vy*dt*s+0.5*g*dt*dt*s;ctx.globalAlpha=clamp(1-dt/1.6);ctx.save();ctx.translate(px,py);ctx.rotate(f.w*dt);ctx.fillStyle='#39414c';ctx.fillRect(-f.l*s/2,-2,f.l*s,4);ctx.restore();}
   ctx.globalAlpha=clamp(1-dt/2.2);drone(x+dt*20*s,y+0.5*g*dt*dt*s*0.7,s,t,{rot:dt*3.2,blink:false,spin:4});
   ctx.restore();}
+function cloudMark(x,y,a,label){ctx.save();ctx.globalAlpha=a;ctx.strokeStyle=C.amber;ctx.setLineDash([6,6]);ctx.lineWidth=2;circle(x,y,70,false,true);ctx.setLineDash([]);
+  line(x-70,y-92,x+70,y-92);line(x-70,y-98,x-70,y-86);line(x+70,y-98,x+70,y-86);txt(label||'≈2 m METAL BULUTU · 140 m',x,y-104,{fam:FM,size:15,color:C.amber,align:'center',ls:1});ctx.restore();}
 function targetBox(x,y,w,h,label,color,o){o=o||{};ctx.save();ctx.strokeStyle=color;ctx.lineWidth=2.5;ctx.globalAlpha*=(o.alpha==null?1:o.alpha);ctx.shadowColor='rgba(0,0,0,0.5)';ctx.shadowBlur=4;
   if(o.solid){ctx.strokeRect(x-w/2,y-h/2,w,h);}else corners(x-w/2,y-h/2,w,h,Math.min(w,h)*0.22);
   if(label){txt(label,x-w/2,y-h/2-12,{fam:FM,size:o.size||18,color,ls:1});}ctx.restore();}
+
+/* ---------- taret kesmesi: dönüş ekseni (x,y), ölçek s, rot (+ = sola bakan namlu yukarı kalkar) ---------- */
+function sprite(sp,x,y,s,rot,recoil){const img=IMG[sp.key];ctx.save();ctx.translate(x,y);ctx.rotate(rot);ctx.scale(s,s);ctx.translate(recoil||0,0);
+  ctx.shadowColor='rgba(0,0,0,0.35)';ctx.shadowBlur=8;ctx.drawImage(img,-sp.px,-sp.py);ctx.restore();
+  const c=Math.cos(rot),sn=Math.sin(rot);const f=(lx,ly)=>({x:x+(lx*c-ly*sn)*s,y:y+(lx*sn+ly*c)*s});
+  return {mz:f(sp.mx-sp.px+(recoil||0),sp.my-sp.py),sen:f(sp.sx-sp.px,sp.sy-sp.py)};}
+function restMuzzle(sp,x,y,s){return {x:x+(sp.mx-sp.px)*s,y:y+(sp.my-sp.py)*s};}
+function aimRot(sp,px,py,tx,ty){return clamp(Math.atan2(py-ty,px-tx)-sp.e0,-0.25,1.1);}
+/* hedef listesi [{t0,hit}] üzerinden yumuşatılmış takip açısı */
+function trackRot(sp,pv,targets,t,getPos){let segStart=null,prev=0,cur=-1;
+  for(let i=0;i<targets.length;i++){const d=targets[i];if(t>=d.hit){segStart=d.hit;const p=getPos(d,d.hit);prev=aimRot(sp,pv.x,pv.y,p.x,p.y);}else if(t>=d.t0&&cur<0)cur=i;}
+  let want=0;if(cur>=0){const p=getPos(targets[cur],t);want=aimRot(sp,pv.x,pv.y,p.x,p.y);}
+  if(segStart==null){if(cur<0)return 0;const d=targets[cur];return lerp(0,want,eo(P(t,d.t0,d.t0+0.7)));}
+  return lerp(prev,want,eo(P(t,segStart,segStart+0.5)));}
+function recoilAt(targets,t){let r=0;for(const d of targets){const f=t-(d.hit-0.3);if(f>=0&&f<0.25)r=Math.max(r,1-f/0.25);}return r;}
+function fireAt(targets,t){let f=0;for(const d of targets){const g=t-(d.hit-0.3);if(g>=0&&g<0.3)f=Math.max(f,1-g/0.3);}return f;}
+function gazeLine(sen,p,t,a){ctx.save();ctx.globalAlpha=(a==null?1:a)*0.8;ctx.strokeStyle=C.cyan;ctx.lineWidth=1.5;ctx.setLineDash([10,12]);ctx.lineDashOffset=-t*80;ctx.shadowColor='rgba(0,0,0,0.5)';ctx.shadowBlur=3;line(sen.x,sen.y,p.x,p.y);ctx.setLineDash([]);
+  ctx.fillStyle=C.cyan;circle(sen.x,sen.y,3,true);ctx.restore();}
+/* tam angajman: dronlar, takip eden taret, saçma bulutu, enkaz */
+function engage(sp,pv,s,targets,t,getPos,o){o=o||{};const rot=trackRot(sp,pv,targets,t,getPos);const rec=recoilAt(targets,t)*(o.recoil||12);const fire=fireAt(targets,t);
+  let down=0;const alive=[];
+  for(let i=0;i<targets.length;i++){const d=targets[i];if(t<d.t0)continue;const p=getPos(d,t);
+    if(t<d.hit){drone(p.x,p.y,p.s,t,{phase:i*2});alive.push({i,p,d});}else{down++;wreck(p.x,p.y,p.s,t,d.hit);}}
+  const sp_=sprite(sp,pv.x,pv.y,s,rot,rec);
+  if(alive.length){const a=alive[0];gazeLine(sp_.sen,a.p,t,P(t,a.d.t0+0.5,a.d.t0+1.1));}
+  for(const a of alive){const engaging=t>=a.d.hit-0.9;const col=engaging?C.amber:C.red;const r=a.p.r!=null?a.p.r+' m · ':'';
+    targetBox(a.p.x,a.p.y,150*a.p.s+50,100*a.p.s+40,`H-0${a.i+1} · ${r}${engaging?'ANGAJE':'TAKİP'}`,col,{size:16,solid:engaging&&Math.sin(t*20)>0});}
+  for(const d of targets){const pf=t-(d.hit-0.3);if(pf>=0&&pf<0.75){const tp=getPos(d,d.hit);pelletCloud(sp_.mz,{x:tp.x,y:tp.y},pf/0.3,o.spread||60);}
+    const cl=P(t,d.hit-0.05,d.hit+0.9);if(cl>0&&cl<1&&o.cloudLabel!==false){const tp=getPos(d,d.hit);cloudMark(tp.x,tp.y,1-cl,o.cloudText);}}
+  if(fire>0)flash(sp_.mz.x-6,sp_.mz.y,80*fire+16,fire);
+  return {down,fire,rot,mz:sp_.mz};}
+
+/* ---------- HUD ve yazılar ---------- */
 function radar(cx,cy,r,t,blips){ctx.save();ctx.fillStyle='rgba(8,13,18,0.72)';circle(cx,cy,r,true);
   ctx.strokeStyle='rgba(108,199,224,0.3)';ctx.lineWidth=1.5;for(const f of [0.33,0.66,1])circle(cx,cy,r*f,false,true);line(cx-r,cy,cx+r,cy);line(cx,cy-r,cx,cy+r);
   ctx.strokeStyle='rgba(108,199,224,0.18)';for(let i=0;i<12;i++){const a=i*Math.PI/6;line(cx+Math.cos(a)*r*0.95,cy+Math.sin(a)*r*0.95,cx+Math.cos(a)*r,cy+Math.sin(a)*r);}
@@ -228,23 +272,23 @@ function hud(t,label,o){o=o||{};ctx.save();ctx.globalAlpha=o.alpha==null?1:o.alp
   txt('TURAÇ · STERLING',W-m-18,H-m-20,{fam:FD,size:24,weight:700,color:C.fg,align:'right',ls:4,alpha:0.85});
   ctx.restore();}
 function caption(t,t0,t1,c,o){o=o||{};const ain=P(t,t0,t0+0.7),a=Math.min(eo(ain),1-P(t,t1-0.5,t1));if(a<=0)return;
-  const x=o.x==null?120:o.x,y=o.y==null?H-150:o.y,maxW=o.maxW||1100;ctx.save();ctx.globalAlpha=a;
+  const x=o.x==null?120:o.x,y=o.y==null?H-150:o.y,maxW=o.maxW||1100;const hs=o.headSize||92;ctx.save();ctx.globalAlpha=a;
   ctx.fillStyle=C.brass;ctx.fillRect(x,y-152,Math.round(60*eo(ain)),3);
   txt(c.eyebrow,x+78,y-142,{fam:FM,size:20,color:C.brass,ls:5,alpha:P(t,t0+0.2,t0+0.7)});
   ctx.save();ctx.beginPath();ctx.rect(x-6,y-134,(W-120)*eo(P(t,t0+0.15,t0+0.95)),126);ctx.clip();
-  txt(c.head,x,y-40,{fam:FD,size:o.headSize||92,weight:700,color:C.fg});ctx.restore();
-  ctx.globalAlpha=a*P(t,t0+0.55,t0+1.15);wrap(c.sub,x,y+10,maxW,{fam:FB,size:31,color:C.muted,lh:42});
+  txt(c.head,x,y-40,{fam:FD,size:hs,weight:700,color:C.fg});ctx.restore();
+  if(c.sub){ctx.globalAlpha=a*P(t,t0+0.55,t0+1.15);wrap(c.sub,x,y+10,maxW,{fam:FB,size:31,color:C.muted,lh:42});}
   ctx.restore();}
 function callout(px,py,lx,ly,eyebrow,label,a){if(a<=0)return;ctx.save();const e=eo(P(a,0,0.6)),f=P(a,0.5,1);
   ctx.strokeStyle=C.brass;ctx.lineWidth=2;ctx.fillStyle=C.brass;ctx.shadowColor='rgba(0,0,0,0.6)';ctx.shadowBlur=4;circle(px,py,5,true);
   ctx.strokeStyle='rgba(212,168,83,0.5)';circle(px,py,12,false,true);ctx.strokeStyle=C.brass;
   const ax=lx+12;line(px,py,px+(ax-px)*e,py+(ly-py)*e);
-  if(f>0){const w=Math.max(measure(label,{fam:FB,size:28,weight:500}),measure(eyebrow,{fam:FM,size:16,ls:3}));const sx=lx-w;
+  if(f>0){const w=Math.max(measure(label,{fam:FB,size:28,weight:500}),measure(eyebrow,{fam:FM,size:16,ls:3}));
     ctx.globalAlpha=f;ctx.fillRect(lx-w*f,ly+8,w*f,2);
     txt(eyebrow,lx,ly-34,{fam:FM,size:16,color:C.brass,ls:3,align:'right'});txt(label,lx,ly-2,{fam:FB,size:28,weight:500,color:C.fg,align:'right'});}
   ctx.restore();}
 
-/* ---------- 01 açılış: arka-taret plakası, logo ---------- */
+/* ---------- 01 açılış ---------- */
 function sAcilis(t){const k=1+0.16*eio(P(t,0,7));plate(IMG.arkaTaret,{x:0,y:520,w:1500,h:844},k,0.78,0.3);
   finish(t);topScrim();scrim(0.8,0.45);
   const la=eo(P(t,0.5,1.6));if(la>0){const lw=560,lh=lw*IMG.logo.height/IMG.logo.width;ctx.save();ctx.globalAlpha=la;ctx.shadowColor='rgba(0,0,0,0.6)';ctx.shadowBlur=24;ctx.drawImage(IMG.logo,140,120-(1-la)*20,lw,lh);ctx.restore();}
@@ -253,34 +297,34 @@ function sAcilis(t){const k=1+0.16*eio(P(t,0,7));plate(IMG.arkaTaret,{x:0,y:520,
   txt('ROBOTİK ANTİ-DRON TARET  ·  12 KALİBRE  ·  YAPAY ZEKÂ DESTEKLİ HEDEF TAKİBİ',140,850,{fam:FM,size:18,color:C.brass,ls:4,alpha:P(t,3.2,3.9)});
   const ba=P(t,3.8,4.6);if(ba>0){ctx.save();ctx.globalAlpha=ba;ctx.drawImage(IMG.turac,140,900,110,101);ctx.drawImage(IMG.sterling,270,890,140,120);ctx.restore();}}
 
-/* ---------- 02 tehdit: tesis ve gökyüzü, sürü ---------- */
-const SWARM=(()=>{const r=rng(21),a=[];for(let i=0;i<6;i++)a.push({x0:120+r()*420,y0:90+r()*120,x1:620+i*110+r()*60,y1:330+r()*150,ts:7.2+i*0.7+r()*0.3,dur:7.4,ph:r()*6.28,wob:14+r()*20});return a;})();
-function sTehdit(t){const u=t-7;const map=plate(IMG.yan,{x:60*P(t,7,15),y:150,w:1600,h:900},1+0.06*P(t,7,15),0.5,0.6);
-  finish(t);topScrim();scrim(0.85,0.5);
-  let lead=null;
+/* ---------- 02 tehdit: tesis, sürü, sürüyü izleyen taret ---------- */
+const SWARM=(()=>{const r=rng(21),a=[];for(let i=0;i<6;i++)a.push({x0:120+r()*420,y0:90+r()*120,x1:560+i*110+r()*60,y1:330+r()*150,ts:7.2+i*0.7+r()*0.3,dur:7.4,ph:r()*6.28,wob:14+r()*20});return a;})();
+function sTehdit(t){const u=t-7;const pl=plate(IMG.yanClean,{x:300+40*P(t,7,15),y:150,w:1600,h:900},1+0.06*P(t,7,15),0.5,0.6);const map=pl.map;
+  let lead=null;const pts=[];
   for(let i=0;i<SWARM.length;i++){const d=SWARM[i];const p=P(t,d.ts,d.ts+d.dur);if(p<=0)continue;const x=lerp(d.x0,d.x1,p)+Math.sin(u*1.3+d.ph)*8,y=lerp(d.y0,d.y1,p)+Math.sin(u*2.1+d.ph)*d.wob*0.4;const s=lerp(0.08,0.62,Math.pow(p,1.7));
-    drone(x,y,s,t,{phase:d.ph});if(i===0)lead={x,y,s};}
+    pts.push({x,y,s,ph:d.ph});if(i===0)lead={x,y,s};}
+  const pv=map(1855,640);const rot=lead?lerp(0,aimRot(SPR.yan,pv.x,pv.y,lead.x,lead.y),eo(P(t,9.2,10.4))):0;
+  const sp_=sprite(SPR.yan,pv.x,pv.y,pl.s,rot,0);
+  finish(t);topScrim();scrim(0.85,0.5);
+  for(const p of pts)drone(p.x,p.y,p.s,t,{phase:p.ph});
   if(lead&&t>9.2){const blink=Math.sin(t*7)>-0.2;const bw=160*lead.s+60,bh=110*lead.s+40;targetBox(lead.x,lead.y,bw,bh,blink?'TANIMLANAMAYAN HAVA ARACI':'',C.red,{alpha:P(t,9.2,9.8)});
-    txt(`×${SWARM.filter(d=>t>d.ts).length}  SÜRÜ · ROTA: TESİS`,lead.x-bw/2,lead.y+bh/2+28,{fam:FM,size:18,color:C.red,alpha:P(t,10,10.5)});}
+    txt(`×${SWARM.filter(d=>t>d.ts).length}  SÜRÜ · ROTA: TESİS`,lead.x-bw/2,lead.y+bh/2+28,{fam:FM,size:18,color:C.red,alpha:P(t,10,10.5)});
+    gazeLine(sp_.sen,lead,t,P(t,10.4,11));txt('OTOMATİK TAKİP',sp_.sen.x-20,sp_.sen.y-24,{fam:FM,size:14,color:C.cyan,align:'right',ls:2,alpha:P(t,10.6,11.2)});}
   const f=map(780,635);txt('KORUNAN TESİS',f.x,f.y-60,{fam:FM,size:15,color:C.cyan,ls:3,alpha:P(t,8,8.6)});ctx.save();ctx.globalAlpha=P(t,8,8.6);ctx.strokeStyle='rgba(108,199,224,0.7)';ctx.lineWidth=1.5;line(f.x,f.y-50,f.x,f.y-12);ctx.restore();
-  hud(t,'SAHNE 02 · TEHDİT',{right:'UYARI · HAVA SAHASI İHLALİ',rightColor:t>9.2&&Math.sin(t*6)>0?C.red:C.muted});
+  hud(t,'SAHNE 02 · TEHDİT',{right:t>10.4?'TAKİP · OTOMATİK':'UYARI · HAVA SAHASI İHLALİ',rightColor:t>9.2&&Math.sin(t*6)>0?(t>10.4?C.cyan:C.red):C.muted});
   caption(t,7.8,14.6,{eyebrow:'TEHDİT',head:'FPV ve mini İHA sürüleri',sub:'Düşük maliyetli, hızlı ve sürü hâlinde gelir. Araçlar, konvoylar ve tesisler için en yakın tehdit artık gökyüzünde.'});}
 
-/* ---------- 03 tespit: sensör başlığı plakası, radar + EO/IR ---------- */
-function sTespit(t){const u=t-15;const map=plate(IMG.arkaSensor,{x:0,y:180,w:1500,h:844},1+0.1*P(t,15,24),0.5,0.42);
+/* ---------- 03 tespit: sensör başlığı, radar + termal EO/IR ---------- */
+function sTespit(t){const u=t-15;const pl=plate(IMG.arkaSensor,{x:0,y:180,w:1500,h:844},1+0.1*P(t,15,24),0.5,0.42);const map=pl.map;
   finish(t);topScrim();scrim(0.85,0.5);
   const pr=P(t,15,24);const range=Math.round(800-205*pr);
   const state=t<18?{l:'TESPİT',c:C.red}:t<20.6?{l:'TAKİP',c:C.amber}:{l:'KİLİT',c:C.brass};
-  /* sensör başlığı işaretleri */
-  const head=map(750,520),l1=map(600,470),r1=map(900,470),top=map(750,380);
+  const head=map(750,520),l1=map(600,470),r1=map(900,470);
   const sa=eo(P(t,15.4,16.2));if(sa>0){ctx.save();ctx.globalAlpha=sa;rings(l1.x,l1.y,u,70,C.cyan);rings(r1.x,r1.y,u+0.5,70,C.cyan);
-    ctx.strokeStyle='rgba(108,199,224,0.8)';ctx.lineWidth=1.5;line(head.x,head.y,head.x,head.y+130);txt('SENSÖR BAŞLIĞI · EO/IR + YARDIMCI SENSÖRLER',head.x,head.y+156,{fam:FM,size:15,color:C.cyan,ls:2,align:'center'});
-    ctx.restore();}
-  /* radar */
+    ctx.strokeStyle='rgba(108,199,224,0.8)';ctx.lineWidth=1.5;line(head.x,head.y,head.x,head.y+130);txt('SENSÖR BAŞLIĞI · EO/IR + YARDIMCI SENSÖRLER',head.x,head.y+156,{fam:FM,size:15,color:C.cyan,ls:2,align:'center'});ctx.restore();}
   const rx=330,ry=430,rr_=200;ctx.save();ctx.globalAlpha=eo(P(t,15.3,16.1));
   const blips=[0,1,2].map(i=>({ang:-1.15+i*0.33,d:rr_*(0.96-0.3*pr)-i*22,label:i===0?'H-01':'',a:P(t,15.8+i*0.5,16.2+i*0.5)}));
   radar(rx,ry,rr_,t,blips);txt('RADAR · 360°',rx-rr_,ry-rr_-16,{fam:FM,size:16,color:C.cyan,ls:3});txt(`MENZİL ${range} m`,rx+rr_,ry-rr_-16,{fam:FM,size:16,color:C.muted,align:'right'});ctx.restore();
-  /* EO/IR görüntü penceresi */
   const fx=1180,fy=110,fw=680,fh=450;const fa=eo(P(t,15.7,16.5));ctx.save();ctx.globalAlpha=fa;
   ctx.save();ctx.beginPath();ctx.rect(fx,fy,fw,fh);ctx.clip();
   ctx.save();if(hasFilter)ctx.filter='grayscale(1) contrast(1.4) brightness(0.55)';ctx.drawImage(IMG.arkaSensor,40*pr,20+20*pr,540,358,fx,fy,fw,fh);ctx.restore();
@@ -297,7 +341,6 @@ function sTespit(t){const u=t-15;const map=plate(IMG.arkaSensor,{x:0,y:180,w:150
   txt('HIZ 24 m/s  ROTA 221°  SINIF: FPV',fx+16,fy+fh-16,{fam:FM,size:15,color:'#fff'});
   txt(state.l,fx+fw-16,fy+fh-16,{fam:FM,size:17,weight:600,color:state.c,align:'right',ls:3});
   ctx.restore();
-  /* füzyon şeridi */
   const fz=eo(P(t,17.5,18.5));if(fz>0){ctx.save();ctx.globalAlpha=fz;const y=640;const chips=['EO/IR','AKUSTİK','RADAR'];
     for(let i=0;i<3;i++){const x=1180+i*150;ctx.fillStyle='rgba(8,13,18,0.6)';ctx.strokeStyle='rgba(108,199,224,0.6)';ctx.lineWidth=1.5;rr(x,y-20,136,40,4);ctx.fill();ctx.stroke();
       const pulse=0.5+0.5*Math.sin(t*4+i);ctx.fillStyle=C.cyan;ctx.globalAlpha=fz*(0.4+0.6*pulse);circle(x+18,y,5,true);ctx.globalAlpha=fz;txt(chips[i],x+32,y+6,{fam:FM,size:14,color:C.fg,ls:1});}
@@ -308,9 +351,7 @@ function sTespit(t){const u=t-15;const map=plate(IMG.arkaSensor,{x:0,y:180,w:150
   caption(t,16,23.6,{eyebrow:'TESPİT VE TAKİP',head:'Çok katmanlı sensör füzyonu',sub:'Elektro-optik, termal, akustik ve radar verisi tek yapay zekâ çekirdeğinde birleşir. Hedef 600–800 m mesafede tespit edilir ve kesintisiz takibe alınır.',maxW:1000});}
 
 /* ---------- 04 taret: yakın plan panel + parça açıklamaları ---------- */
-function sTaret(t){const u=t-24;
-  ctx.drawImage(IMG.taretBlur,0,255,450,253,0,0,W,H);
-  ctx.fillStyle='rgba(6,9,13,0.35)';ctx.fillRect(0,0,W,H);
+function sTaret(t){ctx.drawImage(IMG.taretBlur,0,255,450,253,0,0,W,H);ctx.fillStyle='rgba(6,9,13,0.35)';ctx.fillRect(0,0,W,H);
   const px=700,sc=1080/840,pw=900*sc;const pk=1+0.05*P(t,24,34);
   ctx.save();ctx.translate(px+pw/2,H/2);ctx.scale(pk,pk);ctx.translate(-(px+pw/2),-H/2);
   ctx.save();ctx.shadowColor='rgba(0,0,0,0.7)';ctx.shadowBlur=40;ctx.fillStyle='#000';ctx.fillRect(px,0,pw,H);ctx.restore();
@@ -328,82 +369,131 @@ function sTaret(t){const u=t-24;
   hud(t,'SAHNE 04 · ROBOTİK TARET',{right:'SİSTEM GÖRÜNÜMÜ · SAHA'});
   caption(t,29.6,33.6,{eyebrow:'ROBOTİK TARET',head:'Yapay zekâ kilitler, taret takip eder',sub:'Sensör verisi tek çekirdekte birleşir. Taret hedefi otomatik izler, atış anını ve ön tutuşu hesaplar.',maxW:1000});}
 
-/* ---------- 05 angajman: yan plaka, namlu sola bakıyor ---------- */
+/* ---------- 05 angajman: temiz yan plaka + dronu izleyen taret ---------- */
 const TARGETS=[{t0:34.3,hit:38.6,ay:0,ax:0},{t0:36.3,hit:41.3,ay:70,ax:-30},{t0:39.0,hit:44.3,ay:-60,ax:20}];
-const MUZ={x:1500,y:612};
-function tgt(d,t,mz){const fireT=d.hit-0.3;const p=P(t,d.t0,fireT);const r=Math.round(800-650*p-10*P(t,fireT,d.hit));
-  const x=mz.x-(800-650*p)*1.8+d.ax,y0=130+d.ay,y=y0+(mz.y-44-y0)*p*p+Math.sin(t*1.7+d.ay)*5;return {x,y,r,fireT,alive:t<d.hit,visible:t>=d.t0,s:lerp(0.14,0.5,p)};}
-function sAngajman(t){let fire=0,shake=0;for(const d of TARGETS){const f=t-(d.hit-0.3);if(f>=0&&f<0.3)fire=Math.max(fire,1-f/0.3);}
-  if(fire>0){const r=rng(Math.floor(t*FPS));shake=fire*7;}
-  const r2=rng(Math.floor(t*FPS)+11);const ox=shake?(r2()-0.5)*2*shake:0,oy=shake?(r2()-0.5)*2*shake:0;
-  const map=plate(IMG.yan,{x:0,y:60,w:1800,h:1012},1.02+0.05*P(t,34,48),0.88,0.55,{ox,oy});
+function sAngajman(t){const fire=fireAt(TARGETS,t);const r2=rng(Math.floor(t*FPS)+11);const sh=fire*7;const ox=sh?(r2()-0.5)*2*sh:0,oy=sh?(r2()-0.5)*2*sh:0;
+  const pl=plate(IMG.yanClean,{x:200,y:60,w:1800,h:1012},1.02+0.05*P(t,34,48),0.88,0.55,{ox,oy});
   finish(t);topScrim();scrim(0.85,0.55);
-  const mz=map(MUZ.x,MUZ.y);
-  /* menzil çubuğu */
-  ctx.save();ctx.globalAlpha=eo(P(t,34,35));const ay=mz.y+46;const RX=r=>mz.x-r*1.8;
+  const pv=pl.map(1855,640),s=pl.s,sp=SPR.yan;const mz0=restMuzzle(sp,pv.x,pv.y,s);
+  const getPos=(d,tt)=>{const p=P(tt,d.t0,d.hit-0.3);const r=Math.round(800-650*p-10*P(tt,d.hit-0.3,d.hit));const x=mz0.x-(800-650*p)*1.6+d.ax;const y0=130+d.ay;const y=y0+(mz0.y-40-y0)*p*p+Math.sin(tt*1.7+d.ay)*5;return {x,y,r,s:lerp(0.14,0.5,p)};};
+  ctx.save();ctx.globalAlpha=eo(P(t,34,35));const ay=mz0.y+46;const RX=r=>mz0.x-r*1.6;
   ctx.fillStyle='rgba(255,182,72,0.08)';ctx.fillRect(RX(150),ay-70,RX(0)-RX(150),90);
   ctx.strokeStyle='rgba(200,210,220,0.7)';ctx.lineWidth=1.5;ctx.shadowColor='rgba(0,0,0,0.6)';ctx.shadowBlur=4;line(RX(800),ay,RX(0),ay);
   for(const r of [0,150,300,450,600,800]){line(RX(r),ay-8,RX(r),ay+8);txt(`${r} m`,RX(r),ay+30,{fam:FM,size:15,color:r===150?C.amber:C.muted,align:'center'});}
   txt('ANGAJMAN',RX(75),ay-18,{fam:FM,size:13,color:C.amber,align:'center',ls:2});txt('TESPİT · TAKİP',RX(700),ay-18,{fam:FM,size:13,color:C.cyan,align:'center',ls:2});ctx.restore();
-  let down=0;
-  for(let i=0;i<TARGETS.length;i++){const d=TARGETS[i],s=tgt(d,t,mz);if(!s.visible)continue;
-    if(s.alive){const engaging=t>=d.hit-0.9;const col=engaging?C.amber:C.red;const lab=engaging?`H-0${i+1} · ${s.r} m · ANGAJE`:`H-0${i+1} · ${s.r} m · TAKİP`;
-      drone(s.x,s.y,s.s,t,{phase:i*2});targetBox(s.x,s.y,150*s.s+50,100*s.s+40,lab,col,{size:16,solid:engaging&&Math.sin(t*20)>0});}
-    else{down++;wreck(s.x,s.y,s.s,t,d.hit);
-      const cl=P(t,d.hit-0.05,d.hit+0.9);if(cl>0&&cl<1){ctx.save();ctx.globalAlpha=1-cl;ctx.strokeStyle=C.amber;ctx.setLineDash([6,6]);ctx.lineWidth=2;circle(s.x,s.y,70,false,true);ctx.setLineDash([]);
-        line(s.x-70,s.y-92,s.x+70,s.y-92);line(s.x-70,s.y-98,s.x-70,s.y-86);line(s.x+70,s.y-98,s.x+70,s.y-86);txt('≈2 m METAL BULUTU · 140 m',s.x,s.y-104,{fam:FM,size:15,color:C.amber,align:'center',ls:1});ctx.restore();}}
-    const pf=t-(d.hit-0.3);if(pf>=0&&pf<0.75){const target=tgt(d,d.hit,mz);pelletCloud(mz,{x:target.x,y:target.y},pf/0.3,70);}
-  }
-  if(fire>0)flash(mz.x-10,mz.y,90*fire+20,fire);
-  hud(t,'SAHNE 05 · ANGAJMAN',{right:`ETKİSİZ HÂLE GETİRİLEN  ${down}/3`,rightColor:down>0?C.amber:C.muted});
-  if(fire>0){ctx.save();ctx.globalAlpha=fire*0.9;txt('ATEŞ',W/2,180,{fam:FD,size:60,weight:800,color:C.amber,align:'center',ls:10,glow:C.amber});ctx.restore();}
-  caption(t,34.8,47.6,{eyebrow:'ANGAJMAN',head:"150 m'de atış, 140 m'de metal bulutu",sub:'Sterling 12 kalibre magnum anti-dron fişeği hedefin rotasında yaklaşık 2 m çapında bir metal bulutu oluşturur; hedef tek geçişte düşer.'});}
+  const res=engage(sp,pv,s,TARGETS,t,getPos,{spread:70,recoil:12});
+  hud(t,'SAHNE 05 · ANGAJMAN',{right:`ETKİSİZ HÂLE GETİRİLEN  ${res.down}/3`,rightColor:res.down>0?C.amber:C.muted});
+  if(res.fire>0){ctx.save();ctx.globalAlpha=res.fire*0.9;txt('ATEŞ',W/2,180,{fam:FD,size:60,weight:800,color:C.amber,align:'center',ls:10,glow:C.amber});ctx.restore();}
+  caption(t,34.8,47.6,{eyebrow:'ANGAJMAN',head:"150 m'de atış, 140 m'de metal bulutu",sub:'Taret hedefi sensörlerle izler, namluyu otomatik yöneltir. Sterling 12 kalibre magnum anti-dron fişeği hedefin rotasında yaklaşık 2 m çapında metal bulutu oluşturur.'});}
 
-/* ---------- 06 entegrasyon: üç fotoğraf paneli ---------- */
-const PANELS=[{img:'ust',crop:[220,0,1013,1086],name:'ARAÇ KASASI MONTAJI',sub:'Pikap kasasına direkt montaj'},
-  {img:'saha',crop:[0,300,1351,1448],name:'SAHA TESTİ',sub:'Canlı atış, gerçek hedef dronlar'},
-  {img:'on',crop:[218,0,1013,1086],name:'4×4 PLATFORM',sub:'Yüksek hareket kabiliyeti'}];
-function sPlatform(t){ctx.drawImage(IMG.taretBlur,0,255,450,253,0,0,W,H);ctx.fillStyle='rgba(6,9,13,0.5)';ctx.fillRect(0,0,W,H);
-  const pw=560,ph=600,gap=40,x0=(W-(3*pw+2*gap))/2,y0=150;
-  for(let i=0;i<3;i++){const a=eo(P(t,48.5+i*0.5,49.4+i*0.5));if(a<=0)continue;const p=PANELS[i];const img=IMG[p.img];const x=x0+i*(pw+gap),y=y0+(1-a)*30;
-    ctx.save();ctx.globalAlpha=a;ctx.shadowColor='rgba(0,0,0,0.6)';ctx.shadowBlur=30;ctx.fillStyle='#000';ctx.fillRect(x,y,pw,ph);ctx.shadowBlur=0;
-    ctx.save();ctx.beginPath();ctx.rect(x,y,pw,ph);ctx.clip();const k=1+0.08*P(t,48.5+i*0.5,56);const c=p.crop;
-    if(hasFilter)ctx.filter='contrast(1.06) saturate(0.85) brightness(0.92)';ctx.drawImage(img,c[0],c[1],c[2],c[3],x+pw/2-pw*k/2,y+ph/2-ph*k/2,pw*k,ph*k);ctx.restore();
-    ctx.strokeStyle='rgba(212,168,83,0.7)';ctx.lineWidth=2;corners(x+14,y+14,pw-28,ph-28,26);
-    txt(`0${i+1}`,x+32,y+54,{fam:FM,size:16,color:C.brass,ls:2});
-    const g=ctx.createLinearGradient(0,y+ph-170,0,y+ph);g.addColorStop(0,'rgba(6,9,13,0)');g.addColorStop(1,'rgba(6,9,13,0.9)');ctx.fillStyle=g;ctx.fillRect(x,y+ph-170,pw,170);
-    txt(p.name,x+32,y+ph-62,{fam:FD,size:36,weight:700,ls:2});txt(p.sub,x+32,y+ph-30,{fam:FB,size:20,color:C.muted});ctx.restore();}
-  grain(t,0.06);vignette(0.4);
-  hud(t,'SAHNE 06 · ENTEGRASYON',{right:'HAFİF · KOMPAKT · MODÜLER'});
-  caption(t,50.4,55.6,{eyebrow:'ENTEGRASYON',head:'Hafif, kompakt, her platforma uyumlu',sub:'Pikap kasası, tripod veya sabit mevzi. Kara ve deniz araçları, sabit tesisler ve insansız kara araçları için uyarlanabilir.',maxW:1400});}
+/* ---------- 06 araç · gemi · rafineri kulesi ---------- */
+const VIG=[{t0:48,t1:52.667},{t0:52.667,t1:57.333},{t0:57.333,t1:62}];
+function vigLabel(t,v,eyebrow,head,sub){caption(t,v.t0+0.4,v.t1-0.1,{eyebrow,head,sub},{headSize:66,maxW:900});}
+function pathPos(d,tt,A,B,s0,s1){const p=P(tt,d.t0,d.hit-0.3);return {x:lerp(A.x,B.x,p),y:lerp(A.y,B.y,p)+Math.sin(tt*1.9)*4,s:lerp(s0,s1,p),r:Math.round(800-650*p)};}
+function duskSky(t,o){const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#070b14');g.addColorStop(0.45,'#15213a');g.addColorStop(0.72,'#4a3a3c');g.addColorStop(0.8,'#8a5a3a');g.addColorStop(1,'#2a2126');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  ctx.save();ctx.fillStyle='#dfe8f0';for(const s of STARS){if(s.y>0.55)continue;ctx.globalAlpha=0.1+0.3*(0.5+0.5*Math.sin(t*s.f+s.p));ctx.fillRect(s.x,s.y*H*0.6,s.r,s.r);}ctx.restore();
+  const rg=ctx.createRadialGradient(o.sunX,o.hy,0,o.sunX,o.hy,700);rg.addColorStop(0,'rgba(255,170,90,0.45)');rg.addColorStop(1,'rgba(255,170,90,0)');ctx.fillStyle=rg;ctx.fillRect(0,0,W,H);}
+function sea(t,hy,yb){const g=ctx.createLinearGradient(0,hy,0,yb);g.addColorStop(0,'#5a4a4a');g.addColorStop(0.08,'#1d2a3e');g.addColorStop(1,'#0a1220');ctx.fillStyle=g;ctx.fillRect(0,hy,W,yb-hy);
+  ctx.save();ctx.strokeStyle='#9fc3d8';ctx.lineWidth=1.5;const r=rng(31);
+  for(let i=0;i<44;i++){const d=i/44;const y=hy+2+Math.pow(d,1.6)*(yb-hy);const sp=20+d*140;const n=Math.floor(W/sp)+2;const off=(t*(10+d*60))%sp;
+    for(let j=0;j<n;j++){const x=j*sp-off+r()*sp*0.5;const len=sp*(0.2+0.5*r());ctx.globalAlpha=(0.05+0.18*d)*(0.5+0.5*Math.sin(t*2+r()*6.28+x*0.01));line(x,y,x+len,y);}}
+  ctx.restore();}
+function pedestal(x,yb,r,h){ctx.save();const g=ctx.createLinearGradient(x-r,0,x+r,0);g.addColorStop(0,'#2a303a');g.addColorStop(0.5,'#4a525e');g.addColorStop(1,'#1e232b');ctx.fillStyle=g;ctx.fillRect(x-r,yb-h,2*r,h);
+  ctx.fillStyle='#3a424d';ellipse(x,yb-h,r,r*0.3,true);ctx.fillStyle='#232931';ellipse(x,yb,r*1.4,r*0.35,true);ctx.restore();}
+function flame(x,y,t){ctx.save();ctx.globalCompositeOperation='lighter';
+  const gg=ctx.createRadialGradient(x,y-40,0,x,y-40,420);gg.addColorStop(0,'rgba(255,140,50,0.35)');gg.addColorStop(1,'rgba(255,140,50,0)');ctx.fillStyle=gg;ctx.globalAlpha=0.8+0.2*Math.sin(t*7);ctx.fillRect(x-420,y-460,840,840);
+  for(let i=0;i<5;i++){const f=Math.sin(t*9+i*1.7)*0.5+0.5;const h=60+40*f+i*10,w=14+6*f;ctx.globalAlpha=0.5-i*0.08;const g=ctx.createRadialGradient(x,y-h*0.5,0,x,y-h*0.5,h);g.addColorStop(0,'rgba(255,230,160,1)');g.addColorStop(0.3,'rgba(255,150,50,0.8)');g.addColorStop(1,'rgba(255,90,20,0)');ctx.fillStyle=g;ellipse(x+Math.sin(t*5+i)*6,y-h*0.5,w,h*0.6,true);}
+  ctx.restore();}
+function shipEnv(t){const hy=520;duskSky(t,{sunX:420,hy});sea(t,hy,760);
+  ctx.save();const g=ctx.createRadialGradient(420,hy+40,0,420,hy+40,260);g.addColorStop(0,'rgba(255,170,90,0.4)');g.addColorStop(1,'rgba(255,170,90,0)');ctx.fillStyle=g;ctx.save();ctx.translate(420,hy+40);ctx.scale(0.35,1);ctx.translate(-420,-(hy+40));ctx.fillRect(420-600,hy,1200,300);ctx.restore();ctx.restore();
+  ctx.fillStyle='#1a2130';poly([[520,hy-6],[560,hy-6],[566,hy-22],[590,hy-22],[596,hy-34],[612,hy-34],[616,hy-6],[700,hy-6],[708,hy+2],[512,hy+2]]);ctx.fill();
+  const dg=ctx.createLinearGradient(0,760,0,H);dg.addColorStop(0,'#2a3039');dg.addColorStop(1,'#14181e');ctx.fillStyle=dg;ctx.fillRect(0,760,W,H-760);
+  ctx.strokeStyle='rgba(255,255,255,0.06)';ctx.lineWidth=1;for(let i=-8;i<=14;i++)line(960+i*70,760,960+i*300,H);for(const y of [800,860,940,1040])line(0,y,W,y);
+  ctx.strokeStyle='#3a434f';ctx.lineWidth=5;line(0,650,1560,650);ctx.lineWidth=3;line(0,705,1560,705);ctx.lineWidth=4;for(let x=40;x<1560;x+=130)line(x,650,x,762);
+  ctx.fillStyle='#161b22';ctx.fillRect(1560,0,W-1560,765);ctx.fillStyle='#1d2430';ctx.fillRect(1560,0,24,765);
+  ctx.fillStyle='rgba(255,200,120,0.55)';for(let r=0;r<5;r++)for(let c=0;c<3;c++){if(((r*3+c)*7)%5===0)continue;ctx.fillRect(1640+c*80,120+r*90,36,24);}
+  ctx.fillStyle='#0e1117';ctx.fillRect(1600,560,70,205);
+  if(Math.sin(t*3)>0){ctx.save();ctx.fillStyle=C.red;ctx.shadowColor=C.red;ctx.shadowBlur=16;circle(1575,40,5,true);ctx.restore();}
+  pedestal(1300,760,42,82);}
+function refineryEnv(t){const hy=600;duskSky(t,{sunX:1500,hy});
+  const g=ctx.createLinearGradient(0,hy-80,0,H);g.addColorStop(0,'rgba(20,24,32,0)');g.addColorStop(0.25,'#171b22');g.addColorStop(1,'#0c0f14');ctx.fillStyle=g;ctx.fillRect(0,hy-80,W,H-hy+80);
+  ctx.fillStyle='#1b2029';for(const c of [[80,60,420],[180,40,300],[300,90,520],[640,50,360],[760,120,200],[1050,70,460],[1180,40,380]])ctx.fillRect(c[0],hy-c[2],c[1],c[2]);
+  for(const c of [[420,180,110],[860,160,130]]){rr(c[0],hy-c[2],c[1],c[2],16);ctx.fill();}
+  ctx.strokeStyle='#232a35';ctx.lineWidth=6;for(const y of [hy-130,hy-150,hy-170])line(0,y,1250,y);for(let x=60;x<1250;x+=150)line(x,hy-180,x,hy);
+  ctx.fillStyle='#1b2029';ctx.fillRect(560,hy-460,22,460);flame(571,hy-460,t);
+  const r=rng(77);ctx.save();for(let i=0;i<60;i++){const x=r()*1250,y=hy-r()*520;const f=0.6+0.4*Math.sin(t*3+r()*6.28);ctx.fillStyle=`rgba(255,196,110,${0.5*f})`;ctx.shadowColor='rgba(255,196,110,0.9)';ctx.shadowBlur=8;circle(x,y,2,true);}ctx.restore();
+  ctx.fillStyle='#10141a';ctx.fillRect(1560,60,160,H-60);ctx.fillStyle='#161b22';ellipse(1640,60,80,20,true);
+  for(let y=160;y<H;y+=140){ctx.fillStyle='#1c222b';ctx.fillRect(1540,y,200,10);ctx.strokeStyle='#2a323c';ctx.lineWidth=2;line(1540,y-26,1740,y-26);for(let x=1545;x<1740;x+=20)line(x,y-26,x,y);}
+  ctx.strokeStyle='#2a323c';ctx.lineWidth=3;line(1760,200,1760,H);for(let y=200;y<H;y+=18)line(1752,y,1768,y);
+  const x=1350,py=480;ctx.save();ctx.strokeStyle='#2c333d';ctx.lineWidth=7;line(x-70,py,x-110,H);line(x+70,py,x+110,H);ctx.lineWidth=3;
+  for(let y=py;y<H;y+=90){const k=(y-py)/(H-py);const w=70+40*k;const w2=70+40*Math.min(1,(y+90-py)/(H-py));line(x-w,y,x+w,y);line(x-w,y,x+w2,y+90);line(x+w,y,x-w2,y+90);}
+  ctx.fillStyle='#2a303a';ctx.fillRect(x-150,py-14,300,14);ctx.strokeStyle='#3a434f';ctx.lineWidth=3;line(x-150,py-60,x+150,py-60);for(let xx=x-150;xx<=x+150;xx+=50)line(xx,py-60,xx,py-14);ctx.restore();
+  pedestal(1350,466,24,40);}
+function vigVehicle(t,v){const pl=plate(IMG.arkaClean,{x:0,y:520,w:1500,h:844},1.03+0.05*P(t,v.t0,v.t1),0.78,0.3);
+  const pv=pl.map(1150,760),s=pl.s;const tg=[{t0:v.t0+0.4,hit:v.t0+3.7}];
+  const getPos=(d,tt)=>pathPos(d,tt,{x:140,y:120},{x:pv.x-560,y:pv.y-70},0.12,0.5);
+  const pre=()=>{finish(t);topScrim();scrim(0.85,0.5);};pre();
+  const res=engage(SPR.arka,pv,s,tg,t,getPos,{spread:60,cloudText:'METAL BULUTU'});
+  vigLabel(t,v,'01 · ARAÇ ÜSTÜ','Pikap ve zırhlı araç kasası','Konvoy ve araç koruması · hareket hâlinde takip');return res;}
+function vigShip(t,v){shipEnv(t);const pv={x:1300,y:594},s=0.78;const tg=[{t0:v.t0+0.4,hit:v.t0+3.7}];
+  const getPos=(d,tt)=>pathPos(d,tt,{x:160,y:478},{x:640,y:470},0.1,0.5);
+  const res=engage(SPR.yakin,pv,s,tg,t,getPos,{spread:60,cloudText:'METAL BULUTU'});
+  grain(t,0.07);vignette(0.5);scrim(0.8,0.6);
+  vigLabel(t,v,'02 · DENİZ PLATFORMU','Güverte montajı','Gemi, liman ve kıyı tesisleri · deniz üstü dron savunması');return res;}
+function vigRefinery(t,v){refineryEnv(t);const pv={x:1350,y:361},s=0.6;const tg=[{t0:v.t0+0.4,hit:v.t0+3.7}];
+  const getPos=(d,tt)=>pathPos(d,tt,{x:120,y:140},{x:700,y:250},0.1,0.45);
+  const res=engage(SPR.yakin,pv,s,tg,t,getPos,{spread:55,cloudText:'METAL BULUTU'});
+  grain(t,0.07);vignette(0.5);scrim(0.8,0.6);
+  vigLabel(t,v,'03 · RAFİNERİ · KRİTİK TESİS','Kule ve platform montajı','Enerji altyapısı, rafineri, depolama sahaları · sabit mevzi');return res;}
+function sPlatform(t){const i=t<VIG[1].t0?0:t<VIG[2].t0?1:2;const v=VIG[i];const u=t-v.t0,dur=v.t1-v.t0;
+  const res=i===0?vigVehicle(t,v):i===1?vigShip(t,v):vigRefinery(t,v);
+  hud(t,'SAHNE 06 · '+['ARAÇ ÜSTÜ','GEMİ','RAFİNERİ KULESİ'][i],{right:res.down?'HEDEF ETKİSİZ':'HAFİF · KOMPAKT · MODÜLER',rightColor:res.down?C.amber:C.muted});
+  const dIn=i===0?1:P(u,0,0.3),dOut=i===2?1:1-P(u,dur-0.3,dur);const dark=1-Math.min(dIn,dOut);if(dark>0){ctx.fillStyle=`rgba(0,0,0,${dark})`;ctx.fillRect(0,0,W,H);}}
 
-/* ---------- 07 katmanlı savunma: kubbe diyagramı ---------- */
-const LAYERS=[{r:1120,l:'UZUN MENZİL HAVA SAVUNMA',c:'rgba(108,199,224,0.35)'},{r:820,l:'ORTA MENZİL',c:'rgba(108,199,224,0.45)'},{r:540,l:'YAKIN HAVA SAVUNMA',c:'rgba(108,199,224,0.6)'},{r:270,l:'DRONE SHIELD · 0–150 m',c:C.brass}];
-function sKatman(t){const map=plate(IMG.arkaTaret,{x:0,y:300,w:1500,h:844},1+0.05*P(t,56,64),0.75,0.6,{filter:'contrast(1.05) saturate(0.6) brightness(0.72)'});
+/* ---------- 07 hava katmanları ---------- */
+const LAYERS=[{r:1040,l:'UZUN MENZİL HAVA SAVUNMA',c:'rgba(108,199,224,0.35)',icon:'jet',il:'UÇAK · BALİSTİK FÜZE'},
+  {r:860,l:'ORTA MENZİL HAVA SAVUNMA',c:'rgba(108,199,224,0.45)',icon:'missile',il:'SEYİR FÜZESİ · HELİKOPTER'},
+  {r:680,l:'YAKIN HAVA SAVUNMA',c:'rgba(108,199,224,0.6)',icon:'uav',il:'TAKTİK İHA'},
+  {r:460,l:'DRONE SHIELD · 0–150 m',c:C.brass,il:'FPV · MİNİ İHA'}];
+function iconJet(x,y,s,a){ctx.save();ctx.translate(x,y);ctx.scale(s,s);ctx.globalAlpha=a;ctx.fillStyle='#c9d3dd';ctx.shadowColor='rgba(0,0,0,0.6)';ctx.shadowBlur=4;
+  poly([[-34,0],[-14,-4],[6,-5],[22,-2],[34,0],[22,2],[6,5],[-14,4]]);ctx.fill();poly([[-4,-3],[-18,-22],[-10,-22],[10,-3]]);ctx.fill();poly([[-4,3],[-18,22],[-10,22],[10,3]]);ctx.fill();
+  poly([[-30,-2],[-36,-10],[-32,-10],[-24,-2]]);ctx.fill();poly([[-30,2],[-36,10],[-32,10],[-24,2]]);ctx.fill();ctx.restore();}
+function iconMissile(x,y,s,a){ctx.save();ctx.translate(x,y);ctx.scale(s,s);ctx.globalAlpha=a;ctx.fillStyle='#c9d3dd';ctx.shadowColor='rgba(0,0,0,0.6)';ctx.shadowBlur=4;
+  rr(-30,-4,52,8,4);ctx.fill();poly([[22,-4],[34,0],[22,4]]);ctx.fill();poly([[-30,-4],[-38,-12],[-24,-4]]);ctx.fill();poly([[-30,4],[-38,12],[-24,4]]);ctx.fill();
+  const g=ctx.createRadialGradient(-34,0,0,-34,0,16);g.addColorStop(0,'rgba(255,190,90,0.9)');g.addColorStop(1,'rgba(255,120,40,0)');ctx.fillStyle=g;circle(-34,0,16,true);ctx.restore();}
+function iconUav(x,y,s,a){ctx.save();ctx.translate(x,y);ctx.scale(s,s);ctx.globalAlpha=a;ctx.fillStyle='#c9d3dd';ctx.shadowColor='rgba(0,0,0,0.6)';ctx.shadowBlur=4;
+  rr(-24,-3,48,6,3);ctx.fill();rr(-5,-46,8,92,3);ctx.fill();rr(-22,-14,4,28,2);ctx.fill();circle(24,0,3,true);ctx.restore();}
+const ICON={jet:iconJet,missile:iconMissile,uav:iconUav};
+function sKatman(t){const pl=plate(IMG.yanClean,{x:0,y:0,w:2400,h:1350},1+0.04*P(t,62,72),0.6,0.45,{filter:'contrast(1.05) saturate(0.6) brightness(0.8)'});
+  const pv=pl.map(1855,640),s=pl.s,sp=SPR.yan;const hy=pl.map(0,600).y;
+  const tg=[{t0:65.5,hit:69.0},{t0:66.8,hit:70.6}];
+  const getPos=(d,tt)=>{const i=d===tg[0]?0:1;return pathPos(d,tt,{x:pv.x-980+i*60,y:pv.y-560-i*40},{x:pv.x-380-i*40,y:pv.y-90-i*40},0.12,0.45);};
   finish(t,{grade:0.8});topScrim();scrim(0.88,0.5);
-  const c=map(1170,840);const gy=c.y;
-  ctx.save();ctx.beginPath();ctx.rect(0,0,W,gy);ctx.clip();
-  for(let i=0;i<LAYERS.length;i++){const L=LAYERS[i];const a=eo(P(t,56.4+i*0.55,57.3+i*0.55));if(a<=0)continue;const inner=i===3;
-    ctx.save();ctx.globalAlpha=a;ctx.translate(c.x,c.y);ctx.scale(1,0.62);
-    if(inner){const pulse=0.5+0.5*Math.sin(t*2.2);const g=ctx.createRadialGradient(0,0,0,0,0,L.r);g.addColorStop(0,`rgba(212,168,83,${0.05+0.12*pulse})`);g.addColorStop(1,'rgba(212,168,83,0.02)');ctx.fillStyle=g;circle(0,0,L.r,true);}
-    ctx.strokeStyle=L.c;ctx.lineWidth=inner?3:2;ctx.setLineDash(inner?[]:[12,10]);ctx.shadowColor='rgba(0,0,0,0.6)';ctx.shadowBlur=4;circle(0,0,L.r,false,true);ctx.restore();
-    ctx.save();ctx.globalAlpha=a;txt(L.l,c.x,c.y-L.r*0.62-14,{fam:FM,size:inner?18:15,weight:inner?600:400,color:inner?C.brass:C.cyan,align:'center',ls:3});ctx.restore();}
+  ctx.save();ctx.beginPath();ctx.rect(0,0,W,hy+24);ctx.clip();
+  for(let i=0;i<LAYERS.length;i++){const L=LAYERS[i];const a=eo(P(t,62.4+i*0.5,63.3+i*0.5));if(a<=0)continue;const inner=i===3;const ry=L.r*0.42;
+    ctx.save();ctx.globalAlpha=a;
+    if(inner){const pulse=0.5+0.5*Math.sin(t*2.2);const g=ctx.createRadialGradient(pv.x,pv.y,0,pv.x,pv.y,L.r);g.addColorStop(0,`rgba(212,168,83,${0.06+0.12*pulse})`);g.addColorStop(1,'rgba(212,168,83,0.02)');ctx.fillStyle=g;ellipse(pv.x,pv.y,L.r,ry,true);}
+    else{const g=ctx.createRadialGradient(pv.x,pv.y,L.r*0.8,pv.x,pv.y,L.r);g.addColorStop(0,'rgba(108,199,224,0)');g.addColorStop(1,'rgba(108,199,224,0.07)');ctx.fillStyle=g;ellipse(pv.x,pv.y,L.r,ry,true);}
+    ctx.strokeStyle=L.c;ctx.lineWidth=inner?3:2;ctx.setLineDash(inner?[]:[12,10]);ctx.shadowColor='rgba(0,0,0,0.6)';ctx.shadowBlur=4;ellipse(pv.x,pv.y,L.r,ry,false,true);ctx.restore();
+    txt(L.l,pv.x-0.55*L.r,pv.y-0.835*ry-12,{fam:FM,size:inner?18:15,weight:inner?600:400,color:inner?C.brass:C.cyan,align:'center',ls:3,alpha:a});
+    const ia=eo(P(t,64.2+i*0.4,64.9+i*0.4));if(ia>0&&L.icon){const an=3.75;const ix=pv.x+Math.cos(an)*L.r*0.97,iy=pv.y+Math.sin(an)*ry*0.97;ICON[L.icon](ix,iy,1.1,ia);txt(L.il,ix,iy+40,{fam:FM,size:13,color:C.muted,align:'center',ls:2,alpha:ia});}}
   ctx.restore();
-  ctx.save();ctx.globalAlpha=P(t,58.6,59.4);ctx.strokeStyle='rgba(212,168,83,0.8)';ctx.lineWidth=1.5;line(c.x,c.y-6,c.x,c.y-80);ctx.fillStyle=C.brass;circle(c.x,c.y,5,true);ctx.restore();
-  hud(t,'SAHNE 07 · KATMANLI SAVUNMA',{right:'EN İÇ KATMAN · SON SAVUNMA HATTI'});
-  caption(t,58.2,63.6,{eyebrow:'KATMANLI SAVUNMA',head:'Son savunma hattı',sub:'Yüksek maliyetli hava savunma sistemlerinin yerine değil, yanına: en içteki katmanda, ucuz tehdide ekonomik cevap.',maxW:1000});}
+  const res=engage(sp,pv,s,tg,t,getPos,{spread:55,cloudText:'METAL BULUTU'});
+  if(t>65.8)txt(LAYERS[3].il,pv.x-300,pv.y-190,{fam:FM,size:13,color:C.brass,align:'center',ls:2,alpha:P(t,65.8,66.4)});
+  hud(t,'SAHNE 07 · KATMANLI HAVA SAVUNMA',{right:res.down?`EN İÇ KATMAN · ETKİSİZ ${res.down}/2`:'EN İÇ KATMAN · SON SAVUNMA HATTI',rightColor:res.down?C.amber:C.muted});
+  caption(t,66.8,71.6,{eyebrow:'KATMANLI HAVA SAVUNMA',head:'En içteki katman, son savunma hattı',sub:'Uzun, orta ve yakın menzilli hava savunmanın yerine değil, yanına: dron sürüleri için ekonomik, otomatik ve her zaman tetikte.',maxW:1000});}
 
 /* ---------- 08 kapanış ---------- */
 const STATS=[{v:'600–800 m',l:'TESPİT VE TAKİP'},{v:'150 m',l:'ANGAJMAN MESAFESİ'},{v:'≈2 m',l:'METAL BULUTU ÇAPI'},{v:'360°',l:'KORUMA'}];
 function sKapanis(t){ctx.drawImage(IMG.taretBlur,0,255,450,253,0,0,W,H);ctx.fillStyle='rgba(6,9,13,0.72)';ctx.fillRect(0,0,W,H);grain(t,0.06);vignette(0.6);
-  const la=eo(P(t,64.3,65.2));if(la>0){const lw=640,lh=lw*IMG.logo.height/IMG.logo.width;ctx.save();ctx.globalAlpha=la;ctx.shadowColor='rgba(0,0,0,0.6)';ctx.shadowBlur=24;ctx.drawImage(IMG.logo,W/2-lw/2,80-(1-la)*20,lw,lh);ctx.restore();}
-  ctx.save();ctx.beginPath();ctx.rect(0,520,W*eo(P(t,65,66)),180);ctx.clip();txt('DRON KALKANI',W/2,660,{fam:FD,size:150,weight:800,align:'center',ls:8});ctx.restore();
-  txt('Dron tehditlerine karşı son savunma hattı',W/2,715,{fam:FB,size:34,color:C.muted,align:'center',alpha:P(t,65.8,66.5)});
-  for(let i=0;i<4;i++){const a=eo(P(t,66.4+i*0.3,67+i*0.3));if(a<=0)continue;const x=300+i*440;ctx.save();ctx.globalAlpha=a;
+  const la=eo(P(t,72.3,73.2));if(la>0){const lw=640,lh=lw*IMG.logo.height/IMG.logo.width;ctx.save();ctx.globalAlpha=la;ctx.shadowColor='rgba(0,0,0,0.6)';ctx.shadowBlur=24;ctx.drawImage(IMG.logo,W/2-lw/2,80-(1-la)*20,lw,lh);ctx.restore();}
+  ctx.save();ctx.beginPath();ctx.rect(0,520,W*eo(P(t,73,74)),180);ctx.clip();txt('DRON KALKANI',W/2,660,{fam:FD,size:150,weight:800,align:'center',ls:8});ctx.restore();
+  txt('Dron tehditlerine karşı son savunma hattı',W/2,715,{fam:FB,size:34,color:C.muted,align:'center',alpha:P(t,73.8,74.5)});
+  for(let i=0;i<4;i++){const a=eo(P(t,74.4+i*0.3,75+i*0.3));if(a<=0)continue;const x=300+i*440;ctx.save();ctx.globalAlpha=a;
     ctx.fillStyle=C.brass;ctx.fillRect(x-60,770,120*a,2);txt(STATS[i].v,x,850,{fam:FD,size:76,weight:700,color:C.brass,align:'center'});txt(STATS[i].l,x,886,{fam:FM,size:15,color:C.muted,align:'center',ls:3});ctx.restore();}
-  const ba=P(t,68,68.7);if(ba>0){ctx.save();ctx.globalAlpha=ba;ctx.drawImage(IMG.turac,W/2-300,930,110,101);ctx.drawImage(IMG.sterling,W/2-170,920,140,120);ctx.restore();
+  const ba=P(t,76,76.7);if(ba>0){ctx.save();ctx.globalAlpha=ba;ctx.drawImage(IMG.turac,W/2-300,930,110,101);ctx.drawImage(IMG.sterling,W/2-170,920,140,120);ctx.restore();
     txt('turac.com.tr',W/2+20,1000,{fam:FB,size:34,weight:500,color:C.fg,alpha:ba});txt('YERLİ VE MİLLİ ÜRETİM · 1987\'DEN BERİ',W/2+20,968,{fam:FM,size:15,color:C.muted,ls:3,alpha:ba});}
-  ctx.fillStyle=`rgba(0,0,0,${P(t,71,72)})`;ctx.fillRect(0,0,W,H);}
+  ctx.fillStyle=`rgba(0,0,0,${P(t,79,80)})`;ctx.fillRect(0,0,W,H);}
 
 /* ---------- compositor ---------- */
 const SCENE_FN={acilis:sAcilis,tehdit:sTehdit,tespit:sTespit,taret:sTaret,angajman:sAngajman,platform:sPlatform,katman:sKatman,kapanis:sKapanis};
