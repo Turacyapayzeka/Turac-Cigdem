@@ -105,8 +105,8 @@
 
 | 05 Angajman | 06 Araç · gemi · rafineri |
 |---|---|
-| ![](storyboard/05-angajman.jpg) | ![](storyboard/06-entegrasyon.jpg) |
+| ![](storyboard/05-angajman.jpg) | ![](storyboard/06-arac-gemi-rafineri.jpg) |
 
 | 07 Hava katmanları | 08 Kapanış |
 |---|---|
-| ![](storyboard/07-katmanli-savunma.jpg) | ![](storyboard/08-kapanis.jpg) |
+| ![](storyboard/07-hava-katmanlari.jpg) | ![](storyboard/08-kapanis.jpg) |
