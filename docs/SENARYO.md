@@ -82,6 +82,9 @@
 
 ## Üretim notları
 
+- **v5 düzeltmeleri.** Hedef kutuları, etiketler, menzil çubuğu ve katman lejantı artık renk düzeninden sonra çiziliyor (net ve doygun). Akşam sahnelerinde taret boyaması düzeltildi (namlu siyah kalıyor). Taret kesmelerindeki arka plan artıkları ve anahtarlama delikleri temizlendi. Rafineri ve gemi göğü, içinde taret parçası bulunmayan temiz gökyüzü kırpımından alınıyor. Gemi üst yapısı köprü camları, su geçirmez kapı, merdiven ve can simidiyle yeniden çizildi. Sahne 07'de katman adları sol üstte lejant olarak veriliyor.
+- **Yapay zekâ videosu.** `docs/ai-video/` altında çekim listesi, temiz başlangıç kareleri ve ürün referansları var. Film motoru `?clean=1` ile HUD'suz, yazısız kare üretir.
+
 - **Logolar.** DRONE SHIELD logosu Boran VIII afişinden ayıklandı; Turaç ve Sterling logoları aynı afişin alt bandından kırpıldı. Final yayın için vektör (SVG/EPS) logolarla değiştirilmeli: `animasyon/assets/logo-*.png`.
 - **Fotoğraflar.** Kullanılan plakalar `animasyon/assets/` altında. `*-clean.jpg` dosyaları taretin silinip gökyüzüyle doldurulduğu temiz plakalar, `taret-*-cut.png` dosyaları alfa kanallı taret kesmeleri (dönüş ekseni ve namlu ucu koordinatları `index.html` içindeki SPR tablosunda). Plaka numarası fotoğraflarda okunuyor; istenirse maskelenebilir. Üst/ön görünüş renderları ve saha testi fotoğrafı bu sürümde kullanılmıyor (`docs/kaynak-gorseller/`).
 - **Dronlar.** `animasyon/assets/dron-a.png` ve `dron-b.png`, afişteki gerçek dron fotoğraflarından ayıklandı (140 ve 92 px genişlik). Daha yakın plan çekimler için yüksek çözünürlüklü dron fotoğrafı sağlanırsa aynı yerlere konabilir.

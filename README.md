@@ -7,6 +7,7 @@ animasyon/index.html     Film (HTML5 Canvas). Tarayıcıda açın; oynatıcı ve
 animasyon/assets/        Fotoğraf plakaları, temiz plakalar, alfa kanallı taret kesmeleri ve logolar.
 render/render.mjs        Playwright + ffmpeg ile 1080p MP4 render betiği.
 docs/SENARYO.md          Sahne sahne senaryo, zaman kodları, seslendirme metni, üretim notları.
+docs/ai-video/           Yapay zekâ videosu için çekim listesi, temiz başlangıç kareleri ve ürün referans fotoğrafları.
 docs/kaynak-gorseller/   Referans görseller (afiş, maket).
 ```
 
@@ -30,6 +31,7 @@ npm i -g playwright && npx playwright install chromium   # bir kez
 node render/render.mjs                                   # render/out/drone-shield.mp4
 node render/render.mjs --stills 2.5,9,17,26,38.55,50,60,67   # tek kareler (render/out/stills/)
 node render/render.mjs --start 34 --end 48 --crf 16       # yalnızca bir aralık
+node render/render.mjs --clean 1 --stills 13.5,38.2 --stillsdir docs/ai-video/kareler   # HUD'suz temiz kareler
 ```
 
 Render çıktıları `render/out/` altındadır ve sürüm kontrolüne girmez.

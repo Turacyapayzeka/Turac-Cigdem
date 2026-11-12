@@ -4,6 +4,8 @@
  *   node render/render.mjs                      -> render/out/drone-shield.mp4 (1080p, 30 fps)
  *   node render/render.mjs --stills 2,9,20,30   -> verilen saniyelerde PNG kareler (render/out/stills/)
  *   node render/render.mjs --start 34 --end 48  -> yalnızca bir aralığı render eder
+ *   node render/render.mjs --clean 1 --stills 13.5,38.2 --stillsdir docs/ai-video/kareler
+ *                                               -> HUD, yazı ve renk düzeni olmadan temiz kareler (yapay zekâ videosu için başlangıç karesi)
  * Gereksinim: Playwright (Chromium) ve ffmpeg. Görseller yerel bir HTTP sunucusundan servis edilir
  * (file:// altında canvas "tainted" olur ve toDataURL çalışmaz).
  */
@@ -25,6 +27,8 @@ const START = +opt('start', 0);
 const END = opt('end', null);
 const STILLS = opt('stills', null);
 const CRF = opt('crf', '18');
+const CLEAN = opt('clean', null);
+const STILLSDIR = opt('stillsdir', 'render/out/stills');
 const MIME = { '.html': 'text/html; charset=utf-8', '.jpg': 'image/jpeg', '.png': 'image/png', '.js': 'text/javascript', '.css': 'text/css' };
 
 const server = http.createServer((req, res) => {
@@ -40,7 +44,7 @@ const port = server.address().port;
 const browser = await chromium.launch();
 const page = await browser.newPage({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1 });
 page.on('pageerror', e => console.error('sayfa hatası:', e.message));
-await page.goto(`http://127.0.0.1:${port}/index.html?render=1`);
+await page.goto(`http://127.0.0.1:${port}/index.html?render=1${CLEAN ? '&clean=1' : ''}`);
 await page.waitForFunction(() => window.__film && (window.__film.ready || window.__film.error), null, { timeout: 60000 });
 const film = await page.evaluate(() => ({ DUR: window.__film.DUR, error: window.__film.error }));
 if (film.error) { console.error(film.error); process.exit(1); }
@@ -48,7 +52,7 @@ const DUR = film.DUR;
 const frameAt = async t => Buffer.from((await page.evaluate(t => window.__film.renderFrame(t), t)).split(',')[1], 'base64');
 
 if (STILLS) {
-  const dir = path.resolve(ROOT, 'render/out/stills'); fs.mkdirSync(dir, { recursive: true });
+  const dir = path.resolve(ROOT, STILLSDIR); fs.mkdirSync(dir, { recursive: true });
   for (const s of STILLS.split(',')) { const t = +s; const f = path.join(dir, `t${t.toFixed(2).replace('.', '_')}.png`); fs.writeFileSync(f, await frameAt(t)); console.log('kare', t, '->', f); }
 } else {
   fs.mkdirSync(path.dirname(OUT), { recursive: true });
