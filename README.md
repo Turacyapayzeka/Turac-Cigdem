@@ -7,6 +7,10 @@ animasyon/index.html     Film (HTML5 Canvas). Tarayıcıda açın; oynatıcı ve
 animasyon/assets/        Fotoğraf plakaları, temiz plakalar, alfa kanallı taret kesmeleri ve logolar.
 render/render.mjs        Playwright + ffmpeg ile 1080p MP4 render betiği.
 render/3d/sahneler.py    Gemi güvertesi ve rafineri kulesi için 3B arka plan plakaları (Blender bpy, Cycles).
+render/3d/dron3b.py      3B dron modeli: film için dron görünümleri ve 3B sahnelerde hedef dron.
+render/3d/taret3b.py     Tamamı 3B deneme: fotoğraflardan sadeleştirilmiş taret, pikap ve arazi; pilot çekim.
+render/3d/ucmf.py        Bambu Studio 3MF proje dosyalarını okur (parça ağları ve yerleşimleri).
+render/3d/modeller/      3B ağlar (dron.npz).
 render/ses/ses.py        Sentezlenmiş ses bandı: müzik yatağı ve efektler (yalnızca numpy).
 docs/SENARYO.md          Sahne sahne senaryo, zaman kodları, seslendirme metni, üretim notları.
 docs/ai-video/           Yapay zekâ videosu için çekim listesi, temiz başlangıç kareleri ve ürün referans fotoğrafları.

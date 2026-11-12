@@ -118,7 +118,7 @@ const FM='"JetBrains Mono","DejaVu Sans Mono",monospace';
 const SRC={yanClean:'assets/amarok-yan-clean.jpg',arkaTaret:'assets/amarok-arka-taret.jpg',arkaClean:'assets/amarok-arka-taret-clean.jpg',
   arkaSensor:'assets/amarok-arka-sensor.jpg',taret:'assets/taret-yakin.jpg',taretBlur:'assets/taret-yakin-blur.jpg',
   cutYan:'assets/taret-yan-cut.png',cutArka:'assets/taret-arka-cut.png',cutYakin:'assets/taret-yakin-cut.png',
-  dronA:'assets/dron-a.png',dronB:'assets/dron-b.png',
+  dronA:'assets/dron-3b-a.png',dronB:'assets/dron-3b-b.png',
   gemiArka:'assets/gemi-arka.jpg',gemiOn:'assets/gemi-on.png',rafArka:'assets/rafineri-arka.jpg',rafOn:'assets/rafineri-on.png',
   logo:'assets/logo-drone-shield.png',turac:'assets/logo-turac.png',sterling:'assets/logo-sterling.png'};
 const IMG={};
@@ -193,15 +193,16 @@ function scrim(a,from){if(CLEAN)return;const g=ctx.createLinearGradient(0,H*(fro
 function topScrim(){if(CLEAN)return;const g=ctx.createLinearGradient(0,0,0,220);g.addColorStop(0,'rgba(6,9,13,0.55)');g.addColorStop(1,'rgba(6,9,13,0)');ctx.fillStyle=g;ctx.fillRect(0,0,W,220);}
 function finish(t,o){if(CLEAN)return;o=o||{};grade(o.grade);vignette(o.vig);grain(t,o.grain);}
 
-/* ---------- gerçek dron fotoğrafı: yatış, hareket bulanıklığı, uzaklık pusu, termal mod ---------- */
-function drone(x,y,s,t,o){o=o||{};const img=o.v===1?IMG.dronB:IMG.dronA;const w=116*s,h=w*img.height/img.width;
+/* ---------- dron: 3B modelden render edilmiş görünümler (render/3d/dron3b.py); yatış, hareket bulanıklığı, uzaklık pusu, termal mod ---------- */
+const DLED=[[-0.162,-0.125],[-0.237,-0.02]];   /* ön kol ışığının görüntü merkezine göre konumu (en ve boy oranı) */
+function drone(x,y,s,t,o){o=o||{};const img=o.v===1?IMG.dronB:IMG.dronA;const w=150*s,h=w*img.height/img.width,led=DLED[o.v===1?1:0];
   const vx=o.vx||0,vy=o.vy||0,spd=Math.hypot(vx,vy);const bank=clamp(vx*0.0009,-0.42,0.42);const haze=clamp(o.haze||0);
   ctx.save();ctx.translate(x,y+Math.sin(t*2.3+(o.phase||0))*2*s);ctx.rotate((o.rot||0)+bank);ctx.globalAlpha*=(o.alpha==null?1:o.alpha)*(1-0.55*haze);
   if(hasFilter){if(o.hot)ctx.filter='grayscale(1) invert(1) brightness(1.5) contrast(1.4) blur(1.2px)';else if(haze>0.02)ctx.filter=`brightness(${(1+0.55*haze).toFixed(2)}) contrast(${(1-0.35*haze).toFixed(2)})`;}
   if(spd>140&&!o.hot){const ga=ctx.globalAlpha;for(let i=2;i>=1;i--){ctx.globalAlpha=ga*0.18/i;ctx.drawImage(img,-w/2-vx*0.014*i,-h/2-vy*0.014*i,w,h);}ctx.globalAlpha=ga;}
   if(!o.hot&&s>0.3&&haze<0.5){ctx.shadowColor='rgba(0,0,0,0.45)';ctx.shadowBlur=8;ctx.shadowOffsetY=4*s;}
   ctx.drawImage(img,-w/2,-h/2,w,h);
-  if(o.blink!==false&&!o.hot&&haze<0.6&&Math.sin(t*9+(o.phase||0))>0.4){ctx.shadowBlur=0;ctx.filter='none';ctx.fillStyle=C.red;ctx.shadowColor=C.red;ctx.shadowBlur=10;circle(w*0.4,-h*0.18,Math.max(1.5,2.6*s),true);}
+  if(o.blink!==false&&!o.hot&&haze<0.6&&Math.sin(t*9+(o.phase||0))>0.4){ctx.shadowBlur=0;ctx.filter='none';ctx.fillStyle=C.red;ctx.shadowColor=C.red;ctx.shadowBlur=10;circle(w*led[0],h*led[1],Math.max(1.5,2.6*s),true);}
   ctx.restore();}
 
 /* ---------- atış ve vuruş efektleri ---------- */

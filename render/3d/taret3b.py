@@ -126,16 +126,10 @@ def pikap(c):
     root = empty('pikap', (0, 0, 0), c); adopt(o, root); return root
 
 # ---------------------------------------------------------------- dron
-def dron(c):
-    govde = mat('dron_govde', (0.1, 0.1, 0.105), rough=0.5); per = bpy.data.materials.new('pervane'); per.use_nodes = True
-    b = per.node_tree.nodes['Principled BSDF']; b.inputs['Base Color'].default_value = (0.05, 0.05, 0.05, 1); b.inputs['Alpha'].default_value = 0.22
-    led = mat('dron_led', (1, 1, 1), emit=(1.0, 0.05, 0.03), strength=40.0); cam_m = mat('dron_cam', (0.01, 0.01, 0.012), rough=0.05)
-    o = [box((0.20, 0.10, 0.055), (0, 0, 0), govde, c, bevel=0.012), sphere(0.03, (0.1, 0, -0.03), cam_m, c), sphere(0.012, (-0.1, 0, 0.01), led, c)]
-    for sx in (-1, 1):
-        for sy in (-1, 1):
-            p = (sx * 0.15, sy * 0.15, 0.02); o.append(cyl(0.008, (sx * 0.06, sy * 0.03, 0.0), p, govde, c, verts=8)); o.append(cyl(0.016, (p[0], p[1], 0.0), (p[0], p[1], 0.045), govde, c, verts=12))
-            o.append(cyl(0.115, (p[0], p[1], 0.048), (p[0], p[1], 0.05), per, c, verts=28)); o.append(cyl(0.004, (sx * 0.07, sy * 0.05, -0.02), (sx * 0.09, sy * 0.07, -0.09), govde, c, verts=6))
-    root = empty('dron', (0, 0, 0), c); adopt(o, root); root.scale = (2.6, 2.6, 2.6); return root
+def dron(c, olcek=2.6):
+    """Hedef dron: kullanıcının 3B baskı modelinden (dron3b.py). Görünür olması için gerçek boyutun 2,6 katı."""
+    from dron3b import dron_yukle
+    root, _ = dron_yukle(c, olcek=olcek); return root
 
 # ---------------------------------------------------------------- arazi
 def yukseklik(x, y):
