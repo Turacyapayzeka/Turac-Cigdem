@@ -3,6 +3,7 @@
 Turaç / Sterling **Drone Shield** (Dron Kalkanı) anti-dron taret sistemi için 80 saniyelik tanıtım filmi. Film, gerçek saha fotoğrafları üzerine tarayıcıda çizilen animasyon katmanlarından oluşur; tarayıcıda oynatılır veya MP4 olarak render edilir.
 
 ```
+PROJE-OZETI.md           Projenin tek sayfalık özeti: sürümler, bağlantılar, açık konular.
 animasyon/index.html     Film (HTML5 Canvas). Tarayıcıda açın; oynatıcı ve sahne çipleri içerir.
 animasyon/assets/        Fotoğraf plakaları, temiz plakalar, alfa kanallı taret kesmeleri ve logolar.
 render/render.mjs        Playwright + ffmpeg ile 1080p MP4 render betiği.

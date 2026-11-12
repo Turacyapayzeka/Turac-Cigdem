@@ -1,5 +1,6 @@
 render/out/
 node_modules/
+__pycache__/
 surumler/*.mp4
 surumler/ilk-calismalar/*.mp4
 surumler/ilk-calismalar/model/
