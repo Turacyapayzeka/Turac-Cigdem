@@ -89,13 +89,13 @@ PROJE-OZETI.md            Bu belge
 
 | Çalışma | Tarih | Tür | Bu projedeki hâli | Özgün sayfa |
 |---|---|---|---|---|
-| Dron Kalkanı Vitrin | 6 Kasım | Etkileşimli 3B sayfa, gerçek taret modeli | Sayfa kopyası; video kaydı bu belge yazılırken sürüyordu | https://claude.ai/artifact/WvuQjkEA245ak96Smsket2 |
-| Dron Kalkanı Vitrin, ilk hâli | 2 Kasım | Etkileşimli 3B sayfa | Sayfa kopyası; video kaydı sürüyordu | https://claude.ai/artifact/Gs282H3eU9yvDJu8gMMmWX |
+| Dron Kalkanı Vitrin | 6 Kasım | Etkileşimli 3B sayfa, gerçek taret modeli | Sayfa kopyası ve 60 sn'lik tur videosu | https://claude.ai/artifact/WvuQjkEA245ak96Smsket2 |
+| Dron Kalkanı Vitrin, ilk hâli | 2 Kasım | Etkileşimli 3B sayfa | Sayfa kopyası ve 60 sn'lik tur videosu | https://claude.ai/artifact/Gs282H3eU9yvDJu8gMMmWX |
 | Dron Kalkanı Mühendislik Filmi | 31 Ekim | Film, 55 sn, sesli | Video dosyası hazır | https://claude.ai/artifact/SqAWM8pSunY6wrp41DJapu |
 | Dron Kalkanı Tanıtım Filmi | 28 Ekim | Film, 59 sn, sesli | Video dosyası hazır | https://claude.ai/artifact/4D2J8fx2N9SFVRJHmrajzU |
-| Dron Kalkanı Simülasyonu | 28 Ekim | Etkileşimli 3B simülasyon | Sayfa kopyası; video kaydı sürüyordu | https://claude.ai/artifact/7V4VHVvJBVT8fmECVycWLt |
+| Dron Kalkanı Simülasyonu | 28 Ekim | Etkileşimli 3B simülasyon | Sayfa kopyası, 45 sn'lik yatay ve 30 sn'lik dikey kayıt | https://claude.ai/artifact/7V4VHVvJBVT8fmECVycWLt |
 
-İki konuşma tek konuşmada birleştirilemiyor. Bu yüzden o konuşmanın yayınlanmış sayfaları buraya kopyalandı.
+İki konuşma tek konuşmada birleştirilemiyor. Bu yüzden o konuşmanın yayınlanmış sayfaları buraya kopyalandı. Etkileşimli sayfaların videoları sessizdir; iki filmin videosu seslidir.
 
 ## Filmdeki rakamlar ve doğrulanması gerekenler
 
@@ -114,7 +114,7 @@ Kaynak haberler: [Uzmanpara, sahaya çıkış](https://uzmanpara.milliyet.com.tr
 ## Açık konular
 
 1. **Sürüm seçimi.** Kullanıcı sürümlerden birini seçip ondan devam edecek.
-2. **Dikey video.** Kullanıcının hatırladığı dikey video bu projede yok. Önceki iki film yatay çıktı. Video başka bir konuşmada dosya olarak duruyorsa oradan indirilip buraya eklenmeli.
+2. **Dikey video.** Kullanıcının hatırladığı dikey videonun hangisi olduğu belli değil. Önceki iki film yatay çıktı. Simülasyon sayfasının telefon görünümü dikey olarak kaydedildi; aranan video bu değilse başka bir konuşmada dosya olarak duruyordur ve oradan indirilip buraya eklenmeli.
 3. **GitHub.** Push reddediliyor (403): depo, oturumun GitHub kimliğine bağlı değil. Commit'ler yerelde ve `drone-shield-commits.bundle` dosyasında. Çözüm: GitHub bağlantısını yenileyip yeni oturum açmak ya da bundle ile elle push etmek.
 4. **Ses.** Ses bandı ölçümle doğrulandı, kulakla dinlenmedi. Seslendirme kaydı yok; metni senaryoda.
 5. **Yapay zekâ videosu.** Higgsfield hesabı açılmadı. Canva ile video üretimi mümkün ama kullanıcı onayı bekliyor. Çekim paketi hazır.
