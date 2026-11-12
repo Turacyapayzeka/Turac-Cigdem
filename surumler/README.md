@@ -21,14 +21,14 @@ git archive <commit> | tar -x -C /tmp/surum && node /tmp/surum/render/render.mjs
 
 ## Bu yazışmadan önceki çalışmalar
 
-`ilk-calismalar/` klasöründe, daha önce yapılmış üç etkileşimli sayfanın kopyası durur. İkisi film türünde olduğu için kopyalanamadı; yalnızca bağlantıları var.
+`ilk-calismalar/` klasöründe, "Dron kalkanı simülasyonu" başlıklı önceki konuşmada yapılmış çalışmalar durur: üç etkileşimli sayfanın kopyası ve iki filmin video dosyası. Filmler, film sayfasının kendi çizicisinden kare kare alınarak üretildi; sayfadaki Dışa Aktar düğmesinin çıktısı değildir. Videolar sürüm kontrolüne girmez.
 
 | Çalışma | Tarih | Tür | Yerel kopya | Bağlantı |
 |---|---|---|---|---|
 | Dron Kalkanı Vitrin | 6 Kasım | Etkileşimli 3B sayfa, gerçek taret modeli, 60 sn tur | `ilk-calismalar/2026-11-06-vitrin-3b.html` (+ `model/kule.json`) | https://claude.ai/artifact/WvuQjkEA245ak96Smsket2 |
 | Dron Kalkanı Vitrin | 2 Kasım | Etkileşimli 3B sayfa, sade taret | `ilk-calismalar/2026-11-02-vitrin.html` | https://claude.ai/artifact/Gs282H3eU9yvDJu8gMMmWX |
-| Dron Kalkanı Mühendislik Filmi | 31 Ekim | Film, 9 sahne, 55 sn | yok | https://claude.ai/artifact/SqAWM8pSunY6wrp41DJapu |
-| Dron Kalkanı Tanıtım Filmi | 28 Ekim | Film, 11 sahne, 59 sn | yok | https://claude.ai/artifact/4D2J8fx2N9SFVRJHmrajzU |
+| Dron Kalkanı Mühendislik Filmi | 31 Ekim | Film, 9 sahne, 55 sn, sesli | `ilk-calismalar/2026-10-31-muhendislik-filmi.mp4` | https://claude.ai/artifact/SqAWM8pSunY6wrp41DJapu |
+| Dron Kalkanı Tanıtım Filmi | 28 Ekim | Film, 11 sahne, 59 sn, sesli | `ilk-calismalar/2026-10-28-tanitim-filmi.mp4` | https://claude.ai/artifact/4D2J8fx2N9SFVRJHmrajzU |
 | Dron Kalkanı Simülasyonu | 28 Ekim | Etkileşimli 3B simülasyon | `ilk-calismalar/2026-10-28-simulasyon.html` | https://claude.ai/artifact/7V4VHVvJBVT8fmECVycWLt |
 
 Yerel kopyalar three.js kitaplığını internetten yükler. `model/kule.json` taretin 3B modelidir (12 MB) ve sürüm kontrolüne girmez; aynı model `render/3d/modeller/taret.glb` olarak depoda durur.
