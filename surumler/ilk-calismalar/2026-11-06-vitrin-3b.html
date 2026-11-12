@@ -1,0 +1,1349 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Dron Kalkanı Vitrin</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Yerleşim: tam ekran 3D ürün vitrini; solda marka ve platform başlığı, sahnede parça etiketleri, altta platform seçimi ve özellik şeridi. Tek, bilinçli koyu görünüm. */
+:root{
+  --ink:#eef0ee; --muted:#aab4b6; --faint:#7f8a8d; --glass:rgba(13,16,18,.66); --line:rgba(255,255,255,.16);
+  --sand:#c9aa6c; --red:#d3262e;
+  --f-display:"Chakra Petch","Segoe UI",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+  color-scheme:dark;
+}
+html,body{height:100%;overflow:hidden}
+body{background:#15181a;color:var(--ink);font-family:var(--f-body);font-size:14px}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--sand);outline-offset:2px}
+#c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.en{color:var(--faint);font-size:.82em;font-weight:400}
+
+.hud{position:fixed;inset:0;pointer-events:none;display:flex;flex-direction:column;justify-content:space-between;gap:16px;
+  padding-top:calc(18px + env(safe-area-inset-top,0px));padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.top{display:flex;flex-direction:column;gap:22px;max-width:520px}
+.brand{display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+.logo{--w:230px;position:relative;width:var(--w);height:calc(var(--w) * .704);filter:drop-shadow(0 2px 10px rgba(0,0,0,.5))}
+.logo svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.logo b{position:absolute;left:-3%;right:-3%;top:calc(var(--w) * .287);font-size:calc(var(--w) * .125);font-family:var(--f-display);font-weight:700;line-height:1;letter-spacing:.01em;text-align:center;white-space:nowrap}
+.tagline{font-size:13px;color:var(--muted)}
+.plat{display:flex;flex-direction:column;gap:4px;transition:opacity .5s,transform .5s}
+.plat.out{opacity:0;transform:translateX(-14px)}
+.plat small{font-family:var(--f-display);font-weight:600;letter-spacing:.18em;font-size:12px;color:var(--sand)}
+.plat h1{margin:0;font-family:var(--f-display);font-weight:700;font-size:clamp(30px,4.4vw,56px);line-height:1.02;text-wrap:balance;text-shadow:0 2px 18px rgba(0,0,0,.35)}
+.plat p{margin:4px 0 0;color:var(--muted);font-size:15px;max-width:44ch}
+
+.bottom{display:flex;flex-direction:column;gap:10px;align-items:flex-start}
+.bar{pointer-events:auto;display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;background:var(--glass);border:1px solid var(--line);border-radius:6px;padding:8px 10px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);max-width:100%}
+.tabs{display:inline-flex;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.tabs button{background:transparent;border:0;padding:7px 14px;display:flex;flex-direction:column;align-items:flex-start;line-height:1.15;color:var(--muted)}
+.tabs button+button{border-left:1px solid var(--line)}
+.tabs button b{font-family:var(--f-display);font-weight:600;font-size:15px;letter-spacing:.04em}
+.tabs button[aria-pressed="true"]{color:var(--ink);background:rgba(255,255,255,.06);box-shadow:inset 0 -2px 0 var(--sand)}
+.tog{background:transparent;border:1px solid var(--line);border-radius:4px;padding:8px 12px;font-weight:500}
+.tog[aria-pressed="true"]{border-color:var(--sand);color:var(--sand)}
+.specs{display:flex;flex-wrap:wrap;gap:8px}
+.spec{display:flex;flex-direction:column;padding:8px 12px;border-left:2px solid var(--sand);background:var(--glass);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.spec b{font-family:var(--f-display);font-weight:700;font-size:18px;letter-spacing:.03em}
+.spec span{font-size:12px;color:var(--muted)}
+.partners{font-size:12px;color:var(--muted);letter-spacing:.04em}
+.partners b{color:var(--ink);font-weight:500}
+
+.vig{position:fixed;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(10,12,14,.62) 0%,rgba(10,12,14,.22) 34%,transparent 52%),linear-gradient(0deg,rgba(10,12,14,.5) 0%,transparent 28%)}
+.fade{position:fixed;inset:0;background:#15181a;opacity:0;pointer-events:none;transition:opacity .4s}
+.fade.on{opacity:1}
+.tags{display:none}
+.domes{position:fixed;inset:0;pointer-events:none;overflow:hidden}
+.dl{position:absolute;left:0;top:0;display:flex;flex-direction:column;gap:1px;padding:6px 11px;background:var(--glass);border:1px solid var(--line);border-left:3px solid var(--sand);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);white-space:nowrap;transition:opacity .4s}
+.dl.in{border-left-color:var(--red)}
+.dl b{font-family:var(--f-display);font-weight:700;font-size:20px;letter-spacing:.03em;line-height:1.05}
+.dl span{font-size:12px;color:var(--muted)}
+.dl.off{opacity:0}
+.cap{display:flex;flex-direction:column;gap:5px;max-width:min(760px,100%);transition:opacity .35s,transform .35s}
+.cap.out{opacity:0;transform:translateY(8px)}
+.cap small{font-family:var(--f-display);font-weight:600;font-size:12px;letter-spacing:.18em;color:var(--sand);min-height:1em}
+.cap b{font-family:var(--f-display);font-weight:700;font-size:clamp(24px,3.2vw,42px);line-height:1.08;text-wrap:balance;text-shadow:0 2px 16px rgba(0,0,0,.55)}
+.cap .en{font-size:15px}
+body.story .specs,body.story .plat p{display:none}
+body:not(.story) .cap{display:none}
+.start{position:fixed;inset:0;display:grid;place-items:center;background:rgba(10,12,14,.45);z-index:5;padding:16px}
+.start[hidden]{display:none}
+.start-card{background:var(--glass);border:1px solid var(--line);border-top:3px solid var(--sand);padding:22px 24px;display:flex;flex-direction:column;gap:14px;align-items:flex-start;max-width:420px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.start-card b{font-family:var(--f-display);font-size:24px;font-weight:700}
+.start-card p{margin:0;color:var(--muted);font-size:14px;line-height:1.5}
+.start-card .row{display:flex;gap:10px;flex-wrap:wrap}
+.btn{background:var(--sand);color:#1d1708;border:0;padding:10px 16px;font-weight:600;border-radius:4px}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.lines{position:absolute;inset:0;width:100%;height:100%}
+.lines line{stroke:rgba(238,240,238,.75);stroke-width:1.2;transition:opacity .45s}
+.dot{position:absolute;left:0;top:0;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;border:2px solid var(--ink);background:var(--red);box-shadow:0 0 0 4px rgba(211,38,46,.25);opacity:0;transition:opacity .45s}
+.callout{position:absolute;left:0;top:0;width:270px;background:var(--glass);border:1px solid var(--line);border-left:2px solid var(--sand);padding:8px 11px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);opacity:0;transition:opacity .45s}
+.on{opacity:1}
+.callout b{display:block;font-weight:600;font-size:14px}
+.callout span{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+.callout em{display:block;font-style:normal;font-size:11px;color:var(--faint);margin-top:3px}
+.callout u{display:block;text-decoration:none;font-family:var(--f-display);font-weight:600;font-size:11px;letter-spacing:.14em;color:var(--sand);margin-bottom:2px}
+.compact .callout span,.compact .callout em{display:none}
+
+.hint{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));font-size:12px;color:var(--muted);background:var(--glass);border:1px solid var(--line);padding:6px 10px;border-radius:4px;pointer-events:none}
+
+@media (max-width:760px){
+  .logo{--w:150px}
+  .plat p{display:none}
+  .callout{width:150px;padding:6px 8px}
+  .callout span,.callout em{display:none}
+  .specs .spec:nth-child(n+3){display:none}
+  .partners,.hint{display:none}
+}
+@media (prefers-reduced-motion:reduce){.plat,.hs{transition:none}}
+</style>
+
+<canvas id="c" aria-label="Dron Kalkanı 3D ürün vitrini"></canvas>
+<div class="vig"></div>
+<div class="domes" id="domes">
+  <div class="dl" id="dlOut"><b>600–800 m</b><span>Tespit alanı <span class="en">· detection zone</span></span></div>
+  <div class="dl in" id="dlIn"><b>150 m</b><span>Angajman alanı <span class="en">· engagement zone</span></span></div>
+</div>
+<div class="fade" id="fade"></div>
+<div class="tags" id="tags"><svg class="lines" id="lines"></svg></div>
+<div class="hint">Sürükleyerek döndürün · tekerlekle yakınlaştırın</div>
+
+<div class="hud">
+  <div class="top">
+    <div class="brand">
+      <div class="logo"><svg id="emblem" viewBox="60 190 980 690" aria-hidden="true"></svg><b>DRON KALKANI</b></div>
+      <span class="tagline">Son 150 metre bizim. <span class="en">The last 150 metres are ours.</span></span>
+    </div>
+    <div class="plat" id="plat">
+      <small id="pTag">PLATFORM</small>
+      <h1 id="pTitle">Araç üstü koruma</h1>
+      <div class="en" id="pEn">Protection on vehicles</div>
+      <p id="pDesc"></p>
+    </div>
+  </div>
+
+  <div class="bottom">
+    <div class="cap" id="cap" aria-live="polite"><small id="capK"></small><b id="capT"></b><span class="en" id="capE"></span></div>
+    <div class="specs">
+      <div class="spec"><b>600–800 m</b><span>Tespit <span class="en">· detection</span></span></div>
+      <div class="spec"><b>150 m</b><span>Angajman <span class="en">· engagement</span></span></div>
+      <div class="spec"><b>Otonom</b><span>Operatör gerekmez <span class="en">· autonomous</span></span></div>
+      <div class="spec"><b>Pasif</b><span>EO ve akustik sensör <span class="en">· passive sensors</span></span></div>
+    </div>
+    <div class="bar">
+      <div class="tabs" id="tabs" role="group" aria-label="Platform">
+        <button data-p="truck" aria-pressed="true"><b>Pikap</b><span class="en">Vehicle</span></button>
+        <button data-p="ship" aria-pressed="false"><b>Gemi</b><span class="en">Ship</span></button>
+        <button data-p="tower" aria-pressed="false"><b>Kule</b><span class="en">Fixed site</span></button>
+      </div>
+      <button class="tog" id="tour" aria-pressed="true">Sunum modu</button>
+      <button class="tog" id="shield" aria-pressed="true">Koruma alanı</button>
+      <button class="tog" id="music" aria-pressed="false">Müzik</button>
+    </div>
+    <div class="partners">Turaç liderliğinde ortak yapım: <b>Turaç</b> · <b>Derya Arms</b> · <b>Lasersan</b> · <b>Urban Savunma</b> · yapay zekâ <b>İTÜ ARC</b></div>
+  </div>
+</div>
+
+<div class="start" id="start">
+  <div class="start-card">
+    <b>Dron Kalkanı sunumu</b>
+    <p>Bir dakikalık anlatımlı tur: ürün, nasıl çalıştığı, platformlar ve ortaklar. <span class="en">A one-minute guided tour of the product.</span></p>
+    <div class="row"><button class="btn" id="goMusic">Müzikle başlat</button><button class="btn ghost" id="goMute">Sessiz izle</button></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/objects/Sky.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/objects/Water.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/SSAOShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/GammaCorrectionShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/math/SimplexNoise.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/SSAOPass.js"></script>
+
+<script>
+(() => {
+'use strict';
+const V3 = THREE.Vector3;
+const C = h => new THREE.Color(h).convertSRGBToLinear();
+const $ = s => document.querySelector(s);
+const lerp = (a, b, t) => a + (b - a) * t;
+const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+/* ---------- Logo amblemi (Dron Kalkanı) ---------- */
+{
+  const prop = (cx, cy, a) => {
+    const R = 115, g = 20, p = d => [cx + R * Math.cos(d * Math.PI / 180), cy + R * Math.sin(d * Math.PI / 180)].map(v => v.toFixed(1)).join(' ');
+    const arc = (a0, a1) => 'M' + p(a0) + ' A' + R + ' ' + R + ' 0 0 1 ' + p(a1);
+    const blade = 'M34 -5 C58 -28 96 -24 106 -10 C110 -3 106 5 97 7 C72 11 52 9 34 6 Z';
+    return '<path d="' + arc(a + g, a + 180 - g) + ' ' + arc(a + 180 + g, a + 360 - g) + '" fill="none" stroke="#eef0ee" stroke-width="15" stroke-linecap="round"/>' +
+      '<path fill="#eef0ee" transform="translate(' + cx + ',' + cy + ') rotate(' + a + ')" d="' + blade + '"/>' +
+      '<path fill="#eef0ee" transform="translate(' + cx + ',' + cy + ') rotate(' + (a + 180) + ')" d="' + blade + '"/>' +
+      '<circle fill="#eef0ee" cx="' + cx + '" cy="' + cy + '" r="33"/><circle fill="#15181a" cx="' + cx + '" cy="' + cy + '" r="7"/>';
+  };
+  const top = prop(325, 330, -45) + prop(775, 330, 45) +
+    '<path fill="#eef0ee" d="M372 345 C450 395 500 425 550 438 C600 425 650 395 728 345 C745 352 758 365 762 378 C735 415 718 440 705 465 L398 465 C385 440 368 415 340 378 C344 365 355 352 372 345 Z"/>';
+  $('#emblem').innerHTML = top + '<g transform="translate(0,1064) scale(1,-1)">' + top + '</g>';
+}
+
+/* ---------- Render ---------- */
+const canvas = $('#c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = .92;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+const scene = new THREE.Scene();
+const NO_AO = [];                                                         // perdeleme hesabına girmeyen saydam katmanlar
+const tex = (w, h, draw, srgb = true) => {
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  draw(c.getContext('2d'), w, h);
+  const t = new THREE.CanvasTexture(c);
+  if (srgb) t.encoding = THREE.sRGBEncoding;
+  t.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  return t;
+};
+// Fiziksel gökyüzü: alçak, sıcak akşamüstü güneşi; yansımalar da aynı gökyüzünden
+const SUN_DIR = new V3().setFromSphericalCoords(1, THREE.MathUtils.degToRad(90 - 26), THREE.MathUtils.degToRad(338));
+const makeSky = () => {
+  const s = new THREE.Sky(); s.scale.setScalar(1800);
+  const u = s.material.uniforms;
+  u.turbidity.value = 2.6; u.rayleigh.value = 2.4; u.mieCoefficient.value = .004; u.mieDirectionalG.value = .8;
+  u.sunPosition.value.copy(SUN_DIR);
+  return s;
+};
+scene.add(makeSky());
+scene.fog = new THREE.Fog(C(0xa9b8c8), 90, 900);
+renderer.toneMappingExposure = .62;
+{
+  const envScene = new THREE.Scene();
+  envScene.add(makeSky());
+  const gnd = new THREE.Mesh(new THREE.CircleGeometry(1500, 32), new THREE.MeshBasicMaterial({ color: C(0x6c6558) }));
+  gnd.rotation.x = -Math.PI / 2; gnd.position.y = -5; envScene.add(gnd);
+  const pm = new THREE.PMREMGenerator(renderer);
+  scene.environment = pm.fromScene(envScene, 0.03).texture;
+}
+
+const hemi = new THREE.HemisphereLight(C(0xd8d8d6), C(0x7a6a52), 0.75);
+scene.add(hemi);
+const sun = new THREE.DirectionalLight(C(0xffd2a0), 3.4);
+sun.castShadow = true;
+sun.shadow.mapSize.set(4096, 4096);
+sun.shadow.bias = -0.0003;
+sun.shadow.normalBias = 0.02;
+scene.add(sun, sun.target);
+
+/* ---------- Dokular ---------- */
+const camoTex = tex(512, 512, (g, w, h) => {
+  // Sahadaki aracın folyosu: açık gri, kırık beyaz ve bej lekeler, ince geometrik çizgiler
+  g.fillStyle = '#7d7b77'; g.fillRect(0, 0, w, h);
+  const pal = ['#c4c1ba', '#5a5854', '#a39e94', '#3d3b38', '#d6d3cc', '#78726a'];
+  let s = 7; const r = () => (s = (s * 16807) % 2147483647) / 2147483647;
+  for (let i = 0; i < 230; i++) {
+    const cx = r() * w, cy = r() * h, rr = 10 + r() * 34;
+    g.fillStyle = pal[i % pal.length];
+    const pts = [];
+    for (let k = 0; k < 6; k++) { const a = k / 6 * Math.PI * 2 + r() * .5, q = rr * (.45 + r() * .7); pts.push([cx + Math.cos(a) * q * 1.7, cy + Math.sin(a) * q]); }
+    // Döşenebilir olsun diye kenardan taşan leke karşı kenarda da çizilir
+    for (const dx of [-w, 0, w]) for (const dy of [-h, 0, h]) { g.beginPath(); pts.forEach(([x, y]) => g.lineTo(x + dx, y + dy)); g.closePath(); g.fill(); }
+  }
+  g.strokeStyle = 'rgba(225,222,214,.45)'; g.lineWidth = 1.2;
+  for (let i = 0; i < 26; i++) {
+    const x = r() * w, y = r() * h, a = Math.floor(r() * 6) * Math.PI / 3, l = 40 + r() * 90;
+    g.beginPath(); g.moveTo(x, y); g.lineTo(x + Math.cos(a) * l, y + Math.sin(a) * l); g.stroke();
+  }
+});
+camoTex.wrapS = camoTex.wrapT = THREE.RepeatWrapping;
+camoTex.repeat.set(.5, .5);
+
+const netTex = tex(256, 256, (g, w, h) => {
+  g.clearRect(0, 0, w, h);
+  const pal = ['#7d6a52', '#5a4a38', '#a28c6c', '#3f3428', '#8a7b5c', '#6c6146'];
+  let s = 11; const r = () => (s = (s * 16807) % 2147483647) / 2147483647;
+  for (let i = 0; i < 900; i++) {
+    const x = r() * w, y = r() * h, l = 6 + r() * 10, a = r() * Math.PI;
+    g.fillStyle = pal[i % pal.length];
+    g.save(); g.translate(x, y); g.rotate(a);
+    g.beginPath(); g.ellipse(0, 0, l, l * .45, 0, 0, Math.PI * 2); g.fill(); g.restore();
+  }
+});
+netTex.wrapS = netTex.wrapT = THREE.RepeatWrapping; netTex.repeat.set(3, 2);
+
+// Döşenebilir değer gürültüsü (fbm): toprakta renk ve kabartma çeşitliliği; ilk oktav kaba, sonrakiler giderek ince
+function tileNoise(N, seed, octaves, base = 4, gain = .55) {
+  let s = seed; const r = () => (s = (s * 16807) % 2147483647) / 2147483647;
+  const out = new Float32Array(N * N); let amp = 1, tot = 0;
+  for (let o = 0; o < octaves; o++) {
+    const G = base << o, L = Array.from({ length: G * G }, r), cell = N / G;
+    for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+      const fx = x / cell, fy = y / cell, x0 = Math.floor(fx), y0 = Math.floor(fy), tx = fx - x0, ty = fy - y0;
+      const sx = tx * tx * (3 - 2 * tx), sy = ty * ty * (3 - 2 * ty), x1 = (x0 + 1) % G, y1 = (y0 + 1) % G;
+      const a = L[y0 * G + x0], b = L[y0 * G + x1], c = L[y1 * G + x0], d = L[y1 * G + x1];
+      out[y * N + x] += amp * ((a * (1 - sx) + b * sx) * (1 - sy) + (c * (1 - sx) + d * sx) * sy);
+    }
+    tot += amp; amp *= gain;
+  }
+  for (let i = 0; i < out.length; i++) out[i] /= tot;
+  return out;
+}
+// Kuru toprak: renk ve kabartma aynı veriden; çakıllar iki haritada aynı yerde
+const SOIL = (() => {
+  const N = 512, col = tileNoise(N, 3, 4, 16, .6), crust = tileNoise(N, 41, 5, 16, .7);
+  let s = 5; const r = () => (s = (s * 16807) % 2147483647) / 2147483647;
+  const pebbles = Array.from({ length: 1700 }, (_, i) => ({ x: r() * N, y: r() * N, rad: i < 140 ? 2 + r() * 2.5 : .6 + r() * 1.3, tone: r() }));
+  return { N, col, crust, pebbles, r };
+})();
+const dirtTex = tex(SOIL.N, SOIL.N, (g, w, h) => {
+  const { col, crust, pebbles, r } = SOIL, im = g.createImageData(w, h);
+  for (let i = 0; i < w * h; i++) {
+    const k = THREE.MathUtils.smoothstep(col[i], .3, .72), c = crust[i], v = (r() - .5) * 16;
+    im.data[i * 4] = 100 + k * 70 + c * 20 + v; im.data[i * 4 + 1] = 92 + k * 66 + c * 18 + v * .95; im.data[i * 4 + 2] = 78 + k * 58 + c * 14 + v * .85; im.data[i * 4 + 3] = 255;
+  }
+  g.putImageData(im, 0, 0);
+  // Çakıllar: açık üst kenar, koyu alt gölge; kenardan taşan karşı kenarda da çizilir
+  for (const p of pebbles) for (const dx of [-w, 0, w]) for (const dy of [-h, 0, h]) {
+    const x = p.x + dx, y = p.y + dy; if (x < -6 || y < -6 || x > w + 6 || y > h + 6) continue;
+    const base = p.tone < .5 ? [198, 193, 182] : p.tone < .8 ? [140, 132, 120] : [86, 80, 72];
+    g.fillStyle = 'rgba(40,30,20,.35)'; g.beginPath(); g.ellipse(x + p.rad * .35, y + p.rad * .4, p.rad, p.rad * .8, 0, 0, Math.PI * 2); g.fill();
+    g.fillStyle = 'rgb(' + base.join(',') + ')'; g.beginPath(); g.ellipse(x, y, p.rad, p.rad * .8, 0, 0, Math.PI * 2); g.fill();
+  }
+});
+dirtTex.wrapS = dirtTex.wrapT = THREE.RepeatWrapping; dirtTex.repeat.set(280, 280);
+
+// Yükseklikten normal haritası (döşenebilir): toprakta çakıl, denizde dalgacık
+function normalTex(N, height, rep) {
+  const H = new Float32Array(N * N);
+  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) H[y * N + x] = height(x, y, N);
+  const c = document.createElement('canvas'); c.width = c.height = N;
+  const g = c.getContext('2d'), im = g.createImageData(N, N);
+  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+    const nx = H[y * N + (x + N - 1) % N] - H[y * N + (x + 1) % N], ny = H[((y + N - 1) % N) * N + x] - H[((y + 1) % N) * N + x], l = Math.hypot(nx, ny, 1), i = (y * N + x) * 4;
+    im.data[i] = (nx / l * .5 + .5) * 255; im.data[i + 1] = (ny / l * .5 + .5) * 255; im.data[i + 2] = (1 / l * .5 + .5) * 255; im.data[i + 3] = 255;
+  }
+  g.putImageData(im, 0, 0);
+  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(rep, rep);
+  return t;
+}
+const dirtNrm = (() => {
+  // Kabartma: kabuk gürültüsü ve renk haritasındaki çakılların yerinde küçük tümsekler
+  const { N, col, crust, pebbles } = SOIL, B = new Float32Array(N * N);
+  for (let i = 0; i < N * N; i++) B[i] = crust[i] * 3 + col[i] * 1.5;
+  for (const p of pebbles) {
+    const R = Math.ceil(p.rad) + 1;
+    for (let y = -R; y <= R; y++) for (let x = -R; x <= R; x++) { const d = Math.hypot(x, y); if (d < p.rad) B[((Math.floor(p.y) + y + N) % N) * N + (Math.floor(p.x) + x + N) % N] += Math.sqrt(1 - (d / p.rad) ** 2) * p.rad * .5; }
+  }
+  return normalTex(N, (x, y) => B[y * N + x], 280);
+})();
+const waterNrm = (() => {
+  // Rastgele yönlü çok sayıda küçük dalga: döşenebilir olması için tam sayı frekanslar
+  let s = 17; const r = () => (s = (s * 16807) % 2147483647) / 2147483647;
+  const W = Array.from({ length: 24 }, () => ({ fx: Math.round((r() - .5) * 40), fy: Math.round((r() - .5) * 40), p: r() * 6.28 })).filter(w => w.fx || w.fy);
+  return normalTex(256, (x, y, N) => W.reduce((h, w) => h + Math.sin((w.fx * x + w.fy * y) * 2 * Math.PI / N + w.p) / Math.hypot(w.fx, w.fy), 0) * 6, 1);
+})();
+// Lastik dişi deseni (kabartma haritası)
+const treadTex = tex(256, 64, (g, w, h) => {
+  g.fillStyle = '#fff'; g.fillRect(0, 0, w, h); g.fillStyle = '#000';
+  for (let i = 0; i < 16; i++) { const x = i * 16; g.fillRect(x, 8 + (i % 2) * 6, 9, 20); g.fillRect(x + 4, 36 - (i % 2) * 6, 9, 20); }
+}, false);
+treadTex.wrapS = treadTex.wrapT = THREE.RepeatWrapping; treadTex.repeat.set(10, 1);
+
+// Tank sacı: kat çizgileri, yağmur ve pas izleri, alta doğru kirlenme
+const tankTex = tex(512, 256, (g, w, h) => {
+  g.fillStyle = '#d6d4cd'; g.fillRect(0, 0, w, h);
+  let s = 31; const r = () => (s = (s * 16807) % 2147483647) / 2147483647;
+  for (let i = 0; i < 180; i++) { g.fillStyle = 'rgba(110,98,80,' + (.04 + r() * .09).toFixed(3) + ')'; g.fillRect(r() * w, 0, 1 + r() * 3, 20 + r() * h * .8); }
+  const gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, 'rgba(0,0,0,0)'); gr.addColorStop(1, 'rgba(95,82,62,.32)'); g.fillStyle = gr; g.fillRect(0, 0, w, h);
+  g.fillStyle = 'rgba(70,70,70,.14)'; for (let k = 1; k < 6; k++) g.fillRect(0, k * h / 6, w, 1);
+});
+tankTex.wrapS = tankTex.wrapT = THREE.RepeatWrapping; tankTex.repeat.set(4, 1);
+// Gemi bordası: koyu boya, sac levha dikişleri, güverte kenarından inen pas izleri (16 m × 8 m'lik karo, üst kenar güverte)
+const hullTex = tex(1024, 512, (g, w, h) => {
+  g.fillStyle = '#2f3a42'; g.fillRect(0, 0, w, h);
+  let s = 23; const r = () => (s = (s * 16807) % 2147483647) / 2147483647;
+  for (let i = 0; i < 90; i++) { g.fillStyle = 'rgba(' + (r() < .5 ? '20,26,30' : '70,82,90') + ',' + (.05 + r() * .08).toFixed(3) + ')'; g.fillRect(r() * w, r() * h, 40 + r() * 160, 20 + r() * 90); }
+  g.fillStyle = 'rgba(15,20,24,.5)';
+  for (let x = 0; x < w; x += w / 8) g.fillRect(x, 0, 2, h);
+  for (let y = h / 4; y < h; y += h / 4) g.fillRect(0, y, w, 2);
+  for (let i = 0; i < 70; i++) {
+    const x = r() * w, len = 30 + Math.pow(r(), 2) * h * .8, gr = g.createLinearGradient(0, 0, 0, len);
+    gr.addColorStop(0, 'rgba(120,62,30,' + (.25 + r() * .35).toFixed(3) + ')'); gr.addColorStop(1, 'rgba(120,62,30,0)');
+    g.fillStyle = gr; g.fillRect(x, 0, 2 + r() * 5, len);
+  }
+  g.fillStyle = 'rgba(214,218,214,.85)'; g.fillRect(0, 0, w, 6);
+});
+hullTex.wrapS = hullTex.wrapT = THREE.RepeatWrapping; hullTex.repeat.set(1 / 16, 1 / 8);
+// Güverte: yeşil boya, levha kaynakları, aşınma ve pas lekeleri (8 m × 8 m'lik karo)
+const deckTex = tex(512, 512, (g, w, h) => {
+  g.fillStyle = '#56685a'; g.fillRect(0, 0, w, h);
+  let s = 29; const r = () => (s = (s * 16807) % 2147483647) / 2147483647;
+  for (let i = 0; i < 160; i++) { g.fillStyle = 'rgba(' + (r() < .5 ? '40,52,44' : '110,122,108') + ',' + (.06 + r() * .1).toFixed(3) + ')'; g.beginPath(); g.ellipse(r() * w, r() * h, 10 + r() * 60, 6 + r() * 30, r() * 3, 0, Math.PI * 2); g.fill(); }
+  for (let i = 0; i < 70; i++) { g.fillStyle = 'rgba(128,70,34,' + (.2 + r() * .4).toFixed(3) + ')'; g.beginPath(); g.arc(r() * w, r() * h, 1 + r() * 4, 0, Math.PI * 2); g.fill(); }
+  g.fillStyle = 'rgba(30,38,32,.55)';
+  for (let x = 0; x < w; x += w / 4) g.fillRect(x, 0, 2, h);
+  for (let y = 0; y < h; y += h / 2) g.fillRect(0, y, w, 2);
+});
+deckTex.wrapS = deckTex.wrapT = THREE.RepeatWrapping; deckTex.repeat.set(1 / 8, 1 / 8);
+
+const shadowTex = tex(128, 128, (g, w, h) => {
+  const gr = g.createRadialGradient(64, 64, 4, 64, 64, 64);
+  gr.addColorStop(0, 'rgba(0,0,0,.55)'); gr.addColorStop(1, 'rgba(0,0,0,0)');
+  g.fillStyle = gr; g.fillRect(0, 0, w, h);
+}, false);
+
+/* ---------- Malzemeler ---------- */
+const M = {
+  camo: new THREE.MeshPhysicalMaterial({ map: camoTex, roughness: .5, metalness: .15, clearcoat: .35, clearcoatRoughness: .35 }),
+  wrap: new THREE.MeshPhysicalMaterial({ map: camoTex, color: C(0x8a8a8a), vertexColors: true, roughness: .5, metalness: .15, clearcoat: .35, clearcoatRoughness: .35 }),
+  silver: new THREE.MeshStandardMaterial({ color: C(0xb7babd), roughness: .3, metalness: .85 }),
+  amber: new THREE.MeshStandardMaterial({ color: C(0xc56a10), emissive: C(0xff8a1a), emissiveIntensity: .6, roughness: .4 }),
+  red: new THREE.MeshStandardMaterial({ color: C(0xb3141c), roughness: .7 }),
+  yellow: new THREE.MeshStandardMaterial({ color: C(0xd8b21e), roughness: .7 }),
+  rimDk: new THREE.MeshStandardMaterial({ color: C(0x232528), roughness: .6, metalness: .5 }),
+  tank: new THREE.MeshStandardMaterial({ map: tankTex, roughness: .55, metalness: .25 }),
+  tankIn: new THREE.MeshStandardMaterial({ map: tankTex, roughness: .55, metalness: .25, side: THREE.DoubleSide }),
+  roofDk: new THREE.MeshStandardMaterial({ color: C(0x55585a), roughness: .8, metalness: .3 }),
+  asphalt: new THREE.MeshStandardMaterial({ color: C(0x5d5b56), roughness: .95 }),
+  well: new THREE.MeshStandardMaterial({ color: C(0x171716), roughness: .95, side: THREE.DoubleSide }),
+  grate: new THREE.MeshStandardMaterial({ color: C(0x3b3f42), roughness: .7, metalness: .5, side: THREE.DoubleSide }),
+  cage: new THREE.MeshStandardMaterial({ color: C(0x6a6e70), roughness: .6, metalness: .5, transparent: true, opacity: .55 }),
+  flame: new THREE.MeshStandardMaterial({ color: C(0xff8a2a), emissive: C(0xff7a1a), emissiveIntensity: 2.2, transparent: true, opacity: .9 }),
+  glass: new THREE.MeshPhysicalMaterial({ color: C(0x101a20), roughness: .04, metalness: .3, clearcoat: 1 }),
+  black: new THREE.MeshStandardMaterial({ color: C(0x1b1c1e), roughness: .7, metalness: .1 }),
+  gloss: new THREE.MeshStandardMaterial({ color: C(0x141516), roughness: .25, metalness: .5 }),
+  tire: new THREE.MeshStandardMaterial({ color: C(0x262523), roughness: .92, bumpMap: treadTex, bumpScale: .025 }),
+  rim: new THREE.MeshStandardMaterial({ color: C(0x45484c), roughness: .45, metalness: .7 }),
+  led: new THREE.MeshStandardMaterial({ color: C(0xffffff), emissive: C(0xe8f2ff), emissiveIntensity: 1.4 }),
+  tail: new THREE.MeshStandardMaterial({ color: C(0x7a0d10), emissive: C(0xc0181d), emissiveIntensity: .8, roughness: .3 }),
+  sand: new THREE.MeshPhysicalMaterial({ color: C(0xc8a96f), roughness: .5, metalness: .3, clearcoat: .2 }),
+  sandDk: new THREE.MeshPhysicalMaterial({ color: C(0xa88b55), roughness: .55, metalness: .3 }),
+  gun: new THREE.MeshStandardMaterial({ color: C(0x1c1d1f), roughness: .4, metalness: .65 }),
+  poly: new THREE.MeshStandardMaterial({ color: C(0x232426), roughness: .75, metalness: .05 }),
+  lens: new THREE.MeshPhysicalMaterial({ color: C(0x0b1824), roughness: .02, metalness: .9, clearcoat: 1 }),
+  net: new THREE.MeshStandardMaterial({ map: netTex, alphaTest: .45, side: THREE.DoubleSide, roughness: 1 }),
+  netIn: new THREE.MeshStandardMaterial({ color: C(0x3a3026), roughness: 1 }),
+  steel: new THREE.MeshStandardMaterial({ color: C(0x5d6266), roughness: .5, metalness: .7 }),
+  steelDk: new THREE.MeshStandardMaterial({ color: C(0x3e4245), roughness: .55, metalness: .6 }),
+  hull: new THREE.MeshStandardMaterial({ map: hullTex, roughness: .6, metalness: .3 }),
+  bulwark: new THREE.MeshStandardMaterial({ color: C(0x55645a), roughness: .75, metalness: .15 }),
+  pipe: new THREE.MeshStandardMaterial({ color: C(0xb9bcb4), roughness: .5, metalness: .4 }),
+  hullRed: new THREE.MeshStandardMaterial({ color: C(0x6b2420), roughness: .6, metalness: .2 }),
+  deck: new THREE.MeshStandardMaterial({ map: deckTex, roughness: .8, metalness: .15 }),
+  white: new THREE.MeshStandardMaterial({ color: C(0xe6e8e6), roughness: .55, metalness: .1 }),
+  concrete: new THREE.MeshStandardMaterial({ color: C(0xa7a59c), roughness: .9 }),
+  container: new THREE.MeshStandardMaterial({ color: C(0x5c6b55), roughness: .6, metalness: .4 }),
+};
+for (const m of Object.values(M)) m.envMapIntensity = 1;
+
+const mesh = (geo, mat, x = 0, y = 0, z = 0) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.castShadow = true; m.receiveShadow = true; return m; };
+const box = (w, h, d, mat, x, y, z) => mesh(new THREE.BoxGeometry(w, h, d), mat, x, y, z);
+const cyl = (rt, rb, h, mat, seg = 24) => mesh(new THREE.CylinderGeometry(rt, rb, h, seg), mat);
+// Yuvarlak köşeli kutu (ekstrüzyon + pah)
+function rbox(w, h, d, r, mat) {
+  const s = new THREE.Shape(), x = -w / 2 + r, y = -h / 2 + r, W = w - 2 * r, H = h - 2 * r;
+  s.moveTo(x, y - r + r); s.absarc(x, y, r, Math.PI, Math.PI * 1.5); s.lineTo(x + W, y - r); s.absarc(x + W, y, r, Math.PI * 1.5, Math.PI * 2);
+  s.lineTo(x + W + r, y + H); s.absarc(x + W, y + H, r, 0, Math.PI / 2); s.lineTo(x, y + H + r); s.absarc(x, y + H, r, Math.PI / 2, Math.PI);
+  const b = Math.min(r, d / 4);
+  const g = new THREE.ExtrudeGeometry(s, { depth: d - 2 * b, bevelEnabled: true, bevelThickness: b, bevelSize: b * .8, bevelSegments: 3, curveSegments: 6 });
+  g.translate(0, 0, -(d - 2 * b) / 2);
+  return mesh(g, mat);
+}
+function extrude(shape, depth, mat, bevel = 0) {
+  const g = new THREE.ExtrudeGeometry(shape, { depth, bevelEnabled: bevel > 0, bevelThickness: bevel, bevelSize: bevel * .8, bevelSegments: 3, curveSegments: 16 });
+  g.translate(0, 0, -depth / 2);
+  return mesh(g, mat);
+}
+
+/* ---------- Taret: SolidWorks montajından (Lasersan kule gövdesi, biri ters iki tüfek; dipçikler çıkarıldı) ---------- */
+// model/kule.json (gömülü glTF) bir kez yüklenir; her platformdaki taret aynı geometriyi paylaşır. Ölçü metre, taban orijinde, namlular +X.
+const turretSlots = [];
+let turretModel = null;
+const turretReady = new Promise(res => {
+  new THREE.GLTFLoader().load('model/kule.json', gl => {
+    turretModel = gl.scene;
+    // CAD'den gelen bazı yüzler ters yönlü: iki yüzlü malzeme, yoksa yakından gövdenin içi görünür
+    const tSand = M.sand.clone(), tGun = M.gun.clone(); tSand.side = tGun.side = THREE.DoubleSide;
+    turretModel.traverse(o => { if (o.isMesh) { o.material = o.name.startsWith('gun') ? tGun : tSand; o.castShadow = o.receiveShadow = true; } });
+    turretSlots.forEach(s => s.add(turretModel.clone()));
+    res();
+  }, undefined, () => res());
+});
+function makeTurret() {
+  const t = new THREE.Group();
+  const yaw = new THREE.Group(); t.add(yaw);
+  const slot = new THREE.Group(); yaw.add(slot); turretSlots.push(slot);
+  if (turretModel) slot.add(turretModel.clone());
+  // Montajda yer almayan elektro-optik sensör kutusu: sahadaki kuledeki gibi üst tablanın üstünde
+  const eo = rbox(.24, .2, .28, .02, M.sand); eo.position.set(.05, .51, -.05); yaw.add(eo);
+  yaw.add(box(.25, .015, .29, M.sandDk, .05, .615, -.05));
+  for (const z of [-.11, .01]) {
+    const ring = cyl(.045, .045, .02, M.sandDk, 32); ring.rotation.z = Math.PI / 2; ring.position.set(.175, .5, z); yaw.add(ring);
+    const l = cyl(.036, .036, .02, M.lens, 32); l.rotation.z = Math.PI / 2; l.position.set(.182, .5, z); yaw.add(l);
+  }
+  // Kamera çekimleri bu noktaya göre kurulur (eski yükseliş grubu; model sabit)
+  const pitch = new THREE.Group(); pitch.position.y = .35; yaw.add(pitch);
+  // Etiket bağlantı noktaları
+  const A = (parent, x, y, z) => { const o = new THREE.Object3D(); o.position.set(x, y, z); parent.add(o); return o; };
+  const anchors = {
+    eo: A(yaw, .19, .52, -.05),
+    guns: A(yaw, .55, .32, -.21),
+    ammo: A(yaw, .22, .03, -.21),
+    body: A(yaw, .1, .22, .14),
+  };
+  return { group: t, yaw, pitch, anchors };
+}
+
+/* ---------- Gövde yardımcıları ---------- */
+// Pah yüzeylerinde yumuşak, keskin kenarlarda sert gölgelendirme (aynı noktadaki yüz normallerini açıya göre birleştirir)
+function creaseNormals(geo, deg = 35) {
+  const p = geo.attributes.position, n = geo.attributes.normal, lim = Math.cos(deg * Math.PI / 180), groups = new Map();
+  for (let i = 0; i < p.count; i++) {
+    const k = Math.round(p.getX(i) * 1e4) + ',' + Math.round(p.getY(i) * 1e4) + ',' + Math.round(p.getZ(i) * 1e4);
+    if (!groups.has(k)) groups.set(k, []);
+    groups.get(k).push(i);
+  }
+  const out = new Float32Array(p.count * 3), a = new V3(), b = new V3(), s = new V3();
+  for (const ids of groups.values()) for (const i of ids) {
+    a.fromBufferAttribute(n, i); s.set(0, 0, 0);
+    for (const j of ids) { b.fromBufferAttribute(n, j); if (a.dot(b) >= lim) s.add(b); }
+    s.normalize(); out[i * 3] = s.x; out[i * 3 + 1] = s.y; out[i * 3 + 2] = s.z;
+  }
+  geo.setAttribute('normal', new THREE.BufferAttribute(out, 3));
+}
+// Folyo kaplama alt kenara doğru koyulaşır (sahadaki araç gibi): köşe rengi yükseklikten
+function shadeByHeight(geo, y0 = 0) {
+  const p = geo.attributes.position, c = new Float32Array(p.count * 3);
+  // Köşe renkleri doğrusal uzayda: algılanan koyulaşma için üs alınır
+  for (let i = 0; i < p.count; i++) c.fill(Math.pow(.42 + .58 * THREE.MathUtils.smoothstep(p.getY(i) + y0, .3, 1.2), 2.2), i * 3, i * 3 + 3);
+  geo.setAttribute('color', new THREE.BufferAttribute(c, 3));
+}
+// Kutu izdüşümlü doku koordinatı: desen her yüzde aynı ölçekte, gerilmeden (metre cinsinden; yüz normalleri düzken çağrılır)
+function boxUV(geo) {
+  const p = geo.attributes.position, n = geo.attributes.normal, uv = new Float32Array(p.count * 2);
+  for (let i = 0; i < p.count; i++) {
+    const ax = Math.abs(n.getX(i)), ay = Math.abs(n.getY(i)), az = Math.abs(n.getZ(i));
+    const [u, v] = ay >= ax && ay >= az ? [p.getX(i), p.getZ(i)] : az >= ax ? [p.getX(i), p.getY(i)] : [p.getZ(i), p.getY(i)];
+    uv[i * 2] = u; uv[i * 2 + 1] = v;
+  }
+  geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+}
+// Folyo kaplı parça: dokuyu yeniden eşler, alt kenarı koyulaştırır
+const wrapped = (m, y0 = m.position.y) => { boxUV(m.geometry); shadeByHeight(m.geometry, y0); return m; };
+
+/* ---------- Pikap (sahadaki Amarok gibi: folyo kaplama, açık kasa, tripod) ---------- */
+function makeTruck() {
+  const g = new THREE.Group();
+  const s = new THREE.Shape();
+  s.moveTo(-2.594, .344); s.lineTo(-2.617, .95); s.lineTo(-.74, .95); s.lineTo(-.74, 1.156); s.lineTo(-.70, 1.20); s.lineTo(-.66, 1.30);
+  s.lineTo(1.62, 1.30); s.lineTo(2.339, 1.233); s.quadraticCurveTo(2.583, 1.2, 2.628, 1.067); s.lineTo(2.65, .667); s.lineTo(2.628, .378); s.lineTo(2.517, .244); s.lineTo(2.139, .244);
+  s.absarc(1.661, .392, .5, -.30, Math.PI + .30, false);
+  s.lineTo(-1.128, .244);
+  s.absarc(-1.606, .392, .5, -.30, Math.PI + .30, false);
+  s.lineTo(-2.483, .244); s.closePath();
+  const bg = new THREE.ExtrudeGeometry(s, { depth: 1.76, bevelEnabled: true, bevelThickness: .06, bevelSize: .048, bevelSegments: 5, curveSegments: 24 });
+  bg.translate(0, 0, -.88);
+  {
+    const p = bg.attributes.position;
+    for (let i = 0; i < p.count; i++) {
+      const x = p.getX(i), y = p.getY(i);
+      let k = 1 - Math.max(0, .62 - y) * .07 - Math.max(0, y - 1.12) * .22;   // yan yüzeyler üste ve alta doğru içe döner
+      if (x > 2.2) k -= ((x - 2.2) / .45) ** 2 * .07;                          // burun yuvarlanır
+      if (x < -2.45) k -= ((-2.45 - x) / .2) ** 2 * .025;
+      p.setZ(i, p.getZ(i) * k);
+    }
+    bg.computeVertexNormals(); boxUV(bg); creaseNormals(bg); shadeByHeight(bg);
+  }
+  g.add(mesh(bg, M.wrap));
+  // Cam kabin yukarı doğru içe daralır (gerçek araçlardaki gibi)
+  const gh = new THREE.Shape();
+  gh.moveTo(-.66, 1.30); gh.lineTo(-.606, 1.811); gh.quadraticCurveTo(-.572, 1.889, -.45, 1.889); gh.lineTo(.783, 1.889); gh.quadraticCurveTo(.906, 1.889, .983, 1.822); gh.lineTo(1.62, 1.30); gh.closePath();
+  const ghm = extrude(gh, 1.62, M.glass, .05);
+  { const p = ghm.geometry.attributes.position; for (let i = 0; i < p.count; i++) p.setZ(i, p.getZ(i) * (1 - Math.max(0, p.getY(i) - 1.3) * .16)); ghm.geometry.computeVertexNormals(); creaseNormals(ghm.geometry); }
+  g.add(ghm);
+  g.add(wrapped(box(1.32, .05, 1.48, M.wrap, .17, 1.925, 0)));                 // tavan
+  for (const z of [-.56, .56]) g.add(box(1.1, .03, .04, M.black, .17, 1.965, z)); // tavan rayı
+  g.add(wrapped(box(.09, .58, 1.70, M.wrap, .17, 1.6, 0)));                     // B direği
+  const cp = wrapped(box(.12, .56, 1.70, M.wrap, -.61, 1.58, 0)); cp.rotation.z = -.127; g.add(cp);
+  for (const z of [-.77, .77]) { const ap = wrapped(box(.06, .83, .08, M.wrap, 1.30, 1.56, z)); ap.rotation.z = .884; g.add(ap); }
+  g.add(box(2.3, .03, 1.70, M.black, .48, 1.315, 0));                          // cam altı çıta
+  const ant = cyl(.005, .012, .38, M.black, 8); ant.position.set(-.25, 2.14, .35); ant.rotation.z = .25; g.add(ant);
+  // Açık kasa: yan duvarlar, bagaj kapağı, siyah kasa kaplaması
+  const BX = -1.727;
+  g.add(box(1.86, .02, 1.76, M.black, BX, 1.0, 0));
+  for (const sd of [-1, 1]) {
+    g.add(wrapped(box(1.875, .2, .07, M.wrap, BX, 1.09, sd * .905)));
+    g.add(box(1.9, .035, .1, M.black, BX, 1.205, sd * .9));
+  }
+  g.add(wrapped(box(.07, .2, 1.88, M.wrap, -2.63, 1.09, 0)));
+  g.add(box(.1, .035, 1.9, M.black, -2.63, 1.205, 0));
+  g.add(box(.03, .045, .26, M.black, -2.67, 1.13, 0));                         // bagaj kolu yuvası
+  // Kabin arkası spor bar: siyah yan paneller ve üst boru
+  const sb = new THREE.Shape(); sb.moveTo(-.79, 1.2); sb.lineTo(-1.14, 1.2); sb.quadraticCurveTo(-1.0, 1.58, -.86, 1.78); sb.lineTo(-.76, 1.78); sb.lineTo(-.76, 1.2); sb.closePath();
+  for (const z of [-.86, .86]) { const p = extrude(sb, .08, M.gloss, .01); p.position.z = z; g.add(p); }
+  const bar = cyl(.04, .04, 1.72, M.gloss, 16); bar.rotation.x = Math.PI / 2; bar.position.set(-.8, 1.76, 0); g.add(bar);
+  // Ön yüz: geniş siyah ızgara, krom çıta, ince LED farlar, gümüş tampon
+  const FX = 2.715;
+  g.add(box(.04, .26, 1.5, M.gloss, FX, .93, 0));
+  for (let i = 0; i < 4; i++) g.add(box(.045, .014, 1.46, M.black, FX + .004, .83 + i * .065, 0));
+  g.add(box(.05, .035, 1.62, M.silver, FX, 1.075, 0));
+  for (const z of [-.68, .68]) {
+    g.add(box(.04, .1, .36, M.gloss, FX - .01, 1.0, z));
+    g.add(box(.045, .018, .32, M.led, FX - .005, 1.04, z));
+    for (const dz of [-.07, .07]) { const l = cyl(.034, .034, .02, M.lens, 16); l.rotation.z = Math.PI / 2; l.position.set(FX + .01, .99, z + dz); g.add(l); }
+  }
+  g.add(box(.14, .2, 1.52, M.silver, 2.66, .55, 0));
+  for (const z of [-.76, .76]) g.add(box(.16, .34, .2, M.black, 2.65, .55, z));
+  g.add(box(.3, .04, 1.1, M.silver, 2.52, .32, 0));                            // karter koruma
+  for (const z of [-.32, .32]) g.add(box(.025, .12, .035, M.red, 2.74, .38, z)); // çeki halkası kayışları
+  // Arka: L biçimli stoplar, krom tampon, çeki demiri
+  for (const z of [-.86, .86]) { g.add(box(.05, .42, .12, M.tail, -2.68, 1.0, z)); g.add(box(.05, .09, .2, M.tail, -2.68, .82, z - Math.sign(z) * .06)); }
+  g.add(box(.16, .15, 1.84, M.silver, -2.66, .42, 0));
+  g.add(box(.18, .04, .5, M.black, -2.67, .5, 0));
+  g.add(box(.3, .06, .07, M.steel, -2.85, .36, 0));
+  const ball = mesh(new THREE.SphereGeometry(.045, 16, 10), M.steel); ball.position.set(-2.98, .42, 0); g.add(ball);
+  // Yanlar: kapı çizgileri, gümüş kollar ve aynalar, alüminyum basamak, geniş çamurluk dodikleri
+  for (const sd of [-1, 1]) {
+    const z = sd * .947;
+    for (const x of [-.66, .17, 1.13]) g.add(box(.012, .62, .006, M.black, x, .9, z));
+    for (const x of [-.15, .8]) g.add(box(.17, .035, .03, M.silver, x, 1.12, sd * .955));
+    const mir = rbox(.24, .15, .1, .03, M.silver); mir.position.set(1.42, 1.42, sd * 1.03); g.add(mir);
+    g.add(box(.12, .04, .1, M.black, 1.48, 1.36, sd * .97));
+    g.add(box(1.9, .04, .2, M.silver, .02, .36, sd * .99));
+    for (const x of [-.6, -.1, .4, .9]) g.add(box(.06, .02, .04, M.amber, x, .335, sd * 1.07));
+    for (const cx of [1.661, -1.606]) {
+      const fs = new THREE.Shape(); fs.absarc(0, 0, .6, -.12, Math.PI + .12, false); fs.absarc(0, 0, .47, Math.PI + .12, -.12, true);
+      const fl = extrude(fs, .12, M.black); fl.position.set(cx, .392, sd * .93); g.add(fl);
+      if (sd > 0) {                                                               // çamurluk içi: koyu davlumbaz, gövde içi görünmesin
+        const wg = new THREE.CylinderGeometry(.455, .455, 1.8, 32, 1, true, Math.PI / 2, Math.PI); wg.rotateX(Math.PI / 2);
+        g.add(mesh(wg, M.well, cx, .392, 0));
+      }
+    }
+  }
+  // Tekerlekler: arazi lastiği (omuz blokları) ve çok kollu koyu jant
+  const tireGeo = new THREE.LatheGeometry([[.25, -.15], [.33, -.162], [.39, -.155], [.415, -.12], [.425, -.05], [.425, .05], [.415, .12], [.39, .155], [.33, .162], [.25, .15]].map(([x, y]) => new THREE.Vector2(x, y)), 64);
+  tireGeo.rotateX(Math.PI / 2);
+  const lugGeo = new THREE.BoxGeometry(.03, .07, .06), spokeGeo = new THREE.BoxGeometry(.19, .022, .03);
+  spokeGeo.translate(.155, 0, 0);
+  for (const x of [1.661, -1.606]) for (const sd of [-1, 1]) {
+    const w = new THREE.Group(); w.position.set(x, .425, sd * .80);
+    w.add(mesh(tireGeo, M.tire));
+    for (let i = 0; i < 30; i++) for (const e of [-1, 1]) {
+      const a = (i + (e > 0 ? .5 : 0)) / 30 * Math.PI * 2, l = mesh(lugGeo, M.tire);
+      l.position.set(Math.cos(a) * .42, Math.sin(a) * .42, e * .1); l.rotation.z = a; w.add(l);
+    }
+    const barrel = cyl(.27, .27, .22, M.rimDk, 48); barrel.rotation.x = Math.PI / 2; w.add(barrel);
+    const lip = mesh(new THREE.TorusGeometry(.262, .012, 8, 48), M.rim); lip.position.z = sd * .11; w.add(lip);
+    for (let i = 0; i < 16; i++) { const sp = mesh(spokeGeo, M.rim); sp.position.z = sd * .112; sp.rotation.z = i * Math.PI / 8; w.add(sp); }
+    const hub = cyl(.07, .07, .24, M.rim, 20); hub.rotation.x = Math.PI / 2; w.add(hub);
+    g.add(w);
+  }
+  // Kasada siyah tripod: üç ayak, orta kolon, üst tabla
+  const TX = -1.68, FL = 1.01, TOP = 2.33;
+  const col = cyl(.05, .05, TOP - FL, M.black, 16); col.position.set(TX, (TOP + FL) / 2, 0); g.add(col);
+  const collar = cyl(.085, .085, .1, M.black, 16); collar.position.set(TX, 1.9, 0); g.add(collar);
+  const plate = cyl(.23, .23, .04, M.black, 32); plate.position.set(TX, TOP - .02, 0); g.add(plate);
+  for (let i = 0; i < 3; i++) {
+    const a = i / 3 * Math.PI * 2 + Math.PI / 6;
+    const foot = new V3(TX + Math.cos(a) * .7, FL, Math.sin(a) * .7), head = new V3(TX + Math.cos(a) * .16, TOP - .05, Math.sin(a) * .16);
+    const leg = box(.055, foot.distanceTo(head), .04, M.black);
+    leg.position.copy(foot).add(head).multiplyScalar(.5);
+    leg.quaternion.setFromUnitVectors(new V3(0, 1, 0), head.clone().sub(foot).normalize()); g.add(leg);
+    const pad = cyl(.07, .07, .02, M.black, 16); pad.position.copy(foot).setY(FL + .01); g.add(pad);
+  }
+  const tur = makeTurret(); tur.group.position.set(TX, TOP, 0); g.add(tur.group);
+  const mount = new THREE.Object3D(); mount.position.set(TX, 1.75, .5); g.add(mount);
+  return { group: g, tur, mount };
+}
+
+/* ---------- Gemi (güverte montajı) ---------- */
+function makeShip() {
+  const g = new THREE.Group();
+  const s = new THREE.Shape();
+  s.moveTo(-40, -7); s.lineTo(6, -7); s.quadraticCurveTo(18, -6.4, 24, 0); s.quadraticCurveTo(18, 6.4, 6, 7); s.lineTo(-40, 7); s.closePath();
+  // Baş bodoslama öne yatar, borda aşağıya ve başa doğru daralır
+  const rake = (x, k) => x + Math.max(0, (x - 4) / 20) ** 2 * (k - .3) * 3.2;
+  const hg = new THREE.ExtrudeGeometry(s, { depth: 8, steps: 10, bevelEnabled: true, bevelThickness: .2, bevelSize: .2, bevelSegments: 2, curveSegments: 32 });
+  hg.rotateX(-Math.PI / 2);
+  {
+    const p = hg.attributes.position;
+    for (let i = 0; i < p.count; i++) {
+      const x = p.getX(i), k = THREE.MathUtils.clamp(p.getY(i) / 8, 0, 1), b = Math.max(0, (x - 4) / 20);
+      p.setZ(i, p.getZ(i) * (.9 + .1 * k) * (1 - b * (1 - k) * .5)); p.setX(i, rake(x, k));
+    }
+    hg.computeVertexNormals(); boxUV(hg); creaseNormals(hg, 30);
+  }
+  const hull = mesh(hg, M.hull); hull.position.y = -2; g.add(hull);
+  const bot = mesh(hg.clone(), M.hullRed); bot.scale.set(1.002, .3, 1.002); bot.position.y = -2.05; g.add(bot);
+  const dg = new THREE.ShapeGeometry(s, 32); dg.rotateX(-Math.PI / 2);
+  { const p = dg.attributes.position; for (let i = 0; i < p.count; i++) p.setX(i, rake(p.getX(i), 1)); }
+  const deck = new THREE.Mesh(dg, M.deck); deck.position.y = 6.21; deck.receiveShadow = true; g.add(deck);
+  for (const z of [-5.2, 5.2]) g.add(box(30, .01, .12, M.yellow, -12, 6.22, z));  // yürüme yolu çizgileri
+  // Küpeşte (orta gövde) ve baş tarafta dolu borda
+  const rail = (pts) => { for (let i = 0; i < pts.length - 1; i++) { const a = pts[i], b = pts[i + 1], d = Math.hypot(b[0] - a[0], b[1] - a[1]);
+    const r = cyl(.035, .035, d, M.white, 8); r.rotation.z = Math.PI / 2; r.rotation.y = -Math.atan2(b[1] - a[1], b[0] - a[0]);
+    r.position.set((a[0] + b[0]) / 2, 7.25, (a[1] + b[1]) / 2); g.add(r);
+    for (let k = 0; k <= Math.floor(d / 1.6); k++) { const p = cyl(.03, .03, 1.05, M.white, 8); const f = k / Math.max(1, Math.floor(d / 1.6)); p.position.set(lerp(a[0], b[0], f), 6.72, lerp(a[1], b[1], f)); g.add(p); } } };
+  rail([[-29, 6.85], [6, 6.85]]); rail([[-29, -6.85], [6, -6.85]]);
+  const edge = []; for (let i = 0; i <= 14; i++) { const f = i / 14; edge.push([rake(lerp(6, 24, f), 1), 6.85 * (1 - f * f)]); }
+  for (const sd of [-1, 1]) for (let i = 0; i < edge.length - 1; i++) {
+    const a = edge[i], b = edge[i + 1], d = Math.hypot(b[0] - a[0], b[1] - a[1]);
+    const w = box(d + .05, 1.2, .1, M.bulwark, (a[0] + b[0]) / 2, 6.8, sd * (a[1] + b[1]) / 2); w.rotation.y = -Math.atan2(sd * (b[1] - a[1]), b[0] - a[0]); g.add(w);
+    const cap = box(d + .05, .06, .18, M.white, (a[0] + b[0]) / 2, 7.42, sd * (a[1] + b[1]) / 2); cap.rotation.y = w.rotation.y; g.add(cap);
+  }
+  // Irgatlar, zincirler ve loça delikleri
+  const linkGeo = new THREE.TorusGeometry(.085, .026, 6, 12);
+  for (const z of [-2.2, 2.2]) {
+    const sd = Math.sign(z), wl = new THREE.Group(); wl.position.set(17, 6.2, z); g.add(wl);
+    wl.add(box(1.6, .35, 1.5, M.steelDk, 0, .18, 0));
+    const drum = cyl(.3, .3, .7, M.steel, 24); drum.rotation.x = Math.PI / 2; drum.position.y = .78; wl.add(drum);
+    for (const dz of [-.38, .38]) { const f = cyl(.48, .48, .06, M.steelDk, 28); f.rotation.x = Math.PI / 2; f.position.set(0, .78, dz); wl.add(f); }
+    const gy = cyl(.3, .3, .16, M.gun, 16); gy.rotation.x = Math.PI / 2; gy.position.set(0, .78, sd * .62); wl.add(gy);
+    const a = new V3(17.3, 7.0, z + sd * .62), b = new V3(rake(21.5, 1), 6.26, z * 1.4), dir = b.clone().sub(a).normalize();
+    for (let i = 0; i < 26; i++) {
+      const l = mesh(linkGeo, M.gun); l.position.lerpVectors(a, b, i / 25); l.lookAt(b); l.rotateX(Math.PI / 2);
+      if (i % 2) l.rotateOnWorldAxis(dir, Math.PI / 2); g.add(l);
+    }
+    const hp = cyl(.3, .36, .14, M.steelDk, 20); hp.position.copy(b).setY(6.27); g.add(hp);
+  }
+  // Çift babalar
+  for (const [x, z] of [[10, 5.6], [10, -5.6], [2, 5.8], [2, -5.8], [-14, 5.8], [-14, -5.8]]) {
+    g.add(box(1.1, .08, .5, M.steelDk, x, 6.25, z));
+    for (const dx of [-.3, .3]) { const b = cyl(.17, .19, .55, M.steelDk, 14); b.position.set(x + dx, 6.55, z); g.add(b); }
+  }
+  // Tanker güvertesi: boyuna boru hattı ve sehpaları, yükseltilmiş yürüme yolu, manifold, havalandırma direkleri
+  const lpipe = (x0, x1, y, z, r, m = M.pipe) => { const p = cyl(r, r, x1 - x0, m, 14); p.rotation.z = Math.PI / 2; p.position.set((x0 + x1) / 2, y, z); g.add(p); };
+  const tpipe = (z0, z1, x, y, r, m = M.pipe) => { const p = cyl(r, r, z1 - z0, m, 14); p.rotation.x = Math.PI / 2; p.position.set(x, y, (z0 + z1) / 2); g.add(p); };
+  for (let x = -28; x <= 9; x += 3) { g.add(box(.18, .55, 3.6, M.steelDk, x, 6.48, 0)); g.add(box(.25, .08, 3.8, M.steelDk, x, 6.78, 0)); }
+  [[-1.4, .32], [-.6, .26], [.2, .32], [1, .2], [1.6, .14]].forEach(([z, r]) => lpipe(-28.5, 9.5, 6.82 + r, z, r));
+  for (let x = -27; x <= 8; x += 3) { const c = cyl(.4, .4, .06, M.pipe, 16); c.rotation.z = Math.PI / 2; c.position.set(x + 1.5, 7.14, -1.4); g.add(c); }
+  // Yürüme yolu: borunun üstünde ızgara, sarı korkuluk
+  for (let x = -28; x <= 9; x += 3) for (const dz of [-.55, .55]) g.add(box(.12, 1.9, .12, M.steelDk, x, 7.15, -3.3 + dz));
+  g.add(box(38, .08, 1.2, M.grate, -9.5, 8.1, -3.3));
+  for (const dz of [-.58, .58]) { lpipe(-28.5, 9.5, 9.15, -3.3 + dz, .035, M.yellow); lpipe(-28.5, 9.5, 8.62, -3.3 + dz, .025, M.yellow); }
+  for (let x = -28; x <= 9; x += 1.5) for (const dz of [-.58, .58]) { const p = cyl(.025, .025, 1.05, M.yellow, 6); p.position.set(x, 8.62, -3.3 + dz); g.add(p); }
+  // Manifold: gemi ortasında enine borular, vanalar ve damlama teknesi
+  for (const [dx, r] of [[-1.2, .26], [0, .3], [1.2, .26]]) {
+    tpipe(-6.2, 6.2, -11 + dx, 7.3, r);
+    for (const sd of [-1, 1]) {
+      const fl = cyl(r + .12, r + .12, .08, M.pipe, 18); fl.rotation.x = Math.PI / 2; fl.position.set(-11 + dx, 7.3, sd * 6.2); g.add(fl);
+      const vw = mesh(new THREE.TorusGeometry(.28, .03, 6, 20), M.red); vw.position.set(-11 + dx, 7.95, sd * 4.6); vw.rotation.x = Math.PI / 2; g.add(vw);
+      const vs = cyl(.03, .03, .6, M.steelDk, 6); vs.position.set(-11 + dx, 7.65, sd * 4.6); g.add(vs);
+      g.add(box(.5, .45, .5, M.pipe, -11 + dx, 7.3, sd * 4.6));
+    }
+  }
+  for (const sd of [-1, 1]) g.add(box(4.6, .3, 1.6, M.steelDk, -11, 6.36, sd * 5.8));
+  // Basınç ve vakum vanaları (havalandırma direkleri)
+  for (const [x, z] of [[-24, 2.6], [-17, 2.6], [-4, 2.6], [3, 2.6]]) {
+    const v = cyl(.12, .12, 3.2, M.pipe, 10); v.position.set(x, 7.8, z); g.add(v);
+    const hd = cyl(.28, .2, .5, M.pipe, 14); hd.position.set(x, 9.6, z); g.add(hd);
+  }
+  const crp = cyl(.55, .65, 4, M.white, 20); crp.position.set(-11, 8.2, 5.2); g.add(crp);
+  g.add(box(1.6, 1.4, 1.6, M.white, -11, 10.9, 5.2));
+  const jib = cyl(.26, .16, 13, M.white, 12); jib.position.set(-4.7, 12.8, 5.2); jib.rotation.z = -(Math.PI / 2 - .25); g.add(jib);   // kol ambar üstünde, başa dönük
+  // Kıçta köprüüstü: katlar, pencere bantları, kanatlar, baca, radar direği
+  const sup = new THREE.Group(); sup.position.set(-34, 6.2, 0); g.add(sup);
+  sup.add(box(8, 3, 12.4, M.white, 0, 1.5, 0));
+  sup.add(box(7.4, 3, 12, M.white, -.3, 4.5, 0));
+  sup.add(box(6.6, 2.6, 14.4, M.white, -.2, 7.3, 0));
+  sup.add(box(.06, .9, 13, M.glass, 3.14, 7.5, 0));
+  sup.add(box(.06, .55, 10, M.glass, 3.44, 4.8, 0));
+  sup.add(box(.06, .55, 10, M.glass, 4.04, 1.9, 0));
+  sup.add(box(2.6, 4.2, 2.6, M.white, -2.2, 10.7, 0));
+  sup.add(box(2.65, .6, 2.65, M.hullRed, -2.2, 11.8, 0));
+  sup.add(box(2.66, .5, 2.66, M.black, -2.2, 12.6, 0));
+  const rm = cyl(.08, .1, 3.2, M.white, 10); rm.position.set(.8, 10.2, 0); sup.add(rm);
+  sup.add(box(.12, .1, 2.6, M.black, .8, 11.5, 0));
+  // Baş direk
+  const fm = cyl(.12, .16, 6, M.white, 12); fm.position.set(rake(20.5, 1), 9.2, 0); g.add(fm);
+  g.add(box(.1, .1, 1.6, M.white, rake(20.5, 1), 11.4, 0));
+  // Kaide ve taret
+  const ped = cyl(.32, .4, 1.1, M.steel, 28); ped.position.set(13, 6.76, 0); g.add(ped);
+  g.add(box(.9, .06, .9, M.steelDk, 13, 7.32, 0));
+  const tur = makeTurret(); tur.group.position.set(13, 7.35, 0); g.add(tur.group);
+  const mount = new THREE.Object3D(); mount.position.set(13, 6.9, .4); g.add(mount);
+  return { group: g, tur, mount };
+}
+
+/* ---------- Kule (sabit tesis) ---------- */
+function makeTower() {
+  const g = new THREE.Group();
+  const H = 8, b0 = 1.6, b1 = .7;
+  const leg = (sx, sz) => {
+    const a = new V3(sx * b0, 0, sz * b0), b = new V3(sx * b1, H, sz * b1), d = a.distanceTo(b);
+    const m = cyl(.07, .09, d, M.steel, 10); m.position.copy(a).add(b).multiplyScalar(.5); m.lookAt(b); m.rotateX(Math.PI / 2); g.add(m);
+  };
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) leg(sx, sz);
+  const strut = (a, b) => { const d = a.distanceTo(b); const m = cyl(.035, .035, d, M.steelDk, 8); m.position.copy(a).add(b).multiplyScalar(.5); m.lookAt(b); m.rotateX(Math.PI / 2); g.add(m); };
+  const at = (sx, sz, y) => { const w = lerp(b0, b1, y / H); return new V3(sx * w, y, sz * w); };
+  for (let k = 0; k < 4; k++) {
+    const y0 = k * 2, y1 = y0 + 2;
+    for (const [s1, s2] of [[[-1, -1], [1, -1]], [[1, -1], [1, 1]], [[1, 1], [-1, 1]], [[-1, 1], [-1, -1]]]) {
+      strut(at(s1[0], s1[1], y0), at(s2[0], s2[1], y1)); strut(at(s2[0], s2[1], y0), at(s1[0], s1[1], y1)); strut(at(s1[0], s1[1], y1), at(s2[0], s2[1], y1));
+    }
+  }
+  g.add(box(2.2, .12, 2.2, M.steelDk, 0, H + .06, 0));
+  for (const [x, z, w, d] of [[0, 1.1, 2.2, .04], [0, -1.1, 2.2, .04], [1.1, 0, .04, 2.2], [-1.1, 0, .04, 2.2]]) {
+    g.add(box(w, .04, d, M.steel, x, H + 1.0, z));
+    for (const f of [-1, 0, 1]) { const p = cyl(.025, .025, .95, M.steel, 8); p.position.set(x + (w > d ? f * 1.05 : 0), H + .55, z + (d > w ? f * 1.05 : 0)); g.add(p); }
+  }
+  const ped = cyl(.26, .3, .5, M.steel, 24); ped.position.set(0, H + .37, 0); g.add(ped);
+  const tur = makeTurret(); tur.group.position.set(0, H + .62, 0); g.add(tur.group);
+  for (const [x, z] of [[-1.6, -1.6], [1.6, -1.6], [-1.6, 1.6], [1.6, 1.6]]) g.add(box(.8, .3, .8, M.concrete, x, .15, z));
+  // Rafineri: kule çitli alanda ön planda; proses yapıları, kolonlar, tank sahaları ve meşale gerçek ölçekte arkada
+  const pad = (w, d, x, z, y = .075) => g.add(box(w, .15, d, M.concrete, x, y, z));
+  const beam = (a, b, s, m) => { const o = box(s, a.distanceTo(b), s, m); o.position.copy(a).add(b).multiplyScalar(.5); o.quaternion.setFromUnitVectors(new V3(0, 1, 0), b.clone().sub(a).normalize()); g.add(o); };
+  const tank = (r, h, x, z, floating) => {
+    const t = mesh(new THREE.CylinderGeometry(r, r, h, 64), floating ? [M.tank, M.roofDk, M.tank] : M.tank); t.position.set(x, h / 2 + .15, z); g.add(t);
+    if (floating) { const rim = mesh(new THREE.CylinderGeometry(r, r, 1, 64, 1, true), M.tankIn); rim.position.set(x, h + .65, z); g.add(rim); }
+    else { const R = r / Math.sin(.3), roof = mesh(new THREE.SphereGeometry(R, 64, 6, 0, Math.PI * 2, 0, .3), M.tank); roof.position.set(x, h + .15 - R * Math.cos(.3), z); g.add(roof); }
+    const wg = mesh(new THREE.TorusGeometry(r + .05, .1, 6, 64), M.steelDk); wg.rotation.x = Math.PI / 2; wg.position.set(x, h * .82, z); g.add(wg);
+    for (let i = 0; i < 34; i++) {                                                     // tank çevresinde dönen merdiven
+      const a = i / 34 * Math.PI * .8 + 2.2, st = box(1, .06, .32, M.steelDk, x + Math.cos(a) * (r + .35), .4 + i / 34 * h, z + Math.sin(a) * (r + .35));
+      st.rotation.y = -a; g.add(st);
+    }
+  };
+  // Tank sahası: beton taban ve alçak set duvarı
+  const bund = (x, z, w, d) => { pad(w, d, x, z, .02); for (const [bx, bz, bw, bd] of [[0, -d / 2, w, .5], [0, d / 2, w, .5], [-w / 2, 0, .5, d], [w / 2, 0, .5, d]]) g.add(box(bw, 1.2, bd, M.concrete, x + bx, .6, z + bz)); };
+  const column = (r, h, x, z) => {
+    const c = cyl(r, r, h, M.tank, 40); c.position.set(x, h / 2 + .15, z); g.add(c);
+    const top = mesh(new THREE.SphereGeometry(r, 32, 10, 0, Math.PI * 2, 0, Math.PI / 2), M.tank); top.position.set(x, h + .15, z); g.add(top);
+    const skirt = cyl(r * 1.05, r * 1.15, 3, M.concrete, 32); skirt.position.set(x, 1.5, z); g.add(skirt);
+    for (let y = 7; y < h - 1; y += 7) {                                                // ızgara platformlar ve korkuluk
+      const pl = mesh(new THREE.RingGeometry(r, r + 1.3, 32, 1, 0, Math.PI * 1.3), M.grate); pl.rotation.x = -Math.PI / 2; pl.rotation.z = y * .7; pl.position.set(x, y, z); g.add(pl);
+      const rl = mesh(new THREE.TorusGeometry(r + 1.25, .04, 4, 40, Math.PI * 1.3), M.yellow); rl.rotation.x = -Math.PI / 2; rl.rotation.z = y * .7; rl.position.set(x, y + 1.05, z); g.add(rl);
+    }
+    g.add(box(.6, h - 2, .6, M.cage, x + r + .45, h / 2 + 1, z));                     // kafesli merdiven
+    for (const dz of [-.7, .7]) { const p = cyl(.25, .25, h * .95, M.silver, 10); p.position.set(x + dz, h * .48, z - r - .45); g.add(p); }
+  };
+  const sphere = (r, x, z) => {
+    pad(r * 2.6, r * 2.6, x, z);
+    const s = mesh(new THREE.SphereGeometry(r, 48, 28), M.tank); s.position.set(x, r + 2.4, z); g.add(s);
+    for (let i = 0; i < 10; i++) { const a = i / 10 * Math.PI * 2, l = cyl(.22, .22, r + 2.4, M.steelDk, 8); l.position.set(x + Math.cos(a) * r * .92, (r + 2.4) / 2, z + Math.sin(a) * r * .92); g.add(l); }
+  };
+  // Çok katlı çelik proses yapısı: kolonlar, kirişler, ızgara katlar, çaprazlar, tamburlar ve eşanjörler
+  const frame = (x, z, w, d, n, lh) => {
+    pad(w + 2, d + 2, x, z);
+    const H = n * lh, nx = Math.max(2, Math.round(w / 4)), nz = Math.max(2, Math.round(d / 4));
+    for (let i = 0; i <= nx; i++) for (let k = 0; k <= nz; k++) if (i === 0 || k === 0 || i === nx || k === nz) g.add(box(.35, H, .35, M.steelDk, x - w / 2 + i * w / nx, H / 2, z - d / 2 + k * d / nz));
+    for (let l = 1; l <= n; l++) {
+      const y = l * lh;
+      for (const sd of [-1, 1]) { g.add(box(w, .3, .3, M.steelDk, x, y, z + sd * d / 2)); g.add(box(.3, .3, d, M.steelDk, x + sd * w / 2, y, z)); g.add(box(w, .05, .05, M.yellow, x, y + 1.05, z + sd * d / 2)); }
+      g.add(box(w, .06, d, M.grate, x, y - .12, z));
+    }
+    for (let l = 0; l < n; l++) for (const sd of [-1, 1]) for (let i = 0; i < nx; i += 2)
+      beam(new V3(x - w / 2 + i * w / nx, l * lh, z + sd * d / 2), new V3(x - w / 2 + (i + 1) * w / nx, (l + 1) * lh, z + sd * d / 2), .18, M.steelDk);
+    let s = 1 + Math.abs(Math.round(x * 7 + z * 13)); const r = () => (s = (s * 16807) % 2147483647) / 2147483647;
+    for (let l = 0; l < n; l++) for (let i = 0; i < 3; i++) {
+      const ex = x - w / 2 + 1.6 + r() * (w - 3.2), ez = z - d / 2 + 1.6 + r() * (d - 3.2), y = l * lh + .15;
+      if (r() < .5) { const v = cyl(1, 1, lh * .75, M.tank, 24); v.position.set(ex, y + lh * .375, ez); g.add(v); }
+      else { const v = cyl(.65, .65, 4.5, M.silver, 20); v.rotation.z = Math.PI / 2; v.position.set(ex, y + 1, ez); g.add(v); }
+    }
+  };
+  // Boru köprüsü; üstünde hava soğutucu fan sırası
+  const rack = (x0, x1, z, y = 7, fans) => {
+    for (let x = x0; x <= x1; x += 6) {
+      for (const dz of [-2, 2]) g.add(box(.35, y + (fans ? 3 : 0), .35, M.steelDk, x, (y + (fans ? 3 : 0)) / 2, z + dz));
+      for (const yy of [y, y - 2.5]) g.add(box(.3, .3, 4.4, M.steelDk, x, yy, z));
+    }
+    const P = [M.silver, M.steel, M.silver, M.yellow, M.steelDk, M.silver, M.steel, M.silver];
+    P.forEach((m, i) => {
+      for (const yy of [y + .35, y - 2.15]) { const rr = .18 + (i % 3) * .08, p = cyl(rr, rr, x1 - x0, m, 10); p.rotation.z = Math.PI / 2; p.position.set((x0 + x1) / 2, yy, z - 1.75 + i * .5); g.add(p); }
+    });
+    if (fans) {
+      g.add(box(x1 - x0, .7, 5, M.steelDk, (x0 + x1) / 2, y + 3.35, z));
+      for (let x = x0 + 2; x < x1 - 1; x += 4) { const f = cyl(1.6, 1.6, .9, M.steel, 24); f.position.set(x, y + 4.1, z); g.add(f); }
+    }
+  };
+  // Kulenin çevresi: çitli beton saha ve aydınlatma direkleri
+  g.add(box(30, .15, 30, M.asphalt, 0, .02, 0));
+  const fenceMat = new THREE.MeshStandardMaterial({ color: C(0x8a9095), transparent: true, opacity: .22, side: THREE.DoubleSide, metalness: .6, roughness: .4, depthWrite: false });
+  for (const [x, z, w, d] of [[0, -18, 36, 0], [0, 18, 36, 0], [-18, 0, 0, 36], [18, 0, 0, 36]]) {
+    const f = new THREE.Mesh(new THREE.PlaneGeometry(Math.max(w, d), 2.4), fenceMat); f.position.set(x, 1.3, z); if (d) f.rotation.y = Math.PI / 2; g.add(f);
+    for (let k = 0; k <= 12; k++) { const p = cyl(.05, .05, 2.6, M.steel, 6), f2 = k / 12 - .5; p.position.set(x + (w ? f2 * w : 0), 1.3, z + (d ? f2 * d : 0)); g.add(p); }
+  }
+  // Proses alanı
+  frame(-32, -25, 16, 10, 4, 5); frame(-24, -43, 12, 10, 3, 5);
+  column(2.4, 46, -37, -41); column(1.7, 38, -35, -47); column(1.3, 30, -45, -44); column(2.8, 42, -20, -52);
+  pad(14, 10, -35, -63); g.add(box(11, 9, 7, M.steelDk, -35, 4.65, -63));                // fırın ve bacaları
+  for (const dx of [-3, 3]) { const s = cyl(.9, 1.1, 34, M.steel, 20); s.position.set(-35 + dx, 17, -63); g.add(s); }
+  rack(-110, -58, -14, 7, true); rack(-70, -10, -74, 6);
+  sphere(6, -48, -24); sphere(6, -60, -18);
+  // Tank sahaları
+  bund(-85, -50, 46, 38); tank(10, 14, -97, -60, false); tank(10, 14, -73, -60, true); tank(9, 13, -97, -39, true); tank(9, 13, -73, -39, false);
+  bund(-36, -92, 50, 26); tank(11, 15, -49, -92, true); tank(11, 15, -23, -92, false);
+  bund(60, 50, 50, 26); tank(11, 15, 47, 50, false); tank(11, 15, 73, 50, true);
+  // Meşale bacası (gergi halatlı)
+  const FX = -86, FZ = -88, FH = 62;
+  const flare = cyl(.5, .9, FH, M.steel, 16); flare.position.set(FX, FH / 2, FZ); g.add(flare);
+  for (const y of [FH - 6, FH - 3]) { const b = cyl(.6, .6, 1.4, M.red, 16); b.position.set(FX, y, FZ); g.add(b); }
+  const flame = mesh(new THREE.ConeGeometry(1.2, 4.5, 14), M.flame); flame.position.set(FX, FH + 2.3, FZ); flame.castShadow = false; g.add(flame);
+  const guyMat = new THREE.LineBasicMaterial({ color: C(0x55595c) });
+  for (let i = 0; i < 3; i++) { const a = i / 3 * Math.PI * 2; g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new V3(FX, FH * .7, FZ), new V3(FX + Math.cos(a) * 26, 0, FZ + Math.sin(a) * 26)]), guyMat)); }
+  const mount = new THREE.Object3D(); mount.position.set(.6, H + .3, .6); g.add(mount);
+  return { group: g, tur, mount };
+}
+
+/* ---------- Ortam: zemin, tepeler, çalılar, deniz ---------- */
+// Platformun çevresi düz, uzaklaştıkça hafif engebeli arazi
+const gh = (x, z) => {
+  const d = Math.hypot(x, z);
+  return (Math.sin(x * .021) * Math.cos(z * .017) * 1.6 + Math.sin(x * .07 + z * .05) * .35 + Math.sin(x * .19 - z * .23) * .08) * Math.min(1, Math.max(0, (d - 14) / 30));
+};
+const groundGeo = new THREE.PlaneGeometry(1400, 1400, 280, 280); groundGeo.rotateX(-Math.PI / 2);
+{ const p = groundGeo.attributes.position; for (let i = 0; i < p.count; i++) p.setY(i, gh(p.getX(i), p.getZ(i))); groundGeo.computeVertexNormals(); }
+// Geniş ölçekli renk dalgalanması ve seyrek çim yamaları: döşenen dokunun tekrarını kırar (köşe rengi)
+{ const p = groundGeo.attributes.position, c = new Float32Array(p.count * 3);
+  for (let i = 0; i < p.count; i++) {
+    const x = p.getX(i), z = p.getZ(i);
+    const m = .5 + .5 * (Math.sin(x * .031 + z * .017) * .45 + Math.sin(-x * .013 + z * .041 + 1.3) * .3 + Math.sin(x * .087 - z * .061 + 2.1) * .15 + Math.sin(x * .19 + z * .23) * .1), k = .82 + .3 * m;
+    const gn = .5 + .5 * (Math.sin(x * .052 - z * .029 + .7) * .5 + Math.sin(x * .023 + z * .067 + 2.4) * .3 + Math.sin(x * .13 + z * .11) * .2);
+    const gp = THREE.MathUtils.smoothstep(gn, .66, .82) * .75;                       // çim yaması payı
+    c[i * 3] = k * (1 - gp) + .72 * gp; c[i * 3 + 1] = k * (1 - gp) + .78 * gp; c[i * 3 + 2] = k * .97 * (1 - gp) + .52 * gp;
+  }
+  groundGeo.setAttribute('color', new THREE.BufferAttribute(c, 3)); }
+const ground = new THREE.Mesh(groundGeo, new THREE.MeshStandardMaterial({ map: dirtTex, normalMap: dirtNrm, normalScale: new THREE.Vector2(.55, .55), color: C(0xf0ebe2), vertexColors: true, roughness: .97 }));
+// Gökyüzü yansıması toprakta zayıf: gölgedeki zemin maviye (yeşile) kaçmasın
+ground.material.envMapIntensity = .35;
+ground.receiveShadow = true; scene.add(ground);
+const land = new THREE.Group(); scene.add(land);
+{
+  // Kuru ot öbekleri: her öbekte ince, uca doğru daralan ve eğilen yapraklar; öbek başına renk farkı
+  const pos = [];
+  let gs = 21; const gr = () => (gs = (gs * 16807) % 2147483647) / 2147483647;
+  for (let b = 0; b < 22; b++) {
+    const a = gr() * Math.PI * 2, lean = .15 + gr() * .55, hgt = .12 + gr() * .3, w = .0035 + gr() * .003, rr = gr() * .05;
+    const ox = Math.cos(a) * rr, oz = Math.sin(a) * rr, px = -Math.sin(a) * w, pz = Math.cos(a) * w, S = 4;
+    const pt = k => { const f = k / S, bend = f * f * lean * hgt; return [ox + Math.cos(a) * bend, f * hgt, oz + Math.sin(a) * bend, 1 - f]; };
+    for (let k = 0; k < S; k++) {
+      const [x0, y0, z0, w0] = pt(k), [x1, y1, z1, w1] = pt(k + 1);
+      pos.push(x0 - px * w0, y0, z0 - pz * w0, x0 + px * w0, y0, z0 + pz * w0, x1 + px * w1, y1, z1 + pz * w1);
+      pos.push(x0 - px * w0, y0, z0 - pz * w0, x1 + px * w1, y1, z1 + pz * w1, x1 - px * w1, y1, z1 - pz * w1);
+    }
+  }
+  const tuftGeo = new THREE.BufferGeometry(); tuftGeo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); tuftGeo.computeVertexNormals();
+  const N_TUFT = 7000, tufts = new THREE.InstancedMesh(tuftGeo, new THREE.MeshStandardMaterial({ color: C(0xffffff), roughness: .9, side: THREE.DoubleSide }), N_TUFT);
+  const tm = new THREE.Matrix4(), tq = new THREE.Quaternion(), ts = new V3(), tc = new THREE.Color(), dry = C(0xb3a47c), green = C(0x7d8a52), grey = C(0x8f8a78);
+  for (let i = 0; i < N_TUFT; i++) {
+    const a = gr() * Math.PI * 2, d = 4.5 + Math.pow(gr(), 1.6) * 150, x = Math.cos(a) * d, z = Math.sin(a) * d, k = .5 + gr() * 1.1;
+    tq.setFromAxisAngle(new V3(0, 1, 0), gr() * 6.28);
+    tm.compose(new V3(x, gh(x, z), z), tq, ts.set(k, k * (.6 + gr() * .7), k)); tufts.setMatrixAt(i, tm);
+    tc.copy(dry).lerp(gr() < .35 ? green : grey, gr() * .7); tufts.setColorAt(i, tc);
+  }
+  tufts.receiveShadow = true; land.add(tufts);
+  // Taşlar: küçük, toprak renginde
+  const rockGeo = new THREE.IcosahedronGeometry(1, 1);
+  { const p = rockGeo.attributes.position; for (let i = 0; i < p.count; i++) { const k = .75 + gr() * .45; p.setXYZ(i, p.getX(i) * k, p.getY(i) * k * .6, p.getZ(i) * k); } rockGeo.computeVertexNormals(); }
+  const rocks = new THREE.InstancedMesh(rockGeo, new THREE.MeshStandardMaterial({ color: C(0x7e7468), roughness: .95, flatShading: true }), 320);
+  for (let i = 0; i < 320; i++) {
+    const a = gr() * Math.PI * 2, d = 5 + Math.pow(gr(), 1.4) * 160, x = Math.cos(a) * d, z = Math.sin(a) * d, k = .03 + Math.pow(gr(), 3) * .22;
+    tq.setFromEuler(new THREE.Euler(gr() * .4, gr() * 6.28, gr() * .4));
+    tm.compose(new V3(x, gh(x, z) + k * .15, z), tq, ts.set(k, k, k)); rocks.setMatrixAt(i, tm);
+  }
+  rocks.castShadow = true; rocks.receiveShadow = true; land.add(rocks);
+}
+{
+  // Ufukta dağ silsileleri: çan biçimli sırtlar, üstte kırışık; uzaklık sisiyle mavileşir
+  const mm = new THREE.MeshStandardMaterial({ color: C(0x7a746c), roughness: 1 });
+  let s = 5; const r = () => (s = (s * 16807) % 2147483647) / 2147483647;
+  for (let i = 0; i < 16; i++) {
+    const a = i / 16 * Math.PI * 2 + r() * .3, d = 820 + r() * 260, L = 520 + r() * 420, H = 24 + r() * 34, ph = r() * 9;
+    const geo = new THREE.PlaneGeometry(L, L * .45, 72, 24); geo.rotateX(-Math.PI / 2);
+    const p = geo.attributes.position;
+    for (let k = 0; k < p.count; k++) {
+      const x = p.getX(k), z = p.getZ(k), env = Math.exp(-((x / (L * .36)) ** 2) - ((z / (L * .16)) ** 2));
+      const rid = 1 + .22 * Math.sin(x * .018 + ph) + .12 * Math.sin(x * .047 + z * .03 + ph * 2) + .05 * Math.sin(x * .13 + z * .09);
+      p.setY(k, H * env * rid);
+    }
+    geo.computeVertexNormals();
+    const mtn = new THREE.Mesh(geo, mm); mtn.position.set(Math.cos(a) * d, -4, Math.sin(a) * d); mtn.rotation.y = -a + Math.PI / 2; land.add(mtn);
+  }
+}
+// Bulutlar: yüksek, saydam bir katman; döşenebilir gürültüden yumuşak kümeler
+{
+  const n = tileNoise(256, 13, 5, 3, .6);
+  const ct = tex(256, 256, (g, w, h) => {
+    const im = g.createImageData(w, h);
+    for (let i = 0; i < w * h; i++) { const a = THREE.MathUtils.smoothstep(n[i], .52, .78); im.data[i * 4] = im.data[i * 4 + 1] = im.data[i * 4 + 2] = 255 - (1 - a) * 30; im.data[i * 4 + 3] = a * 235; }
+    g.putImageData(im, 0, 0);
+  });
+  ct.wrapS = ct.wrapT = THREE.RepeatWrapping; ct.repeat.set(3, 6);
+  // Kenarı görünmesin diye uzaklıkla saydamlaşan disk (kamera uzak düzleminin içinde kalır)
+  const cm = new THREE.ShaderMaterial({
+    uniforms: { map: { value: ct } }, transparent: true, depthWrite: false,
+    vertexShader: 'varying vec2 vUv; varying float vR; void main(){ vUv = uv * vec2(3.0, 6.0); vR = length(position.xy); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+    fragmentShader: 'uniform sampler2D map; varying vec2 vUv; varying float vR; void main(){ vec4 c = texture2D(map, vUv); c.a *= .9 * (1.0 - smoothstep(1250.0, 1740.0, vR)); gl_FragColor = c; }',
+  });
+  const clouds = new THREE.Mesh(new THREE.CircleGeometry(1750, 64), cm);
+  clouds.rotation.x = Math.PI / 2; clouds.position.y = 300; scene.add(clouds); NO_AO.push(clouds);
+}
+// Pikap sahası: atış alanındaki gibi uzun toprak setleri (yalnızca araç sahnesinde)
+function addBerms(g) {
+  const t = dirtTex.clone(); t.repeat.set(14, 5); t.needsUpdate = true;
+  const nm = dirtNrm.clone(); nm.repeat.set(14, 5); nm.needsUpdate = true;
+  const mat = new THREE.MeshStandardMaterial({ map: t, normalMap: nm, normalScale: new THREE.Vector2(.8, .8), color: C(0xd9d2c4), roughness: 1 });
+  let s = 17; const r = () => (s = (s * 16807) % 2147483647) / 2147483647;
+  for (const [x, z, len, h, rot] of [[-15, -11, 30, 2.4, .5], [14, -21, 22, 1.9, -.15], [-24, 9, 18, 1.5, 1.2]]) {
+    const geo = new THREE.SphereGeometry(1, 64, 24), p = geo.attributes.position, ph = r() * 9;
+    for (let k = 0; k < p.count; k++) {
+      const X = p.getX(k), Y = p.getY(k), Z = p.getZ(k), bump = 1 + .12 * Math.sin(X * 9 + ph) * Math.cos(Z * 7) + .06 * Math.sin(X * 23 + Z * 17);
+      p.setXYZ(k, X * len / 2, Math.max(-.2, Y) * h * bump, Z * h * 2.6 * (1 + .1 * Math.sin(X * 5 + ph)));
+    }
+    geo.computeVertexNormals();
+    const b = mesh(geo, mat, x, gh(x, z) - .1, z); b.rotation.y = rot; g.add(b);
+  }
+}
+// Deniz: gökyüzünü ve gemiyi yansıtan su yüzeyi
+const sea = new THREE.Water(new THREE.PlaneGeometry(3000, 3000), {
+  textureWidth: 1024, textureHeight: 1024, waterNormals: waterNrm, sunDirection: SUN_DIR.clone(),
+  sunColor: 0xffe2b8, waterColor: 0x0e2f3c, distortionScale: 1.6, fog: true,
+});
+sea.material.uniforms.size.value = 3;
+sea.rotation.x = -Math.PI / 2; scene.add(sea);
+
+/* ---------- Platformlar ---------- */
+const P = {
+  truck: Object.assign(makeTruck(), {
+    tag: 'PLATFORM 1 / 3', title: 'Araç üstü koruma', en: 'Protection on vehicles',
+    desc: 'Pikap kasasına monte edilir; konvoy ve devriyeyle birlikte hareket eder. İnsansız kara araçlarına da uyarlanabilir.',
+    mountTxt: ['Araç entegrasyonu', 'Mekanik tasarım ve kasaya montaj', 'Vehicle integration', 'URBAN SAVUNMA'],
+    cam: new V3(5, 2.4, 8), dist: 17.5, off: new V3(.9, -1.1, 0) }),
+  ship: Object.assign(makeShip(), {
+    tag: 'PLATFORM 2 / 3', title: 'Gemi güvertesinde', en: 'Deck-mounted at sea',
+    desc: 'Kargo gemisi ve tankerlerin güvertesine kurulur; açık denizde gemiyi korur.',
+    mountTxt: ['Güverte montajı', 'Kargo gemisi ve tanker için', 'Deck mount for cargo ships and tankers', 'URBAN SAVUNMA'],
+    cam: new V3(6, 2.8, 7), dist: 15.5, off: new V3(-1, -.6, 0) }),
+  tower: Object.assign(makeTower(), {
+    tag: 'PLATFORM 3 / 3', title: 'Kritik tesislerde', en: 'Fixed-site protection',
+    desc: 'Kule üzerine sabit kurulur; rafineri, enerji ve liman tesislerini korur.',
+    mountTxt: ['Sabit kurulum', 'Kritik tesis koruması', 'Fixed installation for critical facilities', 'URBAN SAVUNMA'],
+    cam: new V3(6, 1.1, 7), dist: 27, off: new V3(-2, -1.6, -2) }),
+};
+addBerms(P.truck.group);
+for (const p of Object.values(P)) { scene.add(p.group); p.group.visible = false; }
+
+/* ---------- Koruma kubbeleri: dışta 600 m tespit, içte 150 m angajman (sembolik ölçek) ---------- */
+const domeMat = (hex, a) => new THREE.ShaderMaterial({
+  uniforms: { col: { value: new THREE.Color(hex) }, a: { value: a }, t: { value: 0 }, ph: { value: 0 } },
+  vertexShader: 'varying vec3 vN; varying vec3 vP; varying vec3 vV;' +
+    'void main(){ vP = position; vec4 mv = modelViewMatrix * vec4(position, 1.0); vN = normalize(normalMatrix * normal); vV = normalize(-mv.xyz); gl_Position = projectionMatrix * mv; }',
+  fragmentShader: 'uniform vec3 col; uniform float a; uniform float t; uniform float ph; varying vec3 vN; varying vec3 vP; varying vec3 vV;' +
+    'void main(){' +
+    ' float f = pow(1.0 - abs(dot(normalize(vN), normalize(vV))), 2.2);' +
+    ' vec3 p = normalize(vP);' +
+    ' float lat = asin(clamp(p.y, -1.0, 1.0)) * 57.2958, lon = atan(p.z, p.x) * 57.2958;' +
+    ' float dl = abs(fract(lat / 15.0 + 0.5) - 0.5) * 15.0, dn = abs(fract(lon / 15.0 + 0.5) - 0.5) * 15.0 * cos(radians(lat));' +
+    ' float line = max(1.0 - smoothstep(0.0, 0.4, dl), 1.0 - smoothstep(0.0, 0.4, dn));' +
+    ' float s = exp(-pow((p.y - (fract(t * 0.16 + ph) * 2.0 - 1.0)) * 12.0, 2.0));' +
+    ' float face = gl_FrontFacing ? 1.0 : 0.45;' +
+    ' float al = a * face * (0.22 + f * 2.0 + line * 1.1 + s * 1.3);' +
+    ' gl_FragColor = vec4(col * (0.85 + f * 0.6 + s * 0.6), clamp(al, 0.0, 0.85));' +
+    '}',
+  transparent: true, depthWrite: false, side: THREE.DoubleSide,
+});
+const R_OUT = 6, R_IN = 3;
+const domeOut = new THREE.Mesh(new THREE.SphereGeometry(R_OUT, 96, 48), domeMat(0xd9bd7c, .1));
+const domeIn = new THREE.Mesh(new THREE.SphereGeometry(R_IN, 72, 36), domeMat(0xe0444b, .09));
+domeIn.material.uniforms.ph.value = .5;
+domeOut.renderOrder = 10; domeIn.renderOrder = 11;
+scene.add(domeOut, domeIn); NO_AO.push(domeOut, domeIn);
+let shieldOn = true;
+
+/* ---------- Kamera ---------- */
+const camera = new THREE.PerspectiveCamera(40, 1, .1, 2000);
+const controls = new THREE.OrbitControls(camera, canvas);
+controls.enableDamping = true; controls.dampingFactor = .06;
+controls.minDistance = 2.6; controls.maxDistance = 26; controls.maxPolarAngle = 1.55;
+controls.enablePan = false;
+
+/* ---------- Ortam perdelemesi (SSAO): köşelerde ve temas yüzeylerinde yumuşak gölge ---------- */
+const composer = new THREE.EffectComposer(renderer);
+const ssao = new THREE.SSAOPass(scene, camera, 16, 16);
+// Uzaklıklar derinliğe oranla (yakın 0,1 m, uzak 2000 m): yaklaşık 1 cm ile 80 cm arası perdeleme
+ssao.kernelRadius = .45; ssao.minDistance = .000005; ssao.maxDistance = .0004;
+ssao.normalRenderTarget.depthTexture.type = THREE.UnsignedIntType;
+if (renderer.capabilities.isWebGL2) { ssao.beautyRenderTarget.dispose(); ssao.beautyRenderTarget = new THREE.WebGLMultisampleRenderTarget(16, 16, { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBAFormat }); }
+// Saydam kubbeler ve bulutlar normal geçişine girmez (perdeleme hesabını bozmasın)
+const ssaoOverride = ssao.renderOverride.bind(ssao);
+ssao.renderOverride = (...a) => { const v = NO_AO.map(o => o.visible); NO_AO.forEach(o => { o.visible = false; }); ssaoOverride(...a); NO_AO.forEach((o, i) => { o.visible = v[i]; }); };
+composer.addPass(ssao);
+composer.addPass(new THREE.ShaderPass(THREE.GammaCorrectionShader));
+const draw = () => composer.render();
+
+
+/* ---------- Etiketler ---------- */
+const tagsEl = $('#tags');
+const HS = [
+  { key: 'eo', t: ['Pasif sensörler', 'Elektro-optik ve akustik algılama', 'Passive electro-optical and acoustic sensing', 'LASERSAN'] },
+  { key: 'guns', t: ['Çift 12 kalibre', 'Yarı otomatik, biri ters monte', 'Twin semi-automatic 12-gauge, one mounted inverted', 'ÇİFT NAMLU'] },
+  { key: 'ammo', t: ['Sterling magnum anti-drone mühimmat', 'Kendi tesislerinde üretim', 'Sterling magnum anti-drone ammunition', 'TURAÇ'] },
+  { key: 'body', t: ['Robotik kule, gömülü yapay zekâ', 'Takip algoritmaları kule üzerinde çalışır', 'Robotic turret with embedded AI', 'LASERSAN · İTÜ ARC'] },
+  { key: 'mount', t: null },
+];
+const linesEl = $('#lines');
+for (const h of HS) {
+  h.dot = document.createElement('div'); h.dot.className = 'dot'; tagsEl.appendChild(h.dot);
+  h.el = document.createElement('div'); h.el.className = 'callout';
+  h.el.innerHTML = '<u></u><b></b><span></span><em></em>';
+  tagsEl.appendChild(h.el);
+  h.line = document.createElementNS('http://www.w3.org/2000/svg', 'line'); linesEl.appendChild(h.line);
+}
+function fillTags(p) {
+  for (const h of HS) {
+    const t = h.t || p.mountTxt;
+    const c = h.el;
+    c.querySelector('u').textContent = t[3]; c.querySelector('b').textContent = t[0];
+    c.querySelector('span').textContent = t[1]; c.querySelector('em').textContent = t[2];
+    h.anchor = h.key === 'mount' ? p.mount : p.tur.anchors[h.key];
+  }
+}
+
+/* ---------- Platform geçişi ---------- */
+let cur = null, curKey = null, camFrom = null, camTo = null, tgtFrom = null, tgtTo = null, moveT = 1, shownAt = 0;
+const tmp = new V3();
+// Platformlar ayrı dünyalar: aralarında kamera kaydırmak yerine kısa bir karartmayla geçilir
+function apply(key) {
+  const p = P[key];
+  if (cur) cur.group.visible = false;
+  cur = p; curKey = key; p.group.visible = true;
+  document.querySelectorAll('#tabs button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.p === key)));
+  const isSea = key === 'ship';
+  sea.visible = isSea; ground.visible = !isSea; land.visible = !isSea;
+  scene.fog.near = isSea ? 200 : key === 'tower' ? 70 : 90; scene.fog.far = isSea ? 1600 : key === 'tower' ? 650 : 900;
+  const tw = new V3(); p.tur.pitch.getWorldPosition(tw);
+  tgtTo = tw.clone().add(p.off);
+  camTo = tgtTo.clone().add(p.cam.clone().setLength(p.dist));
+  camera.position.copy(camTo); controls.target.copy(tgtTo); controls.update(); moveT = 1;
+  sun.position.copy(tgtTo).addScaledVector(SUN_DIR, 60); sun.target.position.copy(tgtTo);
+  const sc = key === 'tower' ? 60 : 12;
+  Object.assign(sun.shadow.camera, { left: -sc, right: sc, top: sc, bottom: -sc, near: 1, far: 140 }); sun.shadow.camera.updateProjectionMatrix();
+  fillTags(p);
+  shownAt = performance.now();
+  $('#pTag').textContent = p.tag; $('#pTitle').textContent = p.title; $('#pEn').textContent = p.en; $('#pDesc').textContent = p.desc;
+  $('#plat').classList.remove('out');
+}
+let switching = false;
+function select(key, instant) {
+  document.querySelectorAll('#tabs button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.p === key)));
+  if (instant) { apply(key); return; }
+  if (switching) return;
+  switching = true;
+  $('#fade').classList.add('on'); $('#plat').classList.add('out');
+  setTimeout(() => { apply(key); $('#fade').classList.remove('on'); switching = false; }, 420);
+}
+
+/* ---------- Kontroller ---------- */
+/* ---------- Senaryo: 60 saniyelik anlatımlı tur (müzikle aynı uzunlukta) ---------- */
+const STORY_LEN = 60;
+const STORY = [
+  { t: 0, p: 'truck', shot: 'wide', k: 'DRON KALKANI', tr: 'Dronlar artık her yerde.', en: 'Drones are now everywhere.' },
+  { t: 6, p: 'truck', shot: 'wide', k: 'SORUN', tr: 'Karıştırıcı her dronu durduramaz.', en: 'Jammers cannot stop every drone.' },
+  { t: 12, p: 'truck', shot: 'turret', k: 'ÇÖZÜM', tr: 'Otonom robotik anti-drone kule.', en: 'An autonomous robotic anti-drone turret.' },
+  { t: 18, p: 'truck', shot: 'eo', k: 'LASERSAN', tr: 'Pasif elektro-optik ve akustik sensörler.', en: 'Passive electro-optical and acoustic sensors.' },
+  { t: 23, p: 'truck', shot: 'guns', k: 'ÇİFT NAMLU', tr: 'Çift 12 kalibre, Sterling magnum anti-drone mühimmat.', en: 'Twin 12-gauge with Sterling magnum anti-drone ammunition.' },
+  { t: 28, p: 'truck', shot: 'far', dome: 1, k: 'KORUMA ALANI', tr: '600–800 metrede tespit, 150 metrede angajman.', en: 'Detection at 600–800 m, engagement at 150 m.' },
+  { t: 34, p: 'ship', shot: 'wide', dome: 1, k: 'GEMİDE', tr: 'Kargo gemisi ve tanker güvertesinde.', en: 'On the deck of cargo ships and tankers.' },
+  { t: 42, p: 'tower', shot: 'wide', dome: 1, k: 'KULEDE', tr: 'Rafinerilerde ve kritik tesislerde sabit kurulum.', en: 'Fixed installation at refineries and critical facilities.' },
+  { t: 50, p: 'truck', shot: 'wide', k: 'ORTAK YAPIM', tr: 'Turaç liderliğinde dört firmanın ortak ürünü.', en: 'Turaç · Derya Arms · Lasersan · Urban Savunma · AI by İTÜ ARC' },
+  { t: 55, p: 'truck', shot: 'turret', k: 'DRONKALKANI.COM.TR', tr: 'Son 150 metre bizim.', en: 'The last 150 metres are ours.' },
+];
+const YAX = new V3(0, 1, 0), tgCur = new V3(), posCur = new V3();
+let story = true, sT = 0, beatI = -1, beatStart = 0, shotFrom = null, shotTo = null, shotK = 1, lastShotPlat = null, yawHold = false;
+function shotFor(b) {
+  const p = P[b.p], T = new V3(); p.tur.pitch.getWorldPosition(T);
+  if (b.shot === 'eo') { const tg = T.clone().add(new V3(.1, .12, -.05)); return { tg, pos: tg.clone().add(new V3(5, .9, 2).setLength(2.4)) }; }
+  if (b.shot === 'guns') { const tg = T.clone().add(new V3(.3, -.08, 0)); return { tg, pos: tg.clone().add(new V3(1.6, 1.1, 5).setLength(2.9)) }; }
+  if (b.shot === 'turret') { const tg = T.clone().add(new V3(.15, -.25, 0)); return { tg, pos: tg.clone().add(new V3(4, 1.3, 5).setLength(3.6)) }; }
+  const tg = T.clone().add(p.off);
+  return { tg, pos: tg.clone().add(p.cam.clone().setLength(p.dist * (b.shot === 'far' ? 1.12 : 1))) };
+}
+function setCaption(b) {
+  const c = $('#cap'); c.classList.add('out');
+  setTimeout(() => { $('#capK').textContent = b.k; $('#capT').textContent = b.tr; $('#capE').textContent = b.en; c.classList.remove('out'); }, 350);
+}
+function setShield(on) { shieldOn = on; $('#shield').setAttribute('aria-pressed', String(on)); }
+function enterBeat(i) {
+  beatI = i;
+  const b = STORY[i];
+  setCaption(b);
+  yawHold = b.shot === 'eo' || b.shot === 'guns' || b.shot === 'turret';
+  const go = () => {
+    const s = shotFor(b), same = shotTo && lastShotPlat === b.p;
+    shotFrom = same ? { tg: tgCur.clone(), pos: camera.position.clone() } : s;
+    shotTo = s; shotK = same ? 0 : 1; beatStart = sT; lastShotPlat = b.p;
+    setShield(!!b.dome);
+  };
+  if (b.p !== curKey) {
+    $('#fade').classList.add('on'); $('#plat').classList.add('out');
+    setTimeout(() => { apply(b.p); go(); $('#fade').classList.remove('on'); }, 420);
+  } else go();
+}
+function setStory(on) {
+  story = on;
+  document.body.classList.toggle('story', on);
+  $('#tour').setAttribute('aria-pressed', String(on));
+  if (on) { beatI = -1; shotTo = null; }
+  else { yawHold = false; controls.target.copy(tgCur.lengthSq() ? tgCur : controls.target); controls.update(); }
+}
+function storyTick(dt) {
+  if (musicOn) scheduleMusic();
+  if (!story) { controls.update(); return; }
+  sT = musicOn ? (((AC.currentTime - musicT0) % STORY_LEN) + STORY_LEN) % STORY_LEN : (sT + dt) % STORY_LEN;
+  let i = 0;
+  for (let k = 0; k < STORY.length; k++) if (STORY[k].t <= sT) i = k;
+  if (i !== beatI) enterBeat(i);
+  if (!shotTo) return;
+  shotK = Math.min(1, shotK + dt / 2.4);
+  const k = ease(shotK);
+  tgCur.lerpVectors(shotFrom.tg, shotTo.tg, k); posCur.lerpVectors(shotFrom.pos, shotTo.pos, k);
+  const off = posCur.clone().sub(tgCur).applyAxisAngle(YAX, (sT - beatStart) * .035);
+  camera.position.copy(tgCur).add(off); camera.lookAt(tgCur); controls.target.copy(tgCur);
+}
+
+/* ---------- Müzik: orijinal, sentezlenmiş; 96 BPM'de 24 ölçü = 60 sn, senaryoyla senkron ---------- */
+let AC = null, master = null, verb = null, noiseBuf = null, musicOn = false, musicT0 = 0, stepI = 0;
+const STEP = 60 / 96 / 2, LOOP = 192;
+const CH = [[50, 57, 62, 65], [46, 53, 58, 62], [48, 55, 60, 64], [45, 52, 57, 60]], END = [50, 57, 62, 66, 69];
+const hz = m => 440 * Math.pow(2, (m - 69) / 12);
+function initAudio() {
+  try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { AC = null; return; }
+  master = AC.createGain(); master.gain.value = 0;
+  const comp = AC.createDynamicsCompressor(); master.connect(comp); comp.connect(AC.destination);
+  const len = Math.floor(AC.sampleRate * 2.6), ir = AC.createBuffer(2, len, AC.sampleRate);
+  for (let c = 0; c < 2; c++) { const d = ir.getChannelData(c); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2.8); }
+  verb = AC.createConvolver(); verb.buffer = ir;
+  const vg = AC.createGain(); vg.gain.value = .3; verb.connect(vg); vg.connect(master);
+  noiseBuf = AC.createBuffer(1, AC.sampleRate, AC.sampleRate);
+  const nd = noiseBuf.getChannelData(0); for (let i = 0; i < nd.length; i++) nd[i] = Math.random() * 2 - 1;
+}
+function tone(type, f, t, dur, vel, o = {}) {
+  const osc = AC.createOscillator(), g = AC.createGain();
+  osc.type = type; osc.frequency.value = f; if (o.det) osc.detune.value = o.det;
+  let n = osc;
+  if (o.lp) { const fl = AC.createBiquadFilter(); fl.type = 'lowpass'; fl.frequency.value = o.lp; osc.connect(fl); n = fl; }
+  n.connect(g); g.connect(master); if (o.wet) g.connect(verb);
+  if (o.pad) { g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vel, t + o.pad); g.gain.setValueAtTime(vel, t + dur - 1); g.gain.linearRampToValueAtTime(0, t + dur + .6); }
+  else { g.gain.setValueAtTime(vel, t); g.gain.exponentialRampToValueAtTime(.0001, t + dur); }
+  osc.start(t); osc.stop(t + dur + .7);
+}
+function noise(t, dur, vel, hp) {
+  const s = AC.createBufferSource(), f = AC.createBiquadFilter(), g = AC.createGain();
+  s.buffer = noiseBuf; f.type = 'highpass'; f.frequency.value = hp; s.connect(f); f.connect(g); g.connect(master);
+  g.gain.setValueAtTime(vel, t); g.gain.exponentialRampToValueAtTime(.0001, t + dur); s.start(t); s.stop(t + dur + .05);
+}
+function kick(t, vel) {
+  const o = AC.createOscillator(), g = AC.createGain();
+  o.frequency.setValueAtTime(120, t); o.frequency.exponentialRampToValueAtTime(42, t + .14);
+  g.gain.setValueAtTime(vel, t); g.gain.exponentialRampToValueAtTime(.0001, t + .35);
+  o.connect(g); g.connect(master); o.start(t); o.stop(t + .4);
+}
+function step(i, t) {
+  const bar = Math.floor(i / 8), s = i % 8, ch = CH[Math.floor(bar / 2) % 4];
+  if (bar < 22) {
+    if (s === 0 && bar % 2 === 0) ch.forEach(m => { tone('sawtooth', hz(m), t, STEP * 16, .026, { det: -7, lp: 900, pad: 1.2, wet: 1 }); tone('sawtooth', hz(m), t, STEP * 16, .026, { det: 7, lp: 900, pad: 1.2, wet: 1 }); });
+    if (bar >= 4 && (s === 0 || s === 3 || s === 6)) tone('triangle', hz(ch[0] - 12), t, STEP * 1.8, .22, { lp: 600 });
+    if (bar >= 6) tone('sine', hz(ch[s % 4] + (bar % 2 ? 24 : 12)), t, .45, .055, { wet: 1 });
+    if (bar >= 8 && bar < 21) { if (s % 2) noise(t, .05, .04, 7000); if (s === 0 || s === 4) kick(t, .5); }
+  } else if (bar === 22 && s === 0) {
+    END.forEach(m => tone('sawtooth', hz(m), t, STEP * 16, .028, { det: 5, lp: 1400, pad: .3, wet: 1 }));
+    kick(t, .7); noise(t, 1.2, .06, 3000);
+    END.forEach((m, k) => tone('sine', hz(m + 12), t + k * .09, 1.2, .07, { wet: 1 }));
+  }
+}
+function scheduleMusic() {
+  while (musicT0 + stepI * STEP < AC.currentTime + .3) { step(stepI % LOOP, musicT0 + stepI * STEP); stepI++; }
+}
+function setMusic(on) {
+  if (on && !AC) initAudio();
+  if (!AC) return;
+  musicOn = on;
+  $('#music').setAttribute('aria-pressed', String(on));
+  const now = AC.currentTime;
+  master.gain.cancelScheduledValues(now);
+  if (on) {
+    AC.resume();
+    musicT0 = now + .1; stepI = 0;
+    master.gain.setValueAtTime(0, now); master.gain.linearRampToValueAtTime(.9, now + 1);
+    if (!story) setStory(true);
+    beatI = -1;
+  } else master.gain.setTargetAtTime(0, now, .3);
+}
+
+$('#tabs').addEventListener('click', e => { const b = e.target.closest('button'); if (b) { setStory(false); select(b.dataset.p); } });
+$('#tour').addEventListener('click', () => setStory(!story));
+$('#music').addEventListener('click', () => setMusic(!musicOn));
+$('#goMusic').addEventListener('click', () => { $('#start').hidden = true; setStory(true); setMusic(true); });
+$('#goMute').addEventListener('click', () => { $('#start').hidden = true; setStory(true); });
+controls.addEventListener('start', () => { if (story) setStory(false); });
+$('#shield').addEventListener('click', e => { shieldOn = !shieldOn; e.currentTarget.setAttribute('aria-pressed', String(shieldOn)); });
+
+function resize() {
+  const w = window.innerWidth, h = window.innerHeight;
+  renderer.setSize(w, h, false);
+  composer.setPixelRatio(renderer.getPixelRatio()); composer.setSize(w, h);
+  camera.aspect = w / h;
+  camera.fov = w < 760 ? 46 : 34;
+  camera.updateProjectionMatrix();
+}
+window.addEventListener('resize', resize);
+resize();
+select('truck', true);
+setStory(true);
+
+/* ---------- Döngü ---------- */
+let last = performance.now(), t = 0;
+function frame(now) {
+  const dt = Math.min(.05, (now - last) / 1000); last = now; t += dt;
+  // Kamera geçişi
+  if (moveT < 1) {
+    moveT = Math.min(1, moveT + dt / 1.6);
+    const k = ease(moveT);
+    camera.position.lerpVectors(camFrom, camTo, k); controls.target.lerpVectors(tgtFrom, tgtTo, k);
+  }
+  // Senaryo ve müzik saati
+  storyTick(dt);
+  // Taret: ufku yavaşça tarar; yakın çekimlerde kameraya dönük durur
+  for (const p of Object.values(P)) {
+    if (!p.group.visible) continue;
+    const ty = yawHold ? .3 : Math.sin(t * .22) * 1.1 + .35, tp = yawHold ? .12 : .16 + Math.sin(t * .37) * .07;
+    p.tur.yaw.rotation.y += (ty - p.tur.yaw.rotation.y) * Math.min(1, dt * 1.5);
+    p.tur.pitch.rotation.z += (tp - p.tur.pitch.rotation.z) * Math.min(1, dt * 1.5);
+  }
+  // Gemi: dalga ve hafif yalpa
+  if (sea.visible) {
+    sea.material.uniforms.time.value += dt * .5;
+    P.ship.group.rotation.x = Math.sin(t * .5) * .012; P.ship.group.rotation.z = Math.sin(t * .37) * .008;
+    P.ship.group.position.y = Math.sin(t * .6) * .12;
+  }
+  // Kubbeler taretle birlikte hareket eder; etiketleri kubbe kenarına, kameranın sağ üstüne yerleşir
+  if (cur) {
+    cur.tur.pitch.getWorldPosition(tmp);
+    domeOut.position.copy(tmp); domeIn.position.copy(tmp);
+    domeOut.visible = domeIn.visible = shieldOn;
+    domeOut.material.uniforms.t.value = domeIn.material.uniforms.t.value = t;
+  }
+  draw();
+  {
+    const W = canvas.clientWidth, H = canvas.clientHeight;
+    const right = new V3().setFromMatrixColumn(camera.matrixWorld, 0);
+    [[$('#dlOut'), R_OUT, .55], [$('#dlIn'), R_IN, .2]].forEach(([el, r, up]) => {
+      const pt = domeOut.position.clone().addScaledVector(right, r * Math.sqrt(1 - up * up)).add(new V3(0, r * up, 0)).project(camera);
+      const vis = shieldOn && pt.z < 1 && Math.abs(pt.x) < .92 && Math.abs(pt.y) < .9;
+      el.classList.toggle('off', !vis);
+      el.style.transform = 'translate(' + ((pt.x + 1) / 2 * W + 8).toFixed(1) + 'px,' + ((1 - pt.y) / 2 * H - 20).toFixed(1) + 'px)';
+    });
+  }
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+})();
+</script>
+
+</body></html>

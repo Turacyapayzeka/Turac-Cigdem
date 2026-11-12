@@ -10,7 +10,8 @@ render/3d/sahneler.py    Gemi güvertesi ve rafineri kulesi için 3B arka plan p
 render/3d/dron3b.py      3B dron modeli: film için dron görünümleri ve 3B sahnelerde hedef dron.
 render/3d/taret3b.py     Tamamı 3B deneme: fotoğraflardan sadeleştirilmiş taret, pikap ve arazi; pilot çekim.
 render/3d/ucmf.py        Bambu Studio 3MF proje dosyalarını okur (parça ağları ve yerleşimleri).
-render/3d/modeller/      3B ağlar (dron.npz).
+render/3d/modeller/      3B ağlar (dron.npz, taret.glb).
+surumler/                Bütün film sürümlerinin dizini; videolar burada durur ama sürüm kontrolüne girmez.
 render/ses/ses.py        Sentezlenmiş ses bandı: müzik yatağı ve efektler (yalnızca numpy).
 docs/SENARYO.md          Sahne sahne senaryo, zaman kodları, seslendirme metni, üretim notları.
 docs/ai-video/           Yapay zekâ videosu için çekim listesi, temiz başlangıç kareleri ve ürün referans fotoğrafları.
@@ -70,7 +71,7 @@ node render/render.mjs            # ses bandı otomatik eklenir; --sessiz ile ek
 | 04 | 0:24 | Robotik taret · parça açıklamaları |
 | 05 | 0:34 | Angajman · dronu izleyen taret, 150 m'de atış, metal bulutu, 3 hedef |
 | 06 | 0:48 | Araç üstü (fotoğraf) · gemi güvertesi ve rafineri kulesi (3B render) |
-| 07 | 1:02 | Hava katmanları · en içteki katman, son savunma hattı |
+| 07 | 1:02 | Katmanlı hava savunma · gökyüzü katmanları ve iç içe kubbeler, en içte Drone Shield |
 | 08 | 1:12 | Kapanış · rakamlar, logolar |
 
 Rakamlar basına yansıyan açıklamalardan alınmıştır; yayın öncesi doğrulanmalıdır. Ayrıntı için `docs/SENARYO.md`.

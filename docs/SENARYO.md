@@ -18,7 +18,7 @@
 | 04 | 00:24–00:34 | Robotik taret | Taret yakın planı (kamuflaj ağı) | Parça açıklamaları · "Yapay zekâ kilitler, taret takip eder" |
 | 05 | 00:34–00:48 | Angajman | Amarok yan görünüş (temiz plaka) + takip eden taret kesmesi | ANGAJMAN · "150 m'de atış, 140 m'de metal bulutu" |
 | 06 | 00:48–01:02 | Araç · gemi · rafineri kulesi | Amarok arka ¾ (temiz plaka) · çizilmiş güverte · çizilmiş rafineri; her birinde takip eden taret | 01 ARAÇ ÜSTÜ · 02 DENİZ PLATFORMU · 03 RAFİNERİ |
-| 07 | 01:02–01:12 | Hava katmanları | Amarok yan görünüş (geniş), gökyüzünde kubbe katmanları + takip eden taret | KATMANLI HAVA SAVUNMA · "En içteki katman, son savunma hattı" |
+| 07 | 01:02–01:12 | Katmanlı hava savunma | Sade kavram çizimi (gökyüzü katmanları, iç içe kubbeler), sonra Amarok yan görünüş + takip eden taret | KATMANLI HAVA SAVUNMA · "En içteki katman, son savunma hattı" |
 | 08 | 01:12–01:20 | Kapanış | Bulanık taret, koyu zemin | Logo · DRON KALKANI · 4 rakam · Turaç / Sterling · turac.com.tr |
 
 ---
@@ -81,6 +81,9 @@
 ---
 
 ## Üretim notları
+
+- **v8: sade katman sahnesi.** Sahne 07 iki parçaya ayrıldı. İlk beş saniye sade bir kavram çizimi: gökyüzünde dört ağ katmanı (komuta kontrol, radar ağı, muhabere ağı, veri bağı), veri bağından kubbelere inen çizgiler, yerde iç içe üç savunma kubbesi ve en içte Drone Shield. Düzen, kullanıcının gönderdiği Steeldome görselinden esinlenir; görselin kendisi, ASELSAN ve ürün adları, logolar ve bayraklar kullanılmadı, katman adları genel işlev adlarıdır. Son beş saniyede aynı fikir gerçek fotoğrafta gösterilir: en iç kubbe ve tek hedefli angajman.
+- **Taret 3B modeli.** Kullanıcının 6 Kasım tarihli Vitrin sayfasındaki glTF model (`body` ve `gun` ağları, toplam 233 bin köşe) `render/3d/modeller/taret.glb` olarak depoya alındı. Henüz filmde kullanılmıyor; tamamı 3B sahneler için hazır. Yatay ve dikey dönüş için ağın parçalara ayrılması gerekiyor.
 
 - **v7: 3B dron.** Filmdeki dronlar artık kullanıcının 3B baskı projesinden gelen dron ağından (`render/3d/modeller/dron.npz`, 128 bin köşe) render ediliyor: `render/3d/dron3b.py` saydam zeminli iki görünüm üretir, film motoru bunları yatış, hareket bulanıklığı ve uzaklık pusuyla kullanır. Model büyük olasılıkla bir model paylaşım sitesinden indirilmiş bir tasarımdır ve ticari bir dronu andırır; tanıtım filminde kullanım için lisansı ve marka benzerliği yayın öncesi kontrol edilmeli. `render/3d/ucmf.py`, Bambu Studio 3MF projelerinin parça dosyalarını okur; taret ve pikap modelleri geldiğinde aynı yoldan eklenecek.
 
