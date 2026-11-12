@@ -52,7 +52,7 @@ Ses bandı sentezdir (kayıt ya da telifli malzeme yok). Zamanlar film motorunda
 
 ```
 python3 render/ses/ses.py render/out/ses.wav
-ffmpeg -y -i render/out/ses.wav -af "volume=4.4dB,lowpass=f=15500,alimiter=limit=0.66:attack=2:release=80:level=disabled" -c:a aac -b:a 160k animasyon/assets/ses.m4a
+ffmpeg -y -i render/out/ses.wav -af "volume=4.4dB,lowpass=f=15500,alimiter=limit=0.66:attack=2:release=80:level=disabled" -c:a libmp3lame -b:a 160k animasyon/assets/ses.mp3
 node render/render.mjs            # ses bandı otomatik eklenir; --sessiz ile eklenmez
 ```
 
