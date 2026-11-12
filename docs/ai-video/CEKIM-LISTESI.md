@@ -37,8 +37,8 @@ Do not add people, text, subtitles, logos, extra weapons or extra vehicles. No s
 | K04 | 0:24–0:34 Robotik taret | `R1` üzerinden üretilecek 16:9 kare | 6 sn | Parça açıklamaları |
 | K05 | 0:34–0:48 Angajman | `C05-angajman.jpg` | 6–8 sn | Menzil çubuğu, hedef kutuları, sayaç |
 | K06a | 0:48–0:53 Araç üstü | `C06a-arac-ustu.jpg` | 5 sn | Vinyet başlığı |
-| K06b | 0:53–0:57 Gemi | `R1` referansı (kompozisyon: `C06b-gemi.jpg`) | 6 sn | Vinyet başlığı |
-| K06c | 0:57–1:02 Rafineri | `R1` referansı (kompozisyon: `C06c-rafineri.jpg`) | 6 sn | Vinyet başlığı |
+| K06b | 0:53–0:57 Gemi | `C06b-gemi.jpg` (3B render + gerçek taret) | 6 sn | Vinyet başlığı |
+| K06c | 0:57–1:02 Rafineri | `C06c-rafineri.jpg` (3B render + gerçek taret) | 6 sn | Vinyet başlığı |
 | K07 | 1:02–1:12 Hava katmanları | `C07-son-katman.jpg` | 7 sn | Dört katman kubbesi, lejant, tehdit ikonları |
 | K08 | 1:12–1:20 Kapanış | yok (grafik) | — | Tamamı mevcut film motorundan |
 

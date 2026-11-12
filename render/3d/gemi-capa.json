@@ -1,0 +1,17 @@
+{
+ "sahne": "gemi",
+ "pivot_px": [
+  1355.1,
+  531.3,
+  3.252
+ ],
+ "kaide_ust_px": [
+  1356.7,
+  607.6,
+  3.239
+ ],
+ "px_per_m": 524.9,
+ "sprite_olcek": 0.694,
+ "ufuk_y": 689.3,
+ "render_sn": 243.7
+}

@@ -2,7 +2,7 @@
 
 **Süre:** 80 saniye · **Format:** 1920×1080, 30 fps · **Dil:** Türkçe
 **Görsel yaklaşım:** Gerçek saha fotoğrafları (Amarok üzerindeki sistem, taret yakın planı, sensör başlığı) üzerine animasyonlu HUD, dron, atış ve yazı katmanları. Dronlar afişteki gerçek dron fotoğraflarından kesildi; hıza göre yatış, hareket bulanıklığı, uzaklık pusu ve termal görünüm uygulanıyor. Namlu alevi (çekirdek, namlu ekseni boyunca koni, bloom ve anamorfik parlama), atış dumanı, vuruşta flaş/kıvılcım/ateş topu ve düşerken duman izi var. Tüm fotoğraf sahnelerinde hafif el kamerası hareketi; akşam sahnelerinde taret kesmesi ortam ışığına boyanıyor (soğuk ton + sıcak kenar ışığı). Gemi ve rafineri gökyüzü, saha fotoğraflarının gerçek gökyüzünden renk düzeniyle türetildi; deniz, aynalanmış gökyüzü ve dalga kaymalarıyla çizildi. Taret fotoğraflardan alfa kanallı olarak ayrıldı ve pan-tilt ekseni etrafında döndürülerek dronları gerçekten takip ediyor (namlu hedefin yükseliş açısına göre yönelir, atışta geri tepme ve kamera sarsıntısı). Gemi ve rafineri sahneleri, fotoğrafı olmayan ortamlar için çizilmiş akşam/gece ortamlarına gerçek taret kesmesinin bindirilmesiyle üretildi. Sinematik renk düzeni (soğuk gölgeler, sıcak vurgular), hafif film greni.
-**Ses:** Film sessiz döngü olarak da çalışır (fuar ekranı). Aşağıdaki seslendirme metni ve müzik notları ses kurgusu içindir.
+**Ses:** Filmde sentezlenmiş müzik yatağı ve efektler var (`render/ses/ses.py`); sessiz döngü olarak da çalışır (fuar ekranı). Seslendirme yoktur; aşağıdaki seslendirme metni stüdyo kaydı içindir.
 
 > Menzil ve mühimmat rakamları (600–800 m tespit, 150 m angajman, ~140 m'de ~2 m metal bulutu) basına yansıyan şirket açıklamalarından alınmıştır. Yayın öncesi Turaç tarafından doğrulanmalıdır.
 
@@ -81,6 +81,8 @@
 ---
 
 ## Üretim notları
+
+- **v6: 3B ortamlar ve ses.** Gemi güvertesi ve rafineri kulesi artık çizim değil, Blender (Cycles) ile fiziksel ışıkla render edilmiş plakalar: gün batımı göğü, okyanus, perspektifli güverte ve korkuluk; alacakaranlıkta damıtma kolonları, tanklar, boru rafları ve sodyum lambaları. Her sahne arka ve ön katman olarak render edilir; film motoru denizi kıpırdatır, gemi yalpasını, flare alevini, buharı ve lamba parlamasını ekler. Taret yine gerçek fotoğraf kesmesidir. Filme sentezlenmiş bir ses bandı eklendi: müzik yatağı, dron vızıltısı, servo, atış ve vuruş sesleri, radar tonları, sahne geçişleri, ortam sesi. Ses bandı kulakla dinlenerek değil, seviye ve spektrum ölçümüyle doğrulandı; yayın öncesi dinlenmeli.
 
 - **v5 düzeltmeleri.** Hedef kutuları, etiketler, menzil çubuğu ve katman lejantı artık renk düzeninden sonra çiziliyor (net ve doygun). Akşam sahnelerinde taret boyaması düzeltildi (namlu siyah kalıyor). Taret kesmelerindeki arka plan artıkları ve anahtarlama delikleri temizlendi. Rafineri ve gemi göğü, içinde taret parçası bulunmayan temiz gökyüzü kırpımından alınıyor. Gemi üst yapısı köprü camları, su geçirmez kapı, merdiven ve can simidiyle yeniden çizildi. Sahne 07'de katman adları sol üstte lejant olarak veriliyor.
 - **Yapay zekâ videosu.** `docs/ai-video/` altında çekim listesi, temiz başlangıç kareleri ve ürün referansları var. Film motoru `?clean=1` ile HUD'suz, yazısız kare üretir.

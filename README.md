@@ -6,6 +6,8 @@ Turaç / Sterling **Drone Shield** (Dron Kalkanı) anti-dron taret sistemi için
 animasyon/index.html     Film (HTML5 Canvas). Tarayıcıda açın; oynatıcı ve sahne çipleri içerir.
 animasyon/assets/        Fotoğraf plakaları, temiz plakalar, alfa kanallı taret kesmeleri ve logolar.
 render/render.mjs        Playwright + ffmpeg ile 1080p MP4 render betiği.
+render/3d/sahneler.py    Gemi güvertesi ve rafineri kulesi için 3B arka plan plakaları (Blender bpy, Cycles).
+render/ses/ses.py        Sentezlenmiş ses bandı: müzik yatağı ve efektler (yalnızca numpy).
 docs/SENARYO.md          Sahne sahne senaryo, zaman kodları, seslendirme metni, üretim notları.
 docs/ai-video/           Yapay zekâ videosu için çekim listesi, temiz başlangıç kareleri ve ürün referans fotoğrafları.
 docs/kaynak-gorseller/   Referans görseller (afiş, maket).
@@ -36,6 +38,24 @@ node render/render.mjs --clean 1 --stills 13.5,38.2 --stillsdir docs/ai-video/ka
 
 Render çıktıları `render/out/` altındadır ve sürüm kontrolüne girmez.
 
+## 3B plakalar ve ses
+
+Gemi ve rafineri sahnelerinin ortamı Blender ile render edilir; taretin kendisi gerçek fotoğraf kesmesidir ve film motorunda render'ın verdiği noktaya oturtulur.
+
+```
+python3 -m venv /root/bpyenv && /root/bpyenv/bin/pip install bpy numpy     # bir kez (~1 GB)
+/root/bpyenv/bin/python render/3d/sahneler.py gemi --kalite final --cikti animasyon/assets
+/root/bpyenv/bin/python render/3d/sahneler.py rafineri --kalite final --cikti animasyon/assets
+```
+
+Ses bandı sentezdir (kayıt ya da telifli malzeme yok). Zamanlar film motorundaki olaylarla eşlidir.
+
+```
+python3 render/ses/ses.py render/out/ses.wav
+ffmpeg -y -i render/out/ses.wav -af "volume=4.4dB,lowpass=f=15500,alimiter=limit=0.66:attack=2:release=80:level=disabled" -c:a aac -b:a 160k animasyon/assets/ses.m4a
+node render/render.mjs            # ses bandı otomatik eklenir; --sessiz ile eklenmez
+```
+
 ## Sahneler
 
 | # | Zaman | Sahne |
@@ -45,7 +65,7 @@ Render çıktıları `render/out/` altındadır ve sürüm kontrolüne girmez.
 | 03 | 0:15 | Tespit ve takip · radar, termal EO/IR, sensör füzyonu |
 | 04 | 0:24 | Robotik taret · parça açıklamaları |
 | 05 | 0:34 | Angajman · dronu izleyen taret, 150 m'de atış, metal bulutu, 3 hedef |
-| 06 | 0:48 | Araç üstü · gemi güvertesi · rafineri kulesi |
+| 06 | 0:48 | Araç üstü (fotoğraf) · gemi güvertesi ve rafineri kulesi (3B render) |
 | 07 | 1:02 | Hava katmanları · en içteki katman, son savunma hattı |
 | 08 | 1:12 | Kapanış · rakamlar, logolar |
 

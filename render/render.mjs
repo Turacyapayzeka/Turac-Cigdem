@@ -4,6 +4,7 @@
  *   node render/render.mjs                      -> render/out/drone-shield.mp4 (1080p, 30 fps)
  *   node render/render.mjs --stills 2,9,20,30   -> verilen saniyelerde PNG kareler (render/out/stills/)
  *   node render/render.mjs --start 34 --end 48  -> yalnızca bir aralığı render eder
+ *   node render/render.mjs --sessiz             -> ses bandı eklemeden (varsayılan: animasyon/assets/ses.m4a eklenir)
  *   node render/render.mjs --clean 1 --stills 13.5,38.2 --stillsdir docs/ai-video/kareler
  *                                               -> HUD, yazı ve renk düzeni olmadan temiz kareler (yapay zekâ videosu için başlangıç karesi)
  * Gereksinim: Playwright (Chromium) ve ffmpeg. Görseller yerel bir HTTP sunucusundan servis edilir
@@ -28,8 +29,9 @@ const END = opt('end', null);
 const STILLS = opt('stills', null);
 const CRF = opt('crf', '18');
 const CLEAN = opt('clean', null);
+const SES = args.includes('--sessiz') ? null : path.resolve(ROOT, opt('ses', 'animasyon/assets/ses.m4a'));
 const STILLSDIR = opt('stillsdir', 'render/out/stills');
-const MIME = { '.html': 'text/html; charset=utf-8', '.jpg': 'image/jpeg', '.png': 'image/png', '.js': 'text/javascript', '.css': 'text/css' };
+const MIME = { '.html': 'text/html; charset=utf-8', '.jpg': 'image/jpeg', '.png': 'image/png', '.js': 'text/javascript', '.css': 'text/css', '.m4a': 'audio/mp4' };
 
 const server = http.createServer((req, res) => {
   const p = decodeURIComponent(req.url.split('?')[0]);
@@ -58,8 +60,11 @@ if (STILLS) {
   fs.mkdirSync(path.dirname(OUT), { recursive: true });
   const end = END == null ? DUR : +END;
   const total = Math.round((end - START) * FPS);
+  const withSound = SES && fs.existsSync(SES);
   const ff = spawn('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'png', '-i', '-',
+    ...(withSound ? ['-ss', String(START), '-t', String(end - START), '-i', SES, '-map', '0:v', '-map', '1:a', '-c:a', 'copy'] : []),
     '-c:v', 'libx264', '-preset', 'medium', '-crf', CRF, '-pix_fmt', 'yuv420p', '-movflags', '+faststart', '-r', String(FPS), OUT], { stdio: ['pipe', 'inherit', 'inherit'] });
+  console.log(withSound ? 'ses bandı ekleniyor: ' + SES : 'sessiz render');
   const t0 = Date.now();
   for (let i = 0; i < total; i++) {
     const t = START + i / FPS;
