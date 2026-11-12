@@ -9,7 +9,7 @@ git archive <commit> | tar -x -C /tmp/surum && node /tmp/surum/render/render.mjs
 
 | Sürüm | Tarih | Dosya | Süre | Ses | Commit | Ne değişti |
 |---|---|---|---:|---|---|---|
-| v8 | 12 Kasım | `v8-sade-katman-sahnesi-sesli.mp4` | 80 sn | var | bu commit | Katman sahnesi yeniden kuruldu: gökyüzünde dört ağ katmanı, yerde iç içe kubbeler; ardından fotoğrafta en iç kubbe ve angajman. **En güncel sürüm.** |
+| v8 | 12 Kasım | `v8-sade-katman-sahnesi-sesli.mp4` | 80 sn | var | `a9f3a74` | Katman sahnesi yeniden kuruldu: gökyüzünde dört ağ katmanı, yerde iç içe kubbeler; ardından fotoğrafta en iç kubbe ve angajman. **En güncel sürüm.** |
 | v7 | 12 Kasım | `v7-3b-dron-sesli.mp4` | 80 sn | var | `438f4fd` | Dronlar 3B modelden render ediliyor. |
 | v6 | 12 Kasım | `v6-3b-gemi-rafineri-sesli.mp4` | 80 sn | var | `fbcfdcf` | Gemi güvertesi ve rafineri kulesi 3B render. Ses bandı eklendi. |
 | v5 | 12 Kasım | `v5-net-isaretler.mp4` | 80 sn | yok | `1d86b82` | Hedef kutuları ve etiketler netleşti. Taret kesmeleri temizlendi, katman lejantı eklendi. |
