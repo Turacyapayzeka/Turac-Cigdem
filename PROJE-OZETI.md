@@ -64,7 +64,7 @@ Videolar `surumler/` klasöründe durur (sürüm kontrolüne girmez). Her biri i
 
 | Sürüm | Tarih | Süre | Ses | Commit | Ne değişti |
 |---|---|---:|---|---|---|
-| v10 | 13 Kasım | 88 sn | var | `48536d3` | Sahne 04'e gerçek kule CAD modeliyle 3B yörünge çekimi eklendi: kamera kulenin çevresinde 95 derece döner. |
+| v10 | 13 Kasım | 88 sn | var | `d317e20` | Sahne 04'e gerçek kule CAD modeliyle 3B yörünge çekimi eklendi: kamera kulenin çevresinde 95 derece döner. |
 | v9 | 13 Kasım | 88 sn | var | `e432c93` | Ortak kurgu: önceki konuşmanın kuralları, sloganları, beş katmanlı savunma şeması, ortak yapım sahnesi ve kapanışı bu filmle birleşti. Fotoğraflardan başka firma işaretleri silindi. |
 | v8 | 12 Kasım | 80 sn | var | `a9f3a74` | Katman sahnesi yeniden kuruldu: gökyüzünde dört ağ katmanı, yerde iç içe kubbeler; ardından fotoğrafta en iç kubbe ve angajman. |
 | v7 | 12 Kasım | 80 sn | var | `438f4fd` | Dronlar 3B modelden render ediliyor. |
@@ -164,7 +164,7 @@ Yalnızca bilgisayarda duran ve işe yarayacak dosyalar:
 1. **Sıradaki adım kararı.** 3B kule çekimi başka sahnelere de taşınsın mı (açılış, kapanış); Vitrin görüntüleri ve teknik çizimler ortak kurguya eklensin mi.
 2. **Bilgisayardaki dosyalar.** Yukarıdaki tablo. Sohbete yüklenirse projeye eklenir.
 3. **Dikey video.** Hangisi olduğu hâlâ belli değil. Önceki iki film yatay. Simülasyon sayfasının telefon görünümü dikey olarak kaydedildi.
-4. **GitHub.** Push reddediliyor (403): depo, oturumun GitHub kimliğine bağlı değil. Commit'ler yerelde ve `drone-shield-commits.bundle` dosyasında.
+4. **GitHub.** Bağlantı kuruldu; commit'ler `claude/dron-kalkani-animation-film-vpq9ox` dalına gönderiliyor. Pull request açılmadı.
 5. **Ses.** Ses bandı ölçümle doğrulandı, kulakla dinlenmedi. Seslendirme kaydı yok; metni senaryoda.
 6. **Yapay zekâ videosu başlangıç kareleri.** `docs/ai-video/kareler/` eski, rötuşsuz fotoğraflardan üretilmişti; içlerinde araç amblemi ve plaka görünüyor. Yeniden üretilmeli.
 7. **"MAX" yazısı.** CAD modelindeki şarjörlerde ve gövdede kabartma "MAX" var (modelde aynalı duruyor); 3B çekimde seçilebiliyor. Aynı yazı gerçek fotoğrafta da görünüyor.
@@ -181,6 +181,6 @@ Yalnızca bilgisayarda duran ve işe yarayacak dosyalar:
 
 ## Başka bir konuşmada devam etmek için
 
-1. Bu belgeyi ve `drone-shield-commits.bundle` dosyasını o konuşmaya ekleyin.
-2. Yukarıdaki üç sayfa bağlantısını verin; sayfalar oradan okunabilir.
-3. Depo GitHub'a gönderildiyse dal adı: `claude/dron-kalkani-animation-film-vpq9ox`.
+1. Depo GitHub'da: `Turacyapayzeka/Turac-Cigdem`, dal `claude/dron-kalkani-animation-film-vpq9ox`. Yeni konuşmayı bu depo ve dal ile başlatın.
+2. Bu belgeyi o konuşmaya ekleyin.
+3. Yukarıdaki üç sayfa bağlantısını verin; sayfalar oradan okunabilir.
