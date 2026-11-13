@@ -9,7 +9,8 @@ git archive <commit> | tar -x -C /tmp/surum && node /tmp/surum/render/render.mjs
 
 | Sürüm | Tarih | Dosya | Süre | Ses | Commit | Ne değişti |
 |---|---|---|---:|---|---|---|
-| v8 | 12 Kasım | `v8-sade-katman-sahnesi-sesli.mp4` | 80 sn | var | `a9f3a74` | Katman sahnesi yeniden kuruldu: gökyüzünde dört ağ katmanı, yerde iç içe kubbeler; ardından fotoğrafta en iç kubbe ve angajman. **En güncel sürüm.** |
+| v9 | 13 Kasım | `v9-ortak-kurgu-sesli.mp4` | 88 sn | var | `e432c93` | Ortak kurgu: önceki konuşmanın kuralları, sloganları, beş katmanlı savunma şeması, ortak yapım sahnesi ve kapanışı bu filmle birleşti. Fotoğraflardan başka firma işaretleri ve plaka silindi. **En güncel sürüm.** |
+| v8 | 12 Kasım | `v8-sade-katman-sahnesi-sesli.mp4` | 80 sn | var | `a9f3a74` | Katman sahnesi yeniden kuruldu: gökyüzünde dört ağ katmanı, yerde iç içe kubbeler; ardından fotoğrafta en iç kubbe ve angajman. |
 | v7 | 12 Kasım | `v7-3b-dron-sesli.mp4` | 80 sn | var | `438f4fd` | Dronlar 3B modelden render ediliyor. |
 | v6 | 12 Kasım | `v6-3b-gemi-rafineri-sesli.mp4` | 80 sn | var | `fbcfdcf` | Gemi güvertesi ve rafineri kulesi 3B render. Ses bandı eklendi. |
 | v5 | 12 Kasım | `v5-net-isaretler.mp4` | 80 sn | yok | `1d86b82` | Hedef kutuları ve etiketler netleşti. Taret kesmeleri temizlendi, katman lejantı eklendi. |
@@ -32,3 +33,5 @@ git archive <commit> | tar -x -C /tmp/surum && node /tmp/surum/render/render.mjs
 | Dron Kalkanı Simülasyonu | 28 Ekim | Etkileşimli 3B simülasyon | `ilk-calismalar/2026-10-28-simulasyon.html`, video: `2026-10-28-simulasyon.mp4` ve dikey `2026-10-28-simulasyon-dikey.mp4` | https://claude.ai/artifact/7V4VHVvJBVT8fmECVycWLt |
 
 Yerel kopyalar three.js kitaplığını internetten yükler. `model/kule.json` taretin 3B modelidir (12 MB) ve sürüm kontrolüne girmez; aynı model `render/3d/modeller/taret.glb` olarak depoda durur.
+
+`ilk-calismalar/kaynak/` altında iki filmin kaynakları durur: sahne betikleri ile görseller (3B kareler, kırpılmış saha fotoğrafları, teknik çizim katmanları). `ilk-calismalar/PROJE-OZETI-simulasyon-sohbeti.md`, o konuşmanın devir özetidir: ürün bilgileri ve v9'un uyduğu kurallar oradan alındı.
