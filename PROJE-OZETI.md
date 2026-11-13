@@ -5,9 +5,9 @@ Son güncelleme: 13 Kasım 2026. Bu belge projeyi başka bir konuşmaya ya da ek
 ## Tek bakışta
 
 - **Ne:** Turaç liderliğindeki **Dron Kalkanı** otonom robotik anti-dron kule sistemi için tanıtım filmi.
-- **Güncel sürüm:** v9, ortak kurgu. 88 saniye, 1920×1080, 30 fps, sesli. Türkçe ekran yazıları, altında küçük İngilizce karşılıkları.
-- **Yöntem:** Gerçek saha fotoğrafları üzerine tarayıcıda çizilen animasyon katmanları. Gemi ve rafineri sahneleri 3B render. Dronlar 3B modelden. Ses sentez.
-- **Bekleyen karar:** Ortak kurgunun bundan sonraki yönü: gerçek kule CAD modeliyle 3B çekimler ve Vitrin görüntüleri eklensin mi.
+- **Güncel sürüm:** v10, ortak kurgu ve gerçek kule modeliyle 3B çekim. 88 saniye, 1920×1080, 30 fps, sesli. Türkçe ekran yazıları, altında küçük İngilizce karşılıkları.
+- **Yöntem:** Gerçek saha fotoğrafları üzerine tarayıcıda çizilen animasyon katmanları. Sahne 04'te gerçek kule CAD modelinin 3B çekimi. Gemi ve rafineri sahneleri 3B render. Dronlar 3B modelden. Ses sentez.
+- **Bekleyen karar:** Ortak kurgunun bundan sonraki yönü: 3B çekim beğenilirse başka sahnelere de taşınsın mı; Vitrin görüntüleri ve teknik çizimler eklensin mi.
 
 ## Ürün bilgisi
 
@@ -32,14 +32,14 @@ Kaynak: önceki konuşmanın devir özeti (`surumler/ilk-calismalar/PROJE-OZETI-
 
 ## Kurallar
 
-Kullanıcının önceki konuşmada koyduğu kurallar. v9 bunların hepsine göre düzeltildi.
+Kullanıcının önceki konuşmada koyduğu kurallar. v9 bunların hepsine göre düzeltildi; v10 aynı kuralları korur.
 
 | # | Kural | v9'daki durumu |
 |---|---|---|
 | 1 | Tespit her yerde 600–800 m, angajman 150 m | Uyuyor. Ürün özetinde olmayan "140 m", "yaklaşık 2 m", "360°", "30×" kaldırıldı. |
 | 2 | Başka firma logosu, bayrağı kullanılmaz; fotoğraflarda araç logosu, plaka, Kaiser logosu kadraja girmez. Sterling kalabilir. | Fotoğraflardan araç amblemi, model yazısı, Kaiser logosu ve plaka silindi. Ortak firmalar yalnızca yazıyla anılıyor. |
 | 3 | Derya MAX adı yalnızca ortak yapım ve kapanışta geçer; ara sahnelerde "çift 12 kalibre / atış birimi" | Uyuyor. Ad yalnızca 08. sahnede. |
-| 4 | İki silahta da dipçik yok | Fotoğraflardaki gerçek kule kullanılıyor. |
+| 4 | İki silahta da dipçik yok | Fotoğraflardaki gerçek kule ve dipçikleri kesilmiş CAD modeli kullanılıyor. |
 | 5 | Türkçe metin büyük, İngilizce karşılığı küçük ve silik | Uyuyor. Ürün adı ekranda "DRON KALKANI"; "DRONE SHIELD" küçük. |
 | 6 | Video yatay (16:9) | Uyuyor. |
 | 7 | Gerçekçilik: ilkel ya da oyuncak görünüm istenmiyor; gerçek fotoğraf ve gerçekçi 3B | Fotoğraf ağırlıklı. Vitrin'in oyun görünümlü kareleri filme alınmadı. |
@@ -64,6 +64,7 @@ Videolar `surumler/` klasöründe durur (sürüm kontrolüne girmez). Her biri i
 
 | Sürüm | Tarih | Süre | Ses | Commit | Ne değişti |
 |---|---|---:|---|---|---|
+| v10 | 13 Kasım | 88 sn | var | `48536d3` | Sahne 04'e gerçek kule CAD modeliyle 3B yörünge çekimi eklendi: kamera kulenin çevresinde 95 derece döner. |
 | v9 | 13 Kasım | 88 sn | var | `e432c93` | Ortak kurgu: önceki konuşmanın kuralları, sloganları, beş katmanlı savunma şeması, ortak yapım sahnesi ve kapanışı bu filmle birleşti. Fotoğraflardan başka firma işaretleri silindi. |
 | v8 | 12 Kasım | 80 sn | var | `a9f3a74` | Katman sahnesi yeniden kuruldu: gökyüzünde dört ağ katmanı, yerde iç içe kubbeler; ardından fotoğrafta en iç kubbe ve angajman. |
 | v7 | 12 Kasım | 80 sn | var | `438f4fd` | Dronlar 3B modelden render ediliyor. |
@@ -75,14 +76,14 @@ Videolar `surumler/` klasöründe durur (sürüm kontrolüne girmez). Her biri i
 | v1 | 8 Kasım | 64 sn | yok | kayıtsız | Fotoğrafsız, tamamı çizim ilk taslak. |
 | Deneme | 12 Kasım | 5 sn | yok | `c5c0a6d` | Tamamı 3B deneme çekimi (sade taret modeliyle). |
 
-## Güncel filmin sahneleri (v9)
+## Güncel filmin sahneleri (v10)
 
 | # | Zaman | Sahne | İçerik |
 |---|---|---|---|
 | 01 | 0:00–0:07 | Açılış | Pikap üzerindeki kule, DRON KALKANI, "Karıştırıcının bittiği yerde başlar." |
 | 02 | 0:07–0:15 | Sorun | "Karıştırıcı her dronu durduramaz": tesise yaklaşan sürü, kule öncü dronu izlemeye başlar. |
 | 03 | 0:15–0:24 | Tespit ve takip | Pasif elektro-optik ve akustik sensörler, termal görüntü, gömülü yapay zekâ; 600–800 m. |
-| 04 | 0:24–0:34 | Robotik kule | Yakın plan ve beş parça açıklaması; "Otonom çalışır, operatör gerekmez". |
+| 04 | 0:24–0:34 | Robotik kule | Fotoğrafta yakın plan ve beş parça açıklaması; ardından gerçek CAD modeliyle 3B yörünge çekimi ve "Otonom çalışır, operatör gerekmez". |
 | 05 | 0:34–0:48 | Angajman | Üç hedef; son 150 metrede atış, metal bulutu, menzil çubuğu. |
 | 06 | 0:48–1:02 | Araçta · gemide · kulede | Üç platformda birer angajman. Gemi ve rafineri 3B render. |
 | 07 | 1:02–1:14 | Katmanlı savunma | Gökyüzünde ağ katmanları; yerde beş kubbe, solda tehditler, sağda çözümler; en içte Dron Kalkanı. Ardından fotoğrafta en iç kubbe ve angajman. |
@@ -98,13 +99,14 @@ Ayrıntılı senaryo, zaman kodları ve seslendirme metni: `docs/SENARYO.md`.
 | Bu konuşma (v1–v8) | Fotoğraflı sahneler, dronu izleyen kule, angajman efektleri, 3B gemi ve rafineri, gökyüzü ağ katmanları, ses bandı | |
 | Tanıtım Filmi (28 Ekim) | "Karıştırıcı her dronu durduramaz" sahnesi, ortak yapım kartları, kapanış sloganı, değerler ve web adresi | 3B Vitrin kareleri (pikap, kule, tüfekler, kubbeler, gemi, kule) |
 | Mühendislik Filmi (31 Ekim) | Beş katmanlı savunma şeması ve metinleri, "Rakamlarla" değerleri, Turaç üretim rakamları | Teknik çizim katmanları |
-| 3B Vitrin (6 Kasım) | Anlatım metinleri (araçta, gemide, kulede) | Gerçek kule CAD modeli, pikap, tanker ve rafineri turu |
+| 3B Vitrin (6 Kasım) | Gerçek kule CAD modeli (sahne 04'teki 3B çekim), anlatım metinleri (araçta, gemide, kulede) | Pikap, tanker ve rafineri turu |
 
 ## Nasıl üretiliyor
 
 1. **Film motoru** `animasyon/index.html`: zamana bağlı, tekrarlanabilir bir canvas çizimi. Tarayıcıda oynatılır.
 2. **Video render** `render/render.mjs`: her kareyi tarayıcıdan alır, ffmpeg ile MP4 yapar, ses bandını ekler. Yaklaşık 15 dakika sürer.
 3. **3B plakalar** `render/3d/sahneler.py`: gemi güvertesi ve rafineri kulesi, Blender ile. Kule bu sahnelerde gerçek fotoğraf kesmesidir.
+   **3B kule çekimi** `render/3d/kule3b.py`: gerçek CAD modelinden 153 karelik yörünge; yaklaşık 40 dakika sürer.
 4. **Dron görünümleri** `render/3d/dron3b.py`: 3B dron modelinden saydam zeminli iki görünüm.
 5. **Ses** `render/ses/ses.py`: müzik yatağı ve efektler, tamamı sentez.
 6. **Rötuş** `render/rotus/rotus.py`: fotoğraflardan başka firma işaretlerini ve plakayı siler.
@@ -115,7 +117,7 @@ Komutlar ve kurulum: `README.md`.
 
 ```
 animasyon/index.html      Film motoru ve oynatıcı
-animasyon/assets/         Fotoğraf plakaları, kule kesmeleri, 3B plakalar, dron görünümleri, logolar, ses
+animasyon/assets/         Fotoğraf plakaları, kule kesmeleri, 3B plakalar, 3B kule çekimi kareleri (kule3b/), dron görünümleri, logolar, ses
 render/render.mjs         MP4 render betiği
 render/3d/                Blender betikleri ve 3B modeller (modeller/dron.npz, modeller/taret.glb)
 render/ses/ses.py         Ses bandı üreticisi
@@ -159,19 +161,20 @@ Yalnızca bilgisayarda duran ve işe yarayacak dosyalar:
 
 ## Açık konular
 
-1. **Sıradaki adım kararı.** Gerçek kule CAD modeliyle 3B çekimler (örneğin kulenin çevresinde dönen tanıtım çekimi) ve Vitrin görüntüleri ortak kurguya eklensin mi.
+1. **Sıradaki adım kararı.** 3B kule çekimi başka sahnelere de taşınsın mı (açılış, kapanış); Vitrin görüntüleri ve teknik çizimler ortak kurguya eklensin mi.
 2. **Bilgisayardaki dosyalar.** Yukarıdaki tablo. Sohbete yüklenirse projeye eklenir.
 3. **Dikey video.** Hangisi olduğu hâlâ belli değil. Önceki iki film yatay. Simülasyon sayfasının telefon görünümü dikey olarak kaydedildi.
 4. **GitHub.** Push reddediliyor (403): depo, oturumun GitHub kimliğine bağlı değil. Commit'ler yerelde ve `drone-shield-commits.bundle` dosyasında.
 5. **Ses.** Ses bandı ölçümle doğrulandı, kulakla dinlenmedi. Seslendirme kaydı yok; metni senaryoda.
 6. **Yapay zekâ videosu başlangıç kareleri.** `docs/ai-video/kareler/` eski, rötuşsuz fotoğraflardan üretilmişti; içlerinde araç amblemi ve plaka görünüyor. Yeniden üretilmeli.
-7. **"MAX" yazısı.** CAD modelindeki şarjörlerde kabartma "MAX" var; model filme girdiğinde yakın çekimde seçilebilir.
-8. **Logolar.** Afişten ayıklandı; yayın için vektör logolarla değiştirilmeli. Ürün logosunun kendisi İngilizce "DRONE SHIELD" yazıyor; Türkçe bir logo varsa onunla değiştirilmeli.
-9. **Lisans.** Dron modeli büyük olasılıkla bir paylaşım sitesinden indirilmiş ve ticari bir dronu andırıyor.
+7. **"MAX" yazısı.** CAD modelindeki şarjörlerde ve gövdede kabartma "MAX" var (modelde aynalı duruyor); 3B çekimde seçilebiliyor. Aynı yazı gerçek fotoğrafta da görünüyor.
+8. **Temsilî parçalar.** 3B çekimdeki sensör kutusu, kaide ve tripod CAD montajında yok; saha fotoğraflarına bakılarak yaklaşık ölçüyle modellendi. Gerçek parçaların modeli gelirse değiştirilmeli.
+9. **Logolar.** Afişten ayıklandı; yayın için vektör logolarla değiştirilmeli. Ürün logosunun kendisi İngilizce "DRONE SHIELD" yazıyor; Türkçe bir logo varsa onunla değiştirilmeli.
+10. **Lisans.** Dron modeli büyük olasılıkla bir paylaşım sitesinden indirilmiş ve ticari bir dronu andırıyor.
 
 ## Bilinen sınırlar
 
-- Fotoğraflı sahnelerde kule iki boyutlu kesmedir; yalnızca yukarı aşağı döner.
+- Fotoğraflı sahnelerde kule iki boyutlu kesmedir; yalnızca yukarı aşağı döner. 3B çekimde kule sabittir, kamera döner: CAD modeli yatay ve dikey dönen parçalara ayrılmadı.
 - Gemi ve rafineri ortamları bilgisayar üretimidir, gerçek çekim değildir.
 - Rötuş yakından bakıldığında fark edilebilir: silinen yerlerde kamuflaj deseni düzleşti, plaka boş beyaz.
 - Bu ortamda ekran kartı yok. Tamamı 3B, 1080p bir film için kare başına 2–3 dakika gerekir.
