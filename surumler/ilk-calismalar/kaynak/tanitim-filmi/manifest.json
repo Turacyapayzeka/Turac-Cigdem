@@ -1,0 +1,90 @@
+{
+ "kinds": {
+  "base.css": "css",
+  "fetched-fonts.json": "json",
+  "scene-alan.js": "js",
+  "scene-arac.js": "js",
+  "scene-bosluk.js": "js",
+  "scene-gemi.js": "js",
+  "scene-kapanis.js": "js",
+  "scene-kule.js": "js",
+  "scene-nasil.js": "js",
+  "scene-ortak.js": "js",
+  "scene-tehdit.js": "js",
+  "scene-urun.js": "js",
+  "scene-yakin.js": "js",
+  "scenes.json": "json",
+  "score.js": "js",
+  "shared.js": "js"
+ },
+ "assets": {
+  "domes.jpg": {
+   "mime": "image/jpeg",
+   "w": 2560,
+   "h": 1440
+  },
+  "guns.jpg": {
+   "mime": "image/jpeg",
+   "w": 2560,
+   "h": 1440
+  },
+  "hero.jpg": {
+   "mime": "image/jpeg",
+   "w": 2560,
+   "h": 1440
+  },
+  "ph-arka.jpg": {
+   "mime": "image/jpeg",
+   "w": 1920,
+   "h": 1080
+  },
+  "ph-eo.jpg": {
+   "mime": "image/jpeg",
+   "w": 1920,
+   "h": 1080
+  },
+  "ph-pickup.jpg": {
+   "mime": "image/jpeg",
+   "w": 1920,
+   "h": 1080
+  },
+  "ph-tripod.jpg": {
+   "mime": "image/jpeg",
+   "w": 1920,
+   "h": 1080
+  },
+  "ph-turret.jpg": {
+   "mime": "image/jpeg",
+   "w": 1920,
+   "h": 1080
+  },
+  "ph-yan.jpg": {
+   "mime": "image/jpeg",
+   "w": 1920,
+   "h": 1080
+  },
+  "ship.jpg": {
+   "mime": "image/jpeg",
+   "w": 2560,
+   "h": 1440
+  },
+  "tower.jpg": {
+   "mime": "image/jpeg",
+   "w": 2560,
+   "h": 1440
+  },
+  "turret.jpg": {
+   "mime": "image/jpeg",
+   "w": 2560,
+   "h": 1440
+  }
+ },
+ "fontrefs": [
+  "_blob/39cc7ca85cbb63fbe255175c821d7352",
+  "_blob/acfdda4daeb3d6bf761f4c066406f41f",
+  "_blob/dc50a3516da0a8d816f7c064fbcbfb19",
+  "_blob/70b86e7e3030401ca1d4670099d15b7b",
+  "_blob/0b2af20d6c878793905d48b7dedf21ce",
+  "_blob/bb56f0cea80887d30dd79f9d08072e39"
+ ]
+}

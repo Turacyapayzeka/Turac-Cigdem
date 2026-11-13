@@ -8,19 +8,20 @@ Tüm sesler sentezdir; kayıt ya da telifli malzeme yoktur.
 import sys, math, wave
 import numpy as np
 
-SR = 48000; DUR = 80.0; N = int(SR * DUR)
+SR = 48000; DUR = 88.0; N = int(SR * DUR)
 L = np.zeros(N); R = np.zeros(N)            # ana çıkış
 WL = np.zeros(N); WR = np.zeros(N)          # yankıya giden efekt yolu
 rng = np.random.default_rng(7)
 
 # ---- film zaman çizelgesi
-CUTS = [7.0, 15.0, 24.0, 34.0, 48.0, 62.0, 72.0]
-VCUTS = [52.667, 57.333, 66.7]
-SHOTS = [(38.3, 'saha'), (41.0, 'saha'), (44.0, 'saha'), (51.4, 'saha'), (56.067, 'gemi'), (60.733, 'rafineri'), (70.0, 'saha')]
-DRONES = [(34.3, 38.6), (36.3, 41.3), (39.0, 44.3), (48.4, 51.7), (53.067, 56.367), (57.733, 61.033), (67.3, 70.3)]
+CUTS = [7.0, 15.0, 24.0, 34.0, 48.0, 62.0, 74.0, 81.0]
+VCUTS = [52.667, 57.333, 69.1]
+SHOTS = [(38.3, 'saha'), (41.0, 'saha'), (44.0, 'saha'), (51.4, 'saha'), (56.067, 'gemi'), (60.733, 'rafineri'), (72.4, 'saha')]
+DRONES = [(34.3, 38.6), (36.3, 41.3), (39.0, 44.3), (48.4, 51.7), (53.067, 56.367), (57.733, 61.033), (69.7, 72.7)]
 CALLOUTS = [24.6, 25.3, 26.0, 26.7, 27.4]
-LAYERS = [62.4, 62.75, 63.1, 63.45, 63.7, 64.1, 64.5, 64.9]
-STATS = [74.4, 74.7, 75.0, 75.3]
+LAYERS = [62.4, 62.7, 63.0, 63.3, 63.5, 64.35, 65.2, 66.05, 66.9]
+ORTAK = [75.3, 75.65, 76.0, 76.35, 77.0, 77.7, 77.95, 78.2, 78.45]
+STATS = [83.6, 83.9, 84.2, 84.5]
 
 def pan_gains(p): a = (p + 1) * math.pi / 4; return math.cos(a), math.sin(a)
 def add(sig, start, gain=1.0, pan=0.0, wet=0.0):
@@ -46,7 +47,7 @@ def saw(f, t, ph=0.0): return 2 * ((f * t + ph) % 1.0) - 1
 
 # ================================================================ müzik
 SECTIONS = [(0.0, 7.0, 73.42), (7.0, 11.0, 73.42), (11.0, 15.0, 58.27), (15.0, 24.0, 49.0), (24.0, 34.0, 58.27), (34.0, 48.0, 73.42),
-            (48.0, 52.667, 87.31), (52.667, 57.333, 65.41), (57.333, 62.0, 55.0), (62.0, 67.0, 58.27), (67.0, 72.0, 65.41), (72.0, 80.0, 73.42)]
+            (48.0, 52.667, 87.31), (52.667, 57.333, 65.41), (57.333, 62.0, 55.0), (62.0, 69.0, 58.27), (69.0, 74.0, 65.41), (74.0, 81.0, 87.31), (81.0, 88.0, 73.42)]
 def root_at(t):
     for a, b, f in SECTIONS:
         if a <= t < b: return f
@@ -66,7 +67,7 @@ pad = filt(pad, lo=40, hi=420, order=2) * (0.82 + 0.18 * np.sin(2 * math.pi * 0.
 sub = np.zeros(N)
 for a, b, f in SECTIONS:
     i0 = max(0, int((a - 0.4) * SR)); i1 = min(N, int((b + 0.4) * SR)); sub[i0:i1] += np.sin(2 * math.pi * (f / 2) * t_all[i0:i1]) * ramp(i1 - i0, 0.8, 0.8)
-music_gain = np.interp(t_all, [0, 1.5, 7, 34, 48, 62, 72, 78.5, 80], [0.0, 0.8, 0.75, 0.9, 0.85, 0.9, 1.0, 0.7, 0.0])
+music_gain = np.interp(t_all, [0, 1.5, 7, 34, 48, 62, 74, 81, 86.5, 88], [0.0, 0.8, 0.75, 0.9, 0.85, 0.9, 0.85, 1.0, 0.7, 0.0])
 L += (pad * 0.042 + sub * 0.04) * music_gain; R += (np.roll(pad, 311) * 0.042 + sub * 0.04) * music_gain
 
 # --- nabız: sekizlik ostinato
@@ -76,10 +77,10 @@ def pluck(f, dur=0.34):
     for k in range(1, 8): s += np.sin(2 * math.pi * k * f * t) / k * np.exp(-t / (0.22 / k ** 0.8))
     return s * ramp(len(t), 0.004, 0.05)
 def pulse_level(t):
-    return float(np.interp(t, [7, 9, 15, 24, 33, 34, 48, 52.6, 62, 71.5, 72.2], [0.0, 0.16, 0.14, 0.17, 0.2, 0.36, 0.3, 0.27, 0.33, 0.36, 0.0]))
+    return float(np.interp(t, [7, 9, 15, 24, 33, 34, 48, 52.6, 62, 73.5, 74.2, 80.4, 81.2], [0.0, 0.16, 0.14, 0.17, 0.2, 0.36, 0.3, 0.27, 0.33, 0.36, 0.18, 0.2, 0.0]))
 PAT = [0, 0, 7, 0, 0, 12, 7, 0]; VEL = [1.0, 0.55, 0.75, 0.5, 0.9, 0.55, 0.7, 0.5]
 k = 0; tcur = 7.0
-while tcur < 72.2:
+while tcur < 81.2:
     lv = pulse_level(tcur)
     if lv > 0.01:
         f = root_at(tcur) * 2 * 2 ** (PAT[k % 8] / 12); add(pluck(f), tcur, gain=lv * VEL[k % 8] * 0.5, pan=0.25 if k % 2 else -0.25, wet=0.15)
@@ -87,23 +88,23 @@ while tcur < 72.2:
 # --- vurmalı: bölümlerde kick, sahne girişlerinde derin vuruş
 def kick():
     t = tt(0.32); f = 44 + 72 * np.exp(-t / 0.028); return np.sin(2 * math.pi * np.cumsum(f) / SR) * np.exp(-t / 0.11)
-for a, b, lv in ((34.0, 48.0, 0.34), (48.0, 62.0, 0.2), (62.0, 72.0, 0.3)):
+for a, b, lv in ((34.0, 48.0, 0.34), (48.0, 62.0, 0.2), (62.0, 74.0, 0.3)):
     tcur = a
     while tcur < b - 0.05: add(kick(), tcur, gain=lv); tcur += BEAT
 def boom(level=1.0):
     t = tt(1.9); f = 36 + 26 * np.exp(-t / 0.07); body = np.sin(2 * math.pi * np.cumsum(f) / SR) * np.exp(-t / 0.55)
     tr = filt(noise(1.9), hi=260) * np.exp(-t / 0.16) * 2.2; return (body + tr) * level
-for tb, lv in [(0.5, 0.55), (1.6, 0.4)] + [(c, 0.5) for c in CUTS[:-1]] + [(v, 0.3) for v in VCUTS] + [(72.3, 0.65), (73.0, 0.45)]:
+for tb, lv in [(0.5, 0.55), (1.6, 0.4)] + [(c, 0.5) for c in CUTS[:-1]] + [(v, 0.3) for v in VCUTS] + [(81.3, 0.65), (82.0, 0.45)]:
     add(boom(), tb, gain=lv, wet=0.3)
 # --- yükselişler ve çanlar
 def riser(dur):
     t = tt(dur); n = filt(noise(dur), lo=900, hi=7000) * (t / dur) ** 2.2; sw = np.sin(2 * math.pi * np.cumsum(180 + 620 * (t / dur) ** 2) / SR) * (t / dur) ** 2 * 0.5
     return (n * 0.6 + sw) * ramp(len(t), 0.1, 0.03)
-add(riser(2.6), 31.4, gain=0.16, wet=0.3); add(riser(1.5), 70.75, gain=0.14, wet=0.3); add(riser(1.2), 5.8, gain=0.08, wet=0.3)
+add(riser(2.6), 31.4, gain=0.16, wet=0.3); add(riser(1.5), 79.75, gain=0.14, wet=0.3); add(riser(1.2), 5.8, gain=0.08, wet=0.3)
 def bell(f, dur=3.2):
     t = tt(dur); s = np.sin(2 * math.pi * f * t) + 0.45 * np.sin(2 * math.pi * 2.76 * f * t) * np.exp(-t / 0.5) + 0.22 * np.sin(2 * math.pi * 5.4 * f * t) * np.exp(-t / 0.2)
     return s * np.exp(-t / 0.9) * ramp(len(t), 0.003, 0.2)
-for tb, f, pn in [(1.6, 587.33, -0.3), (2.6, 880.0, 0.3), (3.8, 698.46, 0.0), (73.0, 587.33, -0.3), (74.4, 880.0, 0.3), (75.3, 698.46, 0.0), (76.0, 1174.66, 0.0)]:
+for tb, f, pn in [(1.6, 587.33, -0.3), (2.6, 880.0, 0.3), (3.8, 698.46, 0.0), (82.0, 587.33, -0.3), (83.6, 880.0, 0.3), (84.5, 698.46, 0.0), (85.2, 1174.66, 0.0)]:
     add(bell(f), tb, gain=0.07, pan=pn, wet=0.5)
 
 # ================================================================ efektler
@@ -155,7 +156,7 @@ add(ping(1480, 0.2, 0.05), 18.0, gain=0.07, wet=0.3); add(ping(1976, 0.2, 0.05),
 for q in range(3): add(ping(2349, 0.12, 0.04), 20.6 + q * 0.13, gain=0.08, wet=0.3)
 for a, _ in DRONES: add(ping(1760, 0.12, 0.03), a + 0.75, gain=0.035, pan=-0.2, wet=0.3)
 def tick(): t = tt(0.05); return (filt(noise(0.05), lo=2500) * np.exp(-t / 0.004) + np.sin(2 * math.pi * 3200 * t) * np.exp(-t / 0.012) * 0.6)
-for tk in CALLOUTS + LAYERS + STATS + [9.2, 10.4, 29.6]: add(tick(), tk, gain=0.06, pan=-0.2, wet=0.2)
+for tk in CALLOUTS + LAYERS + ORTAK + STATS + [9.2, 10.4, 29.6]: add(tick(), tk, gain=0.06, pan=-0.2, wet=0.2)
 # geçiş hışırtıları
 def whoosh(dur=0.8):
     t = tt(dur); a = filt(noise(dur), lo=300, hi=1400) * np.sin(math.pi * t / dur) ** 2; b = filt(noise(dur), lo=1400, hi=6000) * np.sin(math.pi * np.clip(t / dur * 1.3 - 0.3, 0, 1)) ** 2
@@ -166,7 +167,7 @@ for c in VCUTS: add(whoosh(0.6), c - 0.3, gain=0.05, wet=0.3)
 def amb(a, b, sig, gain):
     n = int((b - a) * SR); add(sig[:n] * ramp(n, 0.5, 0.5), a, gain=gain)
 wind = filt(noise(DUR), lo=60, hi=380) * (0.6 + 0.4 * np.sin(2 * math.pi * 0.13 * t_all + 1) * np.sin(2 * math.pi * 0.047 * t_all))
-for a, b in ((0.3, 52.667), (62.0, 72.0)): amb(a, b, wind[int(a * SR):], 0.035)
+for a, b in ((0.3, 52.667), (62.0, 74.0)): amb(a, b, wind[int(a * SR):], 0.035)
 sea = filt(noise(5.0), lo=180, hi=2600) * (0.55 + 0.45 * np.sin(2 * math.pi * 0.27 * tt(5.0) - 1)) ** 2; amb(52.667, 57.333, sea, 0.05)
 th = tt(5.0); hum = (np.sin(2 * math.pi * 50 * th) + 0.5 * np.sin(2 * math.pi * 100 * th) + 0.3 * np.sin(2 * math.pi * 150 * th)) * 0.5 + filt(noise(5.0), lo=90, hi=700) * 0.9
 amb(57.333, 62.0, hum, 0.03)
@@ -180,7 +181,7 @@ def reverb(x, seed, decay=1.5):
     return y / (np.sqrt(np.sum(ir ** 2)) + 1e-9)
 L += reverb(WL, 1) * 0.55; R += reverb(WR, 2) * 0.55
 mix = np.stack([filt(L, lo=26), filt(R, lo=26)])
-mix *= np.interp(t_all, [0, 0.25, 78.8, 80.0], [0, 1, 1, 0])
+mix *= np.interp(t_all, [0, 0.25, 86.8, 88.0], [0, 1, 1, 0])
 mix = np.tanh(mix * 1.25) / 1.25                                   # yumuşak sınırlama
 mix *= 0.89 / np.max(np.abs(mix))
 out = sys.argv[1] if len(sys.argv) > 1 else 'ses.wav'
@@ -188,4 +189,4 @@ with wave.open(out, 'wb') as w:
     w.setnchannels(2); w.setsampwidth(2); w.setframerate(SR); w.writeframes((mix.T * 32767).astype('<i2').tobytes())
 # özet: bölüm bölüm RMS (dBFS)
 def db(x): return round(20 * math.log10(max(1e-9, float(np.sqrt(np.mean(x ** 2))))), 1)
-print('peak', round(float(np.max(np.abs(mix))), 3), '| rms dBFS', {f'{a:g}-{b:g}': db(mix[:, int(a * SR):int(b * SR)]) for a, b in [(0, 7), (7, 15), (15, 24), (24, 34), (34, 48), (48, 62), (62, 72), (72, 80)]})
+print('peak', round(float(np.max(np.abs(mix))), 3), '| rms dBFS', {f'{a:g}-{b:g}': db(mix[:, int(a * SR):int(b * SR)]) for a, b in [(0, 7), (7, 15), (15, 24), (24, 34), (34, 48), (48, 62), (62, 74), (74, 81), (81, 88)]})

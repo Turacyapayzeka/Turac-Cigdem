@@ -1,6 +1,6 @@
-# Drone Shield · Dron Kalkanı — Tanıtım Filmi
+# Dron Kalkanı · Drone Shield — Tanıtım Filmi
 
-Turaç / Sterling **Drone Shield** (Dron Kalkanı) anti-dron taret sistemi için 80 saniyelik tanıtım filmi. Film, gerçek saha fotoğrafları üzerine tarayıcıda çizilen animasyon katmanlarından oluşur; tarayıcıda oynatılır veya MP4 olarak render edilir.
+Turaç liderliğindeki **Dron Kalkanı** (Drone Shield) otonom robotik anti-dron kule sistemi için 88 saniyelik tanıtım filmi. Film, gerçek saha fotoğrafları üzerine tarayıcıda çizilen animasyon katmanlarından oluşur; tarayıcıda oynatılır veya MP4 olarak render edilir. Güncel sürüm v9, iki ayrı çalışmanın ortak kurgusudur; ürün bilgileri ve uyulan kurallar `PROJE-OZETI.md` içindedir.
 
 ```
 PROJE-OZETI.md           Projenin tek sayfalık özeti: sürümler, bağlantılar, açık konular.
@@ -14,6 +14,7 @@ render/3d/ucmf.py        Bambu Studio 3MF proje dosyalarını okur (parça ağla
 render/3d/modeller/      3B ağlar (dron.npz, taret.glb).
 surumler/                Bütün film sürümlerinin dizini; videolar burada durur ama sürüm kontrolüne girmez.
 render/ses/ses.py        Sentezlenmiş ses bandı: müzik yatağı ve efektler (yalnızca numpy).
+render/rotus/rotus.py    Fotoğraflardan başka firma işaretlerini ve plakayı siler (opencv).
 docs/SENARYO.md          Sahne sahne senaryo, zaman kodları, seslendirme metni, üretim notları.
 docs/ai-video/           Yapay zekâ videosu için çekim listesi, temiz başlangıç kareleri ve ürün referans fotoğrafları.
 docs/kaynak-gorseller/   Referans görseller (afiş, maket).
@@ -66,13 +67,14 @@ node render/render.mjs            # ses bandı otomatik eklenir; --sessiz ile ek
 
 | # | Zaman | Sahne |
 |---|------:|-------|
-| 01 | 0:00 | Açılış · logo, DRON KALKANI |
-| 02 | 0:07 | Tehdit · tesise yaklaşan dron sürüsü |
-| 03 | 0:15 | Tespit ve takip · radar, termal EO/IR, sensör füzyonu |
-| 04 | 0:24 | Robotik taret · parça açıklamaları |
-| 05 | 0:34 | Angajman · dronu izleyen taret, 150 m'de atış, metal bulutu, 3 hedef |
-| 06 | 0:48 | Araç üstü (fotoğraf) · gemi güvertesi ve rafineri kulesi (3B render) |
-| 07 | 1:02 | Katmanlı hava savunma · gökyüzü katmanları ve iç içe kubbeler, en içte Drone Shield |
-| 08 | 1:12 | Kapanış · rakamlar, logolar |
+| 01 | 0:00 | Açılış · DRON KALKANI, "Karıştırıcının bittiği yerde başlar." |
+| 02 | 0:07 | Sorun · karıştırıcıyı aşan dron sürüsü |
+| 03 | 0:15 | Tespit ve takip · pasif elektro-optik ve akustik sensörler, gömülü yapay zekâ |
+| 04 | 0:24 | Robotik kule · parça açıklamaları, otonom çalışma |
+| 05 | 0:34 | Angajman · dronu izleyen kule, son 150 metrede atış, 3 hedef |
+| 06 | 0:48 | Araçta (fotoğraf) · gemide ve kulede (3B render) |
+| 07 | 1:02 | Katmanlı savunma · gökyüzü ağ katmanları ve beş kubbe, en içte Dron Kalkanı |
+| 08 | 1:14 | Ortak yapım · dört firma ve İTÜ ARC |
+| 09 | 1:21 | Kapanış · "Son 150 metre bizim.", değerler, dronkalkani.com.tr |
 
-Rakamlar basına yansıyan açıklamalardan alınmıştır; yayın öncesi doğrulanmalıdır. Ayrıntı için `docs/SENARYO.md`.
+Ürün değerleri: tespit ve takip 600–800 m, angajman 150 m. Ayrıntı için `docs/SENARYO.md`.

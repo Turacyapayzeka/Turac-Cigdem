@@ -1,0 +1,73 @@
+{
+ "kinds": {
+  "base.css": "css",
+  "fetched-fonts.json": "json",
+  "scene-acilis.js": "js",
+  "scene-cizim.js": "js",
+  "scene-degerler.js": "js",
+  "scene-kapanis.js": "js",
+  "scene-katman.js": "js",
+  "scene-kule.js": "js",
+  "scene-parca.js": "js",
+  "scene-sensor.js": "js",
+  "scene-uretim.js": "js",
+  "scenes.json": "json",
+  "score.js": "js",
+  "shared.js": "js"
+ },
+ "assets": {
+  "ln-all.png": {
+   "mime": "image/png",
+   "w": 1280,
+   "h": 720
+  },
+  "ln-base.png": {
+   "mime": "image/png",
+   "w": 1280,
+   "h": 720
+  },
+  "ln-cross.png": {
+   "mime": "image/png",
+   "w": 1280,
+   "h": 720
+  },
+  "ln-eo.png": {
+   "mime": "image/png",
+   "w": 1280,
+   "h": 720
+  },
+  "ln-gunback.png": {
+   "mime": "image/png",
+   "w": 1280,
+   "h": 720
+  },
+  "ln-gunfront.png": {
+   "mime": "image/png",
+   "w": 1280,
+   "h": 720
+  },
+  "ph-eo.jpg": {
+   "mime": "image/jpeg",
+   "w": 1920,
+   "h": 1080
+  },
+  "ph-pickup.jpg": {
+   "mime": "image/jpeg",
+   "w": 1920,
+   "h": 1080
+  },
+  "ph-turret.jpg": {
+   "mime": "image/jpeg",
+   "w": 1920,
+   "h": 1080
+  }
+ },
+ "fontrefs": [
+  "_blob/f764f87604bf7b758a0d394b618a80f1",
+  "_blob/66353f747f9ba97f26f94dfc3f39bd7e",
+  "_blob/b1132672ce365fa455c4da01f15eb4bc",
+  "_blob/30e45cda840a2fe23fcc139aa5b4feaa",
+  "_blob/8cee2b7678c7ec5f4df39944d0eb2717",
+  "_blob/78ae9956306c1cd716fc39a5f9188f98"
+ ]
+}
