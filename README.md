@@ -1,6 +1,6 @@
 # Dron Kalkanı · Drone Shield — Tanıtım Filmi
 
-Turaç liderliğindeki **Dron Kalkanı** (Drone Shield) otonom robotik anti-dron kule sistemi için 88 saniyelik tanıtım filmi. Film, gerçek saha fotoğrafları üzerine tarayıcıda çizilen animasyon katmanlarından oluşur; tarayıcıda oynatılır veya MP4 olarak render edilir. Güncel sürüm v9, iki ayrı çalışmanın ortak kurgusudur; ürün bilgileri ve uyulan kurallar `PROJE-OZETI.md` içindedir.
+Turaç liderliğindeki **Dron Kalkanı** (Drone Shield) otonom robotik anti-dron kule sistemi için 88 saniyelik tanıtım filmi. Film, gerçek saha fotoğrafları üzerine tarayıcıda çizilen animasyon katmanlarından oluşur; tarayıcıda oynatılır veya MP4 olarak render edilir. Güncel sürüm v10, iki ayrı çalışmanın ortak kurgusudur ve gerçek kule modeliyle bir 3B çekim içerir; ürün bilgileri ve uyulan kurallar `PROJE-OZETI.md` içindedir.
 
 ```
 PROJE-OZETI.md           Projenin tek sayfalık özeti: sürümler, bağlantılar, açık konular.
@@ -9,6 +9,7 @@ animasyon/assets/        Fotoğraf plakaları, temiz plakalar, alfa kanallı tar
 render/render.mjs        Playwright + ffmpeg ile 1080p MP4 render betiği.
 render/3d/sahneler.py    Gemi güvertesi ve rafineri kulesi için 3B arka plan plakaları (Blender bpy, Cycles).
 render/3d/dron3b.py      3B dron modeli: film için dron görünümleri ve 3B sahnelerde hedef dron.
+render/3d/kule3b.py      Gerçek kule CAD modeliyle stüdyo çekimi: sahne 04'teki 3B yörünge kareleri (animasyon/assets/kule3b/).
 render/3d/taret3b.py     Tamamı 3B deneme: fotoğraflardan sadeleştirilmiş taret, pikap ve arazi; pilot çekim.
 render/3d/ucmf.py        Bambu Studio 3MF proje dosyalarını okur (parça ağları ve yerleşimleri).
 render/3d/modeller/      3B ağlar (dron.npz, taret.glb).
@@ -70,7 +71,7 @@ node render/render.mjs            # ses bandı otomatik eklenir; --sessiz ile ek
 | 01 | 0:00 | Açılış · DRON KALKANI, "Karıştırıcının bittiği yerde başlar." |
 | 02 | 0:07 | Sorun · karıştırıcıyı aşan dron sürüsü |
 | 03 | 0:15 | Tespit ve takip · pasif elektro-optik ve akustik sensörler, gömülü yapay zekâ |
-| 04 | 0:24 | Robotik kule · parça açıklamaları, otonom çalışma |
+| 04 | 0:24 | Robotik kule · parça açıklamaları, gerçek CAD modeliyle 3B yörünge çekimi, otonom çalışma |
 | 05 | 0:34 | Angajman · dronu izleyen kule, son 150 metrede atış, 3 hedef |
 | 06 | 0:48 | Araçta (fotoğraf) · gemide ve kulede (3B render) |
 | 07 | 1:02 | Katmanlı savunma · gökyüzü ağ katmanları ve beş kubbe, en içte Dron Kalkanı |

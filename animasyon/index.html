@@ -63,7 +63,7 @@ body.render .bigplay,body.render .loading{display:none}
       <div class="eyebrow">Turaç · Sterling · Ürün tanıtım filmi</div>
       <h1>Dron Kalkanı · Drone Shield</h1>
     </div>
-    <div class="meta">88 sn · 1920×1080 · 30 fps · sesli · ortak kurgu (v9): gerçek fotoğraf, 3B render ve kesmelerle</div>
+    <div class="meta">88 sn · 1920×1080 · 30 fps · sesli · ortak kurgu (v10): gerçek fotoğraf, gerçek kule modeliyle 3B çekim ve 3B ortamlar</div>
   </header>
 
   <div class="film" id="filmBox">
@@ -394,22 +394,25 @@ function sTespit(t){const u=t-15;world(t,null,()=>{const pl=plate(IMG.arkaSensor
 
 /* ---------- 04 taret ---------- */
 function sTaret(t){ctx.drawImage(IMG.taretBlur,0,255,450,253,0,0,W,H);ctx.fillStyle='rgba(6,9,13,0.35)';ctx.fillRect(0,0,W,H);
+  const k3=k3Kare(t);if(k3){ctx.fillStyle=`rgba(7,10,15,${0.62*k3.a})`;ctx.fillRect(0,0,W,H);}   /* 3B çekimde zemin stüdyo tonuna iner */
   const px=700,sc=1080/840,pw=900*sc;const pk=1+0.05*P(t,24,34);
   ctx.save();ctx.translate(px+pw/2,H/2);ctx.scale(pk,pk);ctx.translate(-(px+pw/2),-H/2);
   ctx.save();ctx.shadowColor='rgba(0,0,0,0.7)';ctx.shadowBlur=40;ctx.fillStyle='#000';ctx.fillRect(px,0,pw,H);ctx.restore();
   ctx.save();if(hasFilter)ctx.filter='contrast(1.06) saturate(0.85) brightness(0.92)';ctx.drawImage(IMG.taret,0,560,900,840,px,0,pw,H);ctx.restore();
+  if(k3){ctx.save();ctx.globalAlpha=k3.a;ctx.drawImage(k3.im,px,0,pw,H);ctx.restore();}
   ctx.restore();
   const map=(x,y)=>{const X=px+x*sc,Y=(y-560)*sc;return {x:(X-(px+pw/2))*pk+(px+pw/2),y:(Y-H/2)*pk+H/2};};
   finish(t,{grade:0.6,vig:0.45});scrim(0.85,0.55);
   if(!CLEAN){ctx.save();ctx.globalAlpha=0.9;ctx.fillStyle=C.brass;ctx.fillRect(px-2,0,2,H);ctx.restore();}
   const mag=map(512,905),eoir=map(470,932),bar=map(300,1004),pan=map(520,1125),base=map(560,1330);
-  const co=(a,b)=>Math.min(P(t,a,b),1-P(t,28.8,29.5));
-  callout(mag.x,mag.y,620,250,'MÜHİMMAT','Sterling 12 kal. magnum anti-dron fişek',co(24.6,25.5));
-  callout(eoir.x,eoir.y,620,355,'SENSÖR','Pasif elektro-optik sensör kutusu',co(25.3,26.2));
-  callout(bar.x,bar.y,620,460,'ATIŞ BİRİMİ','Çift 12 kalibre tüfek · biri ters monte',co(26.0,26.9));
-  callout(pan.x,pan.y,620,565,'ROBOTİK KULE','İki eksende otomatik hedef takibi',co(26.7,27.6));
-  callout(base.x,base.y,620,670,'PLATFORM','Araç kasası, gemi güvertesi, sabit kule',co(27.4,28.3));
-  hud(t,'SAHNE 04 · ROBOTİK KULE',{right:'SİSTEM GÖRÜNÜMÜ · SAHA'});
+  const co=(a,b)=>Math.min(P(t,a,b),1-P(t,28.3,28.95));
+  callout(mag.x,mag.y,620,250,'MÜHİMMAT','Sterling 12 kal. magnum anti-dron fişek',co(24.4,25.3));
+  callout(eoir.x,eoir.y,620,355,'SENSÖR','Pasif elektro-optik sensör kutusu',co(25.0,25.9));
+  callout(bar.x,bar.y,620,460,'ATIŞ BİRİMİ','Çift 12 kalibre tüfek · biri ters monte',co(25.6,26.5));
+  callout(pan.x,pan.y,620,565,'ROBOTİK KULE','İki eksende otomatik hedef takibi',co(26.2,27.1));
+  callout(base.x,base.y,620,670,'PLATFORM','Araç kasası, gemi güvertesi, sabit kule',co(26.8,27.7));
+  if(k3&&!CLEAN)txt('3B CAD MODELİ',px+30,168,{fam:FM,size:14,color:C.brass,ls:3,alpha:0.85*P(t,29.3,29.9)});
+  hud(t,'SAHNE 04 · ROBOTİK KULE',{right:k3&&t>29.2?'SİSTEM GÖRÜNÜMÜ · 3B MODEL':'SİSTEM GÖRÜNÜMÜ · SAHA'});
   caption(t,29.6,33.6,{eyebrow:'OTONOM ROBOTİK KULE',head:'Otonom çalışır, operatör gerekmez',en:'Autonomous: no operator needed to engage',sub:'Gömülü yapay zekâ hedefi kule üzerinde işler, atış anını ve ön tutuşu hesaplar. İstenirse uzaktan kumanda edilir.',maxW:1000});}
 
 /* ---------- 05 angajman ---------- */
@@ -636,6 +639,13 @@ if(!RENDER){
 
 function loadImage(src){return new Promise((res,rej)=>{const im=new Image();im.onload=()=>res(im);im.onerror=()=>rej(new Error('yüklenemedi: '+src));im.src=src;});}
 const imagesReady=Promise.all(Object.entries(SRC).map(([k,src])=>loadImage(src).then(im=>{IMG[k]=im;})));
+/* Sahne 04'ün 3B çekimi: gerçek kule CAD modelinden render edilmiş 153 karelik yörünge (render/3d/kule3b.py).
+   Oynatıcıda arka planda yüklenir; kare henüz gelmediyse fotoğraf paneli görünmeye devam eder. Render kipinde tamamı beklenir. */
+const K3={n:153,t0:28.9,img:[]};
+function k3Yukle(){const ps=[];for(let i=0;i<K3.n;i++){const im=new Image();K3.img[i]=im;ps.push(new Promise(res=>{im.onload=res;im.onerror=res;im.src=`assets/kule3b/k${String(i).padStart(3,'0')}.jpg`;}));}return Promise.all(ps);}
+function k3Kare(t){if(t<K3.t0)return null;const i=Math.min(K3.n-1,Math.max(0,Math.round((t-K3.t0)*FPS)));
+  for(let j=i;j>=Math.max(0,i-12);j--){const im=K3.img[j];if(im&&im.complete&&im.naturalWidth)return {im,a:eio(P(t,K3.t0,K3.t0+0.6))};}return null;}
+const k3Ready=imagesReady.then(k3Yukle);
 const fontsReady=Promise.race([
   Promise.allSettled([document.fonts.load('800 100px "Saira Condensed"'),document.fonts.load('700 100px "Saira Condensed"'),document.fonts.load('600 30px "Saira Condensed"'),document.fonts.load('600 32px "Saira"'),document.fonts.load('400 32px "Saira"'),document.fonts.load('500 32px "Saira"'),document.fonts.load('400 20px "JetBrains Mono"'),document.fonts.load('600 20px "JetBrains Mono"')]),
   new Promise(r=>setTimeout(r,5000))]);
@@ -645,7 +655,7 @@ function start(state){if(state&&typeof state.cur==='number'){cur=state.cur;}
   makeBloom('gemi',[IMG.gemiOn],248,[1,0.82,0.62]);makeBloom('raf',[IMG.rafArka,IMG.rafOn],251,[1,0.72,0.44]);
   if(RENDER){window.__film={DUR,FPS,SCENES,renderFrame(t){draw(t);return canvas.toDataURL('image/png');},ready:true};return;}
   draw(cur);updateUI();setPlaying(state&&typeof state.playing==='boolean'?state.playing:!reduced);last=performance.now();requestAnimationFrame(tick);}
-Promise.all([imagesReady,fontsReady]).then(()=>{window.claude?.hot?.ready?window.claude.hot.ready(start):start(window.claude?.hot?.data??{});})
+Promise.all([imagesReady,fontsReady,RENDER?k3Ready:null]).then(()=>{window.claude?.hot?.ready?window.claude.hot.ready(start):start(window.claude?.hot?.data??{});})
   .catch(err=>{if(loadingEl){loadingEl.hidden=false;loadingEl.textContent='GÖRSEL YÜKLENEMEDİ: '+err.message;}if(RENDER)window.__film={error:String(err)};});
 })();
 </script>

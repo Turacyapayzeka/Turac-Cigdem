@@ -1,7 +1,7 @@
 # Dron Kalkanı · Drone Shield — Tanıtım Filmi Senaryosu
 
-**Sürüm:** v9, ortak kurgu · **Süre:** 88 saniye · **Format:** 1920×1080, 30 fps · **Dil:** Türkçe büyük, İngilizce karşılığı küçük ve silik
-**Görsel yaklaşım:** Gerçek saha fotoğrafları (pikap kasasındaki sistem, kule yakın planı, sensör başlığı) üzerine animasyonlu gösterge, dron, atış ve yazı katmanları. Kule fotoğraflardan alfa kanallı olarak ayrıldı ve dönüş ekseni etrafında döndürülerek dronları izliyor. Gemi güvertesi ve rafineri 3B render; dronlar 3B modelden. Sinematik renk düzeni, hafif film greni, el kamerası hareketi.
+**Sürüm:** v10, ortak kurgu ve gerçek kule modeliyle 3B çekim · **Süre:** 88 saniye · **Format:** 1920×1080, 30 fps · **Dil:** Türkçe büyük, İngilizce karşılığı küçük ve silik
+**Görsel yaklaşım:** Gerçek saha fotoğrafları (pikap kasasındaki sistem, kule yakın planı, sensör başlığı) üzerine animasyonlu gösterge, dron, atış ve yazı katmanları. Kule fotoğraflardan alfa kanallı olarak ayrıldı ve dönüş ekseni etrafında döndürülerek dronları izliyor. Sahne 04'te gerçek kule CAD modelinden render edilmiş 3B yörünge çekimi var. Gemi güvertesi ve rafineri 3B render; dronlar 3B modelden. Sinematik renk düzeni, hafif film greni, el kamerası hareketi.
 **Ses:** Sentezlenmiş müzik yatağı ve efektler (`render/ses/ses.py`). Seslendirme kaydı yoktur; aşağıdaki metin stüdyo kaydı içindir.
 
 > Bu sürüm iki ayrı çalışmayı birleştirir: bu depodaki fotoğraflı film (v1–v8) ile "Dron kalkanı simülasyonu" konuşmasında yapılan Tanıtım Filmi, Mühendislik Filmi ve 3B Vitrin. Ürün bilgileri ve kurallar o konuşmanın devir özetinden alındı (`surumler/ilk-calismalar/PROJE-OZETI-simulasyon-sohbeti.md`); özeti `PROJE-OZETI.md` içinde.
@@ -24,7 +24,7 @@
 | 01 | 00:00–00:07 | Açılış | Pikap arka çapraz, kule (yavaş yaklaşma) | DRON KALKANI · "Karıştırıcının bittiği yerde başlar." |
 | 02 | 00:07–00:15 | Sorun | Pikap yan görünüş, tesis ve gökyüzü; kule sürüyü izler | SORUN · "Karıştırıcı her dronu durduramaz" |
 | 03 | 00:15–00:24 | Tespit ve takip | Sensör başlığı | "Pasif sensörler, gömülü yapay zekâ" |
-| 04 | 00:24–00:34 | Robotik kule | Kule yakın planı | Beş parça açıklaması · "Otonom çalışır, operatör gerekmez" |
+| 04 | 00:24–00:34 | Robotik kule | Kule yakın planı (fotoğraf), ardından gerçek CAD modeliyle 3B yörünge çekimi | Beş parça açıklaması · "Otonom çalışır, operatör gerekmez" |
 | 05 | 00:34–00:48 | Angajman | Pikap yan görünüş + izleyen kule | "Son 150 metrede angajman" |
 | 06 | 00:48–01:02 | Araçta · gemide · kulede | Pikap fotoğrafı · 3B güverte · 3B rafineri | 01 ARAÇTA · 02 GEMİDE · 03 KULEDE |
 | 07 | 01:02–01:14 | Katmanlı savunma | Ölçeksiz şema: gökyüzü ağ katmanları ve beş kubbe; ardından fotoğrafta en iç kubbe | "Karıştırıcının bittiği yerde başlar" · "Karıştırıcıyı aşan dron burada durur" |
@@ -51,7 +51,7 @@
 **Seslendirme.** "Pasif elektro-optik ve akustik sensörler hedefi altı yüz ile sekiz yüz metrede tespit eder. Görüntüyü kule üzerindeki yapay zekâ işler."
 
 ### 04 · Robotik kule (00:24–00:34)
-**Görüntü.** Koyu zemin üzerinde kulenin yakın plan paneli. Soldan sırayla beş açıklama, lider çizgileriyle parçalara bağlanır; başlık gelirken açıklamalar çekilir.
+**Görüntü.** Koyu zemin üzerinde kulenin yakın plan paneli. Soldan sırayla beş açıklama, lider çizgileriyle parçalara bağlanır; başlık gelirken açıklamalar çekilir. 0:28.9'da aynı panelde fotoğraf, gerçek kule CAD modelinin 3B çekimine geçer: kamera 5 saniyede kulenin arka çaprazından ön çaprazına 95 derece döner, namlular hep solda kalır. Koyu stüdyo, sıcak ana ışık ve soğuk kenar ışıkları; sol üstte "3B CAD MODELİ" etiketi.
 1. MÜHİMMAT — Sterling 12 kal. magnum anti-dron fişek
 2. SENSÖR — Pasif elektro-optik sensör kutusu
 3. ATIŞ BİRİMİ — Çift 12 kalibre tüfek · biri ters monte
@@ -117,7 +117,8 @@ Rakamlar: 1987 kuruluş · yılda 200 milyon+ fişek · %60 ihracat · 90+ ülke
 
 - **v9: ortak kurgu.** İki konuşmanın çalışması tek filmde birleşti. Önceki konuşmadan alınanlar: ürün bilgileri ve kurallar, "Karıştırıcının bittiği yerde başlar" ve "Son 150 metre bizim" sloganları, beş katmanlı savunma şeması (tehditler solda, çözümler sağda), ortak yapım sahnesi, Turaç'ın üretim rakamları, kapanış değerleri ve web adresi. Bu depodan kalanlar: fotoğraflı sahneler, dronu izleyen kule, angajman efektleri, 3B gemi ve rafineri, gökyüzündeki ağ katmanları, ses bandı. Film 80 saniyeden 88 saniyeye çıktı; ses bandı yeni zamanlamaya göre yeniden üretildi.
 - **v9: kurala uydurulan yerler.** Fotoğraflardan araç amblemi, model yazısı, Kaiser logosu ve plaka karakterleri silindi (`render/rotus/rotus.py`). "Radar", "30×", "360°", "yaklaşık 2 m" ve "140 m" ifadeleri kaldırıldı: bunlar ürün özetinde yok. Ekrandaki ürün adı "DRON KALKANI" oldu; İngilizce "DRONE SHIELD" küçük ve silik yazılıyor. "Taret" yerine ürün özetindeki "robotik kule" kullanıldı.
-- **v9: henüz alınmayanlar.** Gerçek kule CAD modeli (`render/3d/modeller/taret.glb`) filmde kullanılmıyor. Mühendislik Filmi'ndeki teknik çizim katmanları ve 3B Vitrin'in pikap, tanker ve rafineri turu kaynak olarak depoda duruyor (`surumler/ilk-calismalar/kaynak/`), filme girmedi. Yapay zekâ videosu için hazırlanan başlangıç kareleri (`docs/ai-video/kareler/`) eski, rötuşsuz fotoğraflardan üretilmişti; yeniden üretilmeleri gerekir.
+- **v10: gerçek kule modeliyle 3B çekim.** Sahne 04'ün ikinci yarısı artık 3B: `render/3d/kule3b.py`, kullanıcının SolidWorks montajından gelen kule modelini (`render/3d/modeller/taret.glb`, gövde ve tüfekler) Blender'da koyu bir stüdyoya yerleştirir ve kamerayı çevresinde döndürür. 153 kare, 1160×1080, `animasyon/assets/kule3b/` altında; film motoru bunları sahnenin sağ paneline yerleştirir ve filmin renk düzeni ile grenini üstüne uygular. Gövde kum rengi mat boya, tüfekler siyah. Montajda bulunmayan iki parça temsilîdir: elektro-optik sensör kutusu saha fotoğraflarına bakılarak yaklaşık 19 × 19 × 16 cm ölçüyle, önde iki mercek ve yanlarda havalandırma yarıklarıyla modellendi; kaide ve tripod sade siyah parçalardır. CAD modelindeki şarjör ve gövde kabartmaları ("MAX", modelde aynalı) çekimde seçilebiliyor.
+- **v9: henüz alınmayanlar.** Mühendislik Filmi'ndeki teknik çizim katmanları ve 3B Vitrin'in pikap, tanker ve rafineri turu kaynak olarak depoda duruyor (`surumler/ilk-calismalar/kaynak/`), filme girmedi. Yapay zekâ videosu için hazırlanan başlangıç kareleri (`docs/ai-video/kareler/`) eski, rötuşsuz fotoğraflardan üretilmişti; yeniden üretilmeleri gerekir.
 
 - **v8: sade katman sahnesi.** Sahne 07 iki parçaya ayrıldı. İlk beş saniye sade bir kavram çizimi: gökyüzünde dört ağ katmanı (komuta kontrol, radar ağı, muhabere ağı, veri bağı), veri bağından kubbelere inen çizgiler, yerde iç içe üç savunma kubbesi ve en içte Drone Shield. Düzen, kullanıcının gönderdiği Steeldome görselinden esinlenir; görselin kendisi, ASELSAN ve ürün adları, logolar ve bayraklar kullanılmadı, katman adları genel işlev adlarıdır. Son beş saniyede aynı fikir gerçek fotoğrafta gösterilir: en iç kubbe ve tek hedefli angajman.
 - **Taret 3B modeli.** Kullanıcının 6 Kasım tarihli Vitrin sayfasındaki glTF model (`body` ve `gun` ağları, toplam 233 bin köşe) `render/3d/modeller/taret.glb` olarak depoya alındı. Henüz filmde kullanılmıyor; tamamı 3B sahneler için hazır. Yatay ve dikey dönüş için ağın parçalara ayrılması gerekiyor.

@@ -18,7 +18,7 @@ CUTS = [7.0, 15.0, 24.0, 34.0, 48.0, 62.0, 74.0, 81.0]
 VCUTS = [52.667, 57.333, 69.1]
 SHOTS = [(38.3, 'saha'), (41.0, 'saha'), (44.0, 'saha'), (51.4, 'saha'), (56.067, 'gemi'), (60.733, 'rafineri'), (72.4, 'saha')]
 DRONES = [(34.3, 38.6), (36.3, 41.3), (39.0, 44.3), (48.4, 51.7), (53.067, 56.367), (57.733, 61.033), (69.7, 72.7)]
-CALLOUTS = [24.6, 25.3, 26.0, 26.7, 27.4]
+CALLOUTS = [24.4, 25.0, 25.6, 26.2, 26.8]
 LAYERS = [62.4, 62.7, 63.0, 63.3, 63.5, 64.35, 65.2, 66.05, 66.9]
 ORTAK = [75.3, 75.65, 76.0, 76.35, 77.0, 77.7, 77.95, 78.2, 78.45]
 STATS = [83.6, 83.9, 84.2, 84.5]
@@ -163,6 +163,7 @@ def whoosh(dur=0.8):
     return a * 0.7 + b
 for c in CUTS: add(whoosh(), c - 0.42, gain=0.08, wet=0.3)
 for c in VCUTS: add(whoosh(0.6), c - 0.3, gain=0.05, wet=0.3)
+add(whoosh(0.9), 28.7, gain=0.06, wet=0.35)                                   # sahne 04: fotoğraftan 3B çekime geçiş
 # ortam: rüzgâr (saha), deniz (gemi), tesis uğultusu (rafineri)
 def amb(a, b, sig, gain):
     n = int((b - a) * SR); add(sig[:n] * ramp(n, 0.5, 0.5), a, gain=gain)
