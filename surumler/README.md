@@ -9,7 +9,7 @@ git archive <commit> | tar -x -C /tmp/surum && node /tmp/surum/render/render.mjs
 
 | Sürüm | Tarih | Dosya | Süre | Ses | Commit | Ne değişti |
 |---|---|---|---:|---|---|---|
-| v10 | 13 Kasım | `v10-3b-kule-cekimi-sesli.mp4` | 88 sn | var | `d317e20` | Sahne 04'e gerçek kule CAD modeliyle 3B yörünge çekimi eklendi: kamera kulenin çevresinde 95 derece döner. **En güncel sürüm.** |
+| v10 | 13 Kasım | `v10-3b-kule-cekimi-sesli.mp4` | 88 sn | var | `d317e20` | Sahne 04'e gerçek kule CAD modeliyle 3B yörünge çekimi eklendi: kamera kulenin çevresinde 95 derece döner. 17 Kasım'da çekim, aynalaması düzeltilmiş modelle yenilendi (`04fb130`). **En güncel sürüm.** |
 | v9 | 13 Kasım | `v9-ortak-kurgu-sesli.mp4` | 88 sn | var | `e432c93` | Ortak kurgu: önceki konuşmanın kuralları, sloganları, beş katmanlı savunma şeması, ortak yapım sahnesi ve kapanışı bu filmle birleşti. Fotoğraflardan başka firma işaretleri ve plaka silindi. |
 | v8 | 12 Kasım | `v8-sade-katman-sahnesi-sesli.mp4` | 80 sn | var | `a9f3a74` | Katman sahnesi yeniden kuruldu: gökyüzünde dört ağ katmanı, yerde iç içe kubbeler; ardından fotoğrafta en iç kubbe ve angajman. |
 | v7 | 12 Kasım | `v7-3b-dron-sesli.mp4` | 80 sn | var | `438f4fd` | Dronlar 3B modelden render ediliyor. |
