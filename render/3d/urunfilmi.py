@@ -29,6 +29,7 @@ ARGS = sys.argv[1:]
 def opt(ad, varsayilan): return ARGS[ARGS.index('--' + ad) + 1] if '--' + ad in ARGS else varsayilan
 FINAL = opt('kalite', 'taslak') == 'final'
 FPS = 24
+KENAR = True                                      # kenar yuvarlatma (Bevel); uzun kare dizilerinde süre için kapatılabilir
 ACILIS = bool(ARGS) and ARGS[0] == 'acilis'      # kare dizisinde kenar yuvarlatma örneği düşük tutulur (süre)
 
 # ------------------------------------------------------------------ malzemeler
@@ -46,7 +47,7 @@ def pbr(ad, renk, rough, metal=0.0, kenar=0.0006, puruz=0.0, puruz_olcek=900.0, 
         nt.links.new(tc.outputs['Object'], nz.inputs['Vector'])
         bp = nt.nodes.new('ShaderNodeBump'); bp.inputs['Strength'].default_value = puruz; bp.inputs['Distance'].default_value = 0.0004
         nt.links.new(nz.outputs['Fac'], bp.inputs['Height']); normal = bp.outputs['Normal']
-    if kenar > 0:
+    if kenar > 0 and KENAR:
         bv = nt.nodes.new('ShaderNodeBevel'); bv.samples = 4; bv.inputs['Radius'].default_value = kenar
         if normal is not None: nt.links.new(normal, bv.inputs['Normal'])
         normal = bv.outputs['Normal']

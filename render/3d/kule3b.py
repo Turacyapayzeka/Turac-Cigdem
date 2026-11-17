@@ -3,15 +3,16 @@
     /root/bpyenv/bin/python render/3d/kule3b.py onizleme --cikti DIR [--kare 0,76,152]
     /root/bpyenv/bin/python render/3d/kule3b.py cekim --cikti animasyon/assets/kule3b [--bas 0 --son 152]
 
-Model: modeller/taret.glb (SolidWorks montajından; ölçü metre, taban orijinde, namlular +X, Z yukarı).
-Montajda olmayan elektro-optik sensör kutusu, önceki 3B Vitrin çalışmasındaki tahmini ölçülerle eklenir.
+Model: modeller/kule-parcalar.npz (kule_parcala.py çıktısı: parçalara ayrılmış, aynalaması düzeltilmiş CAD modeli).
+Kule, malzemeler, sensör ünitesi ve tripod ürün filmiyle (urunfilmi.py) aynı kurucudan gelir.
 Çıktı: 1160×1080 JPEG kareler (k000.jpg …); film motoru bunları sahne 04'ün sağ paneline yerleştirir.
 """
 import bpy, math, sys, os, time
 from mathutils import Vector
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from sahneler import reset, coll, put, mat, box, cyl, R
+from sahneler import reset, coll, put, R
+import urunfilmi
 
 KOK = os.path.dirname(os.path.abspath(__file__))
 N = 153                      # 5,1 sn × 30 kare
@@ -19,43 +20,11 @@ EN, BOY = 1160, 1080
 MERKEZ = Vector((0.27, 0.0, 0.20))
 
 def kule(c):
-    bpy.ops.import_scene.gltf(filepath=os.path.join(KOK, 'modeller', 'taret.glb'))
-    kum = mat('kum', (0.27, 0.185, 0.085), rough=0.62, bump=0.05, bump_scale=420, vary=0.06)
-    siyah = mat('siyah', (0.012, 0.012, 0.014), rough=0.5, metal=0.2, spec=0.5)
-    for o in list(bpy.data.objects):
-        if o.type != 'MESH' or o.name not in ('body', 'gun'): continue
-        o.data.materials.clear(); o.data.materials.append(siyah if o.name == 'gun' else kum)
-        for p in o.data.polygons: p.use_smooth = False
-    # sensör kutusu: montajda yok; saha fotoğraflarına göre tahmini ölçü (yaklaşık 19 × 19 × 16 cm),
-    # önde biri büyük biri küçük iki mercek, yanlarda havalandırma yarıkları
-    kum2 = mat('kum-koyu', (0.17, 0.115, 0.055), rough=0.65)
-    oyuk = mat('oyuk', (0.012, 0.012, 0.014), rough=0.7)
-    cam = mat('mercek', (0.012, 0.03, 0.085), rough=0.16, spec=0.5)
-    ex, ey, ez = 0.055, 0.02, 0.492
-    box((0.19, 0.19, 0.16), (ex, ey, ez), kum, c, bevel=0.007, name='eo')
-    box((0.2, 0.2, 0.008), (ex, ey, ez + 0.084), kum2, c, bevel=0.002, name='eo-ust')
-    on = ex + 0.095
-    for y, r, k in ((ey + 0.04, 0.03, 0.078), (ey - 0.045, 0.017, 0.05)):
-        box((0.006, k, k), (on + 0.001, y, ez + 0.012), oyuk, c, bevel=0.002, name='yuva')
-        duz(cyl(r + 0.006, (on, y, ez + 0.012), (on + 0.012, y, ez + 0.012), oyuk, c, verts=48, name='halka'))
-        duz(cyl(r, (on + 0.004, y, ez + 0.012), (on + 0.014, y, ez + 0.012), cam, c, verts=48, name='mercek'))
-    for yan in (-1, 1):
-        for i in range(4):
-            box((0.007, 0.004, 0.085), (ex - 0.05 + i * 0.03, ey + yan * 0.0955, ez + 0.005), oyuk, c, rot=(0, R(14), 0), bevel=0.001, name='yarik')
-    # kaide: siyah tabla ve tripod (kadrajın altına iner)
-    koyu = mat('kaide', (0.008, 0.008, 0.009), rough=0.88, spec=0.15)
-    duz(cyl(0.118, (0, 0, -0.02), (0, 0, 0.0), koyu, c, verts=72, name='tabla'))
-    duz(cyl(0.05, (0, 0, -0.075), (0, 0, -0.02), koyu, c, verts=48, name='boyun'))
-    cyl(0.03, (0, 0, -0.95), (0, 0, -0.07), koyu, c, verts=32, name='kolon')
-    for a in (30, 150, 270):
-        d = Vector((math.cos(R(a)), math.sin(R(a)), 0))
-        cyl(0.016, (d.x * 0.045, d.y * 0.045, -0.13), (d.x * 0.6, d.y * 0.6, -1.05), koyu, c, verts=16, name='ayak')
-
-def duz(o):
-    """Silindiri düz yüzeyli gösterir (yardımcı işlev yumuşak gölgeler; ince tablada kubbe gibi görünüyor)."""
-    if o is not None and getattr(o, 'data', None):
-        for p in o.data.polygons: p.use_smooth = False
-    return o
+    """Kule, ürün filmiyle aynı kurucudan gelir: parçalara ayrılmış ve aynalaması düzeltilmiş model
+    (modeller/kule-parcalar.npz), fiziksel malzemeler, saha fotoğraflarına göre modellenmiş sensör ünitesi ve tripod.
+    İlk sürümde taret.glb doğrudan kullanılıyordu; o dosya aynalı olduğu için ters monte tüfek yanlış yanda duruyordu."""
+    urunfilmi.KENAR = False                    # 153 karelik dizide kenar yuvarlatma kapalı (süre)
+    M = urunfilmi.malzemeler(); urunfilmi.kule(c, M, yatay=0.0, dikey=5.0); urunfilmi.tripod(c, M)
 
 def alan_isik(ad, loc, hedef, guc, renk, boyut, c):
     ld = bpy.data.lights.new(ad, 'AREA'); ld.energy = guc; ld.color = renk; ld.shape = 'RECTANGLE'; ld.size = boyut[0]; ld.size_y = boyut[1]
@@ -101,9 +70,9 @@ def sahne(kalite):
     sc.render.image_settings.file_format = 'JPEG'; sc.render.image_settings.quality = 90
     # ışıklar sahnede sabit; kamera döndükçe parlamalar yüzeylerde gezinir
     alan_isik('ana', (1.5, 2.3, 1.7), MERKEZ, 240, (1.0, 0.93, 0.84), (1.4, 1.0), c)          # sıcak ana ışık, ön sol üst
-    alan_isik('kenar', (-2.2, -1.2, 1.3), MERKEZ, 400, (0.72, 0.84, 1.0), (0.9, 1.6), c)       # soğuk kenar ışığı, arka
+    alan_isik('kenar', (-2.2, -1.2, 1.3), MERKEZ, 320, (0.72, 0.84, 1.0), (0.9, 1.6), c)       # soğuk kenar ışığı, arka
     alan_isik('kenar2', (1.4, -2.0, 2.1), MERKEZ, 230, (0.8, 0.88, 1.0), (0.6, 1.6), c)        # namlu boyunca kenar çizgisi
-    alan_isik('ust', (0.3, 0.0, 2.4), MERKEZ, 70, (1.0, 0.97, 0.92), (1.6, 1.6), c)           # yumuşak üst dolgu
+    alan_isik('ust', (0.3, 0.0, 2.4), MERKEZ, 45, (1.0, 0.97, 0.92), (1.6, 1.6), c)           # yumuşak üst dolgu
     alan_isik('dolgu', (-0.6, 2.6, 0.2), MERKEZ, 45, (0.85, 0.9, 1.0), (1.8, 1.0), c)          # alttan hafif dolgu
     cd = bpy.data.cameras.new('cam'); cam = bpy.data.objects.new('cam', cd); sc.collection.objects.link(cam); sc.camera = cam
     cd.lens = 62; cd.sensor_width = 36; cd.clip_start = 0.05; cd.clip_end = 200
