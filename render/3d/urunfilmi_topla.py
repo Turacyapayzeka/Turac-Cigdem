@@ -2,7 +2,7 @@
 
     python3 render/3d/urunfilmi_topla.py [kaynak=render/out/urunfilmi] [hedef=urunfilmi/assets]
 
-Kaynakta beklenenler: acilis/a000…a079.jpg, yuzey/cam/sensor/govde/final/tesis/deniz .jpg ve .json, pikap-kule.png, pikap.json.
+Kaynakta beklenenler: acilis/a000…a079.jpg; yuzey, cam, sensor, govde, final, pikap, tesis, deniz, gok için .jpg ve .json.
 Dron görüntüsü filmin ortak varlığından (animasyon/assets/dron-3b-a.png) kopyalanır.
 """
 import json, os, shutil, sys
@@ -10,14 +10,11 @@ KOK = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..')
 kaynak = sys.argv[1] if len(sys.argv) > 1 else os.path.join(KOK, 'render', 'out', 'urunfilmi')
 hedef = sys.argv[2] if len(sys.argv) > 2 else os.path.join(KOK, 'urunfilmi', 'assets')
 os.makedirs(os.path.join(hedef, 'acilis'), exist_ok=True); capa = {}; eksik = []
-for ad in ('yuzey', 'cam', 'sensor', 'govde', 'final', 'tesis', 'deniz'):
+for ad in ('yuzey', 'cam', 'sensor', 'govde', 'final', 'pikap', 'tesis', 'deniz', 'gok'):
     j = os.path.join(kaynak, ad + '.json'); g = os.path.join(kaynak, ad + '.jpg')
     if not os.path.exists(g): eksik.append(ad + '.jpg'); continue
     shutil.copyfile(g, os.path.join(hedef, ad + '.jpg'))
     if os.path.exists(j): capa[ad] = json.load(open(j))
-if os.path.exists(os.path.join(kaynak, 'pikap-kule.png')):
-    shutil.copyfile(os.path.join(kaynak, 'pikap-kule.png'), os.path.join(hedef, 'pikap-kule.png')); capa['pikap'] = json.load(open(os.path.join(kaynak, 'pikap.json')))
-else: eksik.append('pikap-kule.png')
 n = 0
 for i in range(80):
     g = os.path.join(kaynak, 'acilis', f'a{i:03d}.jpg')

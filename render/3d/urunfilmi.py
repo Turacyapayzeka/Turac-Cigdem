@@ -10,7 +10,7 @@
   govde       stüdyo, kule gövdesi yandan (tek kare + çapa noktaları)
   final       stüdyo, üç çeyrek geniş plan, solda temiz boşluk (tek kare)
   tesis, deniz   sahneler.py ortamlarında kule (tek kare)
-  pikap       gerçek pikap fotoğrafına bindirmek için saydam zeminli kule (tek kare)
+  pikap, gok     tamamı 3B araç sahnesi: açık arazide pikap, kule kasada (tek kare); gok geniş gökyüzü kadrajıdır
 
 Model: modeller/kule-parcalar.npz (kule_parcala.py çıktısı). Kule bütün çekimlerde aynı geometridir.
 Montajda bulunmayan elektro-optik sensör ünitesi ve tripod saha fotoğraflarına göre modellenmiştir.
@@ -132,18 +132,21 @@ def duz(o):
     for p in o.data.polygons: p.use_smooth = False
     return o
 
-def tripod(c, M, yukseklik=0.95):
-    """Siyah tripod: yuvarlak üst tabla, orta kolon, üç kare kesitli ayak ve ara bağlantılar (saha fotoğraflarındaki kurulum)."""
-    k = M['kaide']; z0 = -yukseklik
-    duz(cyl(0.125, (0, 0, -0.018), (0, 0, 0.0), k, c, verts=96, name='tabla')); duz(cyl(0.06, (0, 0, -0.07), (0, 0, -0.018), k, c, verts=64, name='boyun'))
-    cyl(0.027, (0, 0, z0 + 0.25), (0, 0, -0.06), k, c, verts=48, name='kolon')
+def tripod(c, M, yukseklik=0.95, ebeveyn=None):
+    """Siyah tripod: yuvarlak üst tabla, orta kolon, üç kare kesitli ayak ve ara bağlantılar (saha fotoğraflarındaki kurulum).
+    ebeveyn verilirse parçalar ona bağlanır (kuleyle birlikte taşınır)."""
+    k = M['kaide']; z0 = -yukseklik; p = []
+    p.append(duz(cyl(0.125, (0, 0, -0.018), (0, 0, 0.0), k, c, verts=96, name='tabla'))); p.append(duz(cyl(0.06, (0, 0, -0.07), (0, 0, -0.018), k, c, verts=64, name='boyun')))
+    p.append(cyl(0.027, (0, 0, z0 + 0.25), (0, 0, -0.06), k, c, verts=48, name='kolon'))
     for a in (90, 210, 330):
         d = Vector((math.cos(R(a)), math.sin(R(a)), 0)); ust = Vector((d.x * 0.05, d.y * 0.05, -0.1)); ayak = Vector((d.x * 0.62, d.y * 0.62, z0 + 0.012))
         orta = (ust + ayak) / 2; yon = ayak - ust
-        box((0.032, 0.032, yon.length), orta, k, c, rot=tuple(yon.to_track_quat('Z', 'Y').to_euler()), bevel=0.003, name='ayak')
-        duz(cyl(0.035, ayak - Vector((0, 0, 0.012)), ayak + Vector((0, 0, 0.004)), k, c, verts=32, name='pabuc'))
+        p.append(box((0.032, 0.032, yon.length), orta, k, c, rot=tuple(yon.to_track_quat('Z', 'Y').to_euler()), bevel=0.003, name='ayak'))
+        p.append(duz(cyl(0.035, ayak - Vector((0, 0, 0.012)), ayak + Vector((0, 0, 0.004)), k, c, verts=32, name='pabuc')))
         ara0 = Vector((0, 0, z0 + 0.3)); ara1 = ust + yon * 0.62
-        cyl(0.009, ara0, ara1, k, c, verts=16, name='ara')
+        p.append(cyl(0.009, ara0, ara1, k, c, verts=16, name='ara'))
+    if ebeveyn is not None:
+        for o in p: bagla(o, ebeveyn)
 
 # ------------------------------------------------------------------ stüdyo
 def alan(ad, loc, hedef, guc, renk, boyut, c, yayilim=75):
@@ -295,37 +298,37 @@ def ortam(cikti, hangi):
     bilgi = {'ad': hangi, 'en': en, 'boy': boy, 'capa': {'kule': piksel(dik.matrix_world.translation), 'taban': piksel(kok.matrix_world.translation)}}
     kare(os.path.join(cikti, hangi + '.jpg')); json.dump(bilgi, open(os.path.join(cikti, hangi + '.json'), 'w'), indent=1)
 
+def arac_sahnesi(yon=48.0, dikey=5.0):
+    """Tamamı 3B araç sahnesi: açık arazide pikap; kule kasadaki tripodun üstünde. Alçak güneş, uzun gölgeler."""
+    import pikap3b
+    reset(); c = coll('urun'); M = malzemeler(); taban = pikap3b.pikap(c); pikap3b.arazi(c)
+    kok, yat, dik = kule(c, M, 0.0, dikey); tripod(c, M, ebeveyn=kok)
+    kok.location = (-1.83, 0.0, taban + 0.95); kok.rotation_euler.z = R(yon); bpy.context.view_layer.update()
+    sahneler.sky(elev_deg=float(opt('gunes', 11)), rot_deg=float(opt('gunes-yon', 295)), strength=float(opt('gok', 0.5)), aerosol=1.3, sun_intensity=0.42)
+    return c, kok, yat, dik
+
+def _arac_kare(cikti, ad, cam_loc, hedef, lens, fstop, yon, dikey, pozlama):
+    c, kok, yat, dik = arac_sahnesi(yon, dikey)
+    en, boy, ornek = (2560, 1440, 96) if FINAL else (960, 540, 24); ayar(en, boy, ornek, pozlama=float(opt('pozlama', pozlama)))
+    kamera(cam_loc, hedef, lens, fstop=fstop, odak=(dik.matrix_world.translation - Vector(cam_loc)).length)
+    bilgi = {'ad': ad, 'en': en, 'boy': boy, 'capa': {'kule': piksel(dik.matrix_world.translation), 'taban': piksel(kok.matrix_world.translation)}}
+    kare(os.path.join(cikti, ad + '.jpg')); json.dump(bilgi, open(os.path.join(cikti, ad + '.json'), 'w'), indent=1)
+
 def pikap(cikti):
-    """Gerçek pikap fotoğrafına (amarok-arka-taret-clean.jpg, 1500×2000) bindirmek için saydam zeminli kule.
-    Kamera fotoğraftaki bakışa eşlenir: kule sol yandan, hafif alttan; taban flanşı tripod başlığının üstüne oturur."""
-    reset(); c = coll('urun'); M = malzemeler(); kok, yat, dik = kule(c, M, yatay=0, dikey=float(opt('dikey', 1.5)))
-    w = bpy.data.worlds.new('kapali-hava'); w.use_nodes = True; bpy.context.scene.world = w; nt = w.node_tree; bg = nt.nodes['Background']
-    tc = nt.nodes.new('ShaderNodeTexCoord'); sp = nt.nodes.new('ShaderNodeSeparateXYZ'); rp = nt.nodes.new('ShaderNodeValToRGB')
-    nt.links.new(tc.outputs['Generated'], sp.inputs['Vector']); mp = nt.nodes.new('ShaderNodeMapRange'); mp.inputs['From Min'].default_value = -0.25; mp.inputs['From Max'].default_value = 0.9
-    nt.links.new(sp.outputs['Z'], mp.inputs['Value']); nt.links.new(mp.outputs['Result'], rp.inputs['Fac'])
-    e = rp.color_ramp.elements; e[0].position = 0.0; e[0].color = (0.10, 0.095, 0.08, 1); e[1].position = 1.0; e[1].color = (1.0, 1.02, 1.06, 1)   # zemin yansıması → bulutlu gök
-    orta = rp.color_ramp.elements.new(0.22); orta.color = (0.62, 0.64, 0.67, 1)
-    nt.links.new(rp.outputs['Color'], bg.inputs['Color']); bg.inputs['Strength'].default_value = float(opt('gok', 1.0))
-    K = int(opt('kat', 2)) if FINAL else 1; EN, BOY = 1500 * K, 2000 * K
-    sc = ayar(EN, BOY, 96 if FINAL else 24, pozlama=float(opt('pozlama', 0.0))); sc.render.film_transparent = True
-    sc.render.image_settings.file_format = 'PNG'; sc.render.image_settings.color_mode = 'RGBA'; sc.render.image_settings.compression = 40
-    taban = Vector((0.0035, 0.0021, 0.037)); pivot = dik.matrix_world.translation
-    az, mesafe, dz = float(opt('az', 97)), float(opt('mesafe', 3.36)), float(opt('dz', -0.2))
-    loc = Vector((pivot.x + math.cos(R(az)) * mesafe, pivot.y + math.sin(R(az)) * mesafe, pivot.z + dz))
-    cam = kamera(loc, taban, 26, fstop=None); cam.data.sensor_fit = 'VERTICAL'; cam.data.sensor_height = 36; cam.data.sensor_width = 27
-    hedef_px = (float(opt('px', 1150)) / 1500, float(opt('py', 820)) / 2000)
-    # taban flanşının görüntüdeki yerini hedef piksele getir: kamerayı kaydırma (shift) ile
-    for _ in range(8):                                               # kaydırma, görüntünün uzun kenarı cinsindendir
-        u, v = piksel(taban); cam.data.shift_x -= (hedef_px[0] - u) * EN / BOY; cam.data.shift_y += (hedef_px[1] - v); bpy.context.view_layer.update()
-    sinir = (540, 400, 1500, 940)                                    # fotoğraf pikseli: kulenin bulunduğu bölge
-    sc.render.use_border = True; sc.render.use_crop_to_border = True
-    sc.render.border_min_x = sinir[0] / 1500; sc.render.border_max_x = sinir[2] / 1500; sc.render.border_min_y = 1 - sinir[3] / 2000; sc.render.border_max_y = 1 - sinir[1] / 2000
-    kare(os.path.join(cikti, 'pikap-kule.png'))
-    json.dump({'ad': 'pikap', 'sinir': sinir, 'kat': K, 'taban_px': [round(piksel(taban)[0] * 1500, 1), round(piksel(taban)[1] * 2000, 1)], 'eksen_px': [round(piksel(pivot)[0] * 1500, 1), round(piksel(pivot)[1] * 2000, 1)]},
-              open(os.path.join(cikti, 'pikap.json'), 'w'), indent=1)
+    """Platform entegrasyonu, kara: kamera aracın sol arka çaprazında; kule kasada, ürün kadrajın üst ortasında."""
+    _arac_kare(cikti, 'pikap', (-5.0, 3.15, 2.3), (-1.7, 0.1, 2.0), 55, 4.0, yon=48, dikey=5, pozlama=-0.95)
+
+def gok(cikti):
+    """Durumsal farkındalık: alçak ve geniş açı; kule sağ altta, kadrajın çoğu gökyüzü."""
+    _arac_kare(cikti, 'gok', (-4.1, -3.0, 1.2), (-2.5, 0.9, 3.3), 32, 5.6, yon=118, dikey=14, pozlama=-0.9)
+
+def arac_model(cikti):
+    """Aracın model föyü: arka ve ön çaprazdan iki taslak kare (modeli denetlemek için)."""
+    for ad, loc, hedef in (('arac-arka', (-7.2, 4.6, 2.3), (-0.3, 0, 1.0)), ('arac-on', (6.8, 4.9, 1.9), (0.3, 0, 0.95)), ('arac-yan', (-0.4, 8.5, 1.5), (-0.1, 0, 1.0))):
+        c, kok, yat, dik = arac_sahnesi(48, 5); ayar(960, 540, 24, pozlama=float(opt('pozlama', -0.6))); kamera(loc, hedef, 40); kare(os.path.join(cikti, ad + '.jpg'))
 
 CEKIM = {'acilis': acilis, 'yuzey': yuzey, 'cam': cam_, 'sensor': sensor, 'govde': govde, 'final': final,
-         'deniz': lambda c: ortam(c, 'deniz'), 'tesis': lambda c: ortam(c, 'tesis'), 'pikap': pikap}
+         'deniz': lambda c: ortam(c, 'deniz'), 'tesis': lambda c: ortam(c, 'tesis'), 'pikap': pikap, 'gok': gok, 'arac-model': arac_model}
 
 if __name__ == '__main__':
     ad = ARGS[0] if ARGS else 'final'

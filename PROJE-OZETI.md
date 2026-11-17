@@ -7,7 +7,7 @@ Son güncelleme: 17 Kasım 2026. Bu belge projeyi başka bir konuşmaya ya da ek
 - **Ne:** Turaç liderliğindeki **Dron Kalkanı** otonom robotik anti-dron kule sistemi için tanıtım filmi.
 - **Güncel sürüm:** v10, ortak kurgu ve gerçek kule modeliyle 3B çekim. 88 saniye, 1920×1080, 30 fps, sesli. Türkçe ekran yazıları, altında küçük İngilizce karşılıkları.
 - **Yöntem:** Gerçek saha fotoğrafları üzerine tarayıcıda çizilen animasyon katmanları. Sahne 04'te gerçek kule CAD modelinin 3B çekimi. Gemi ve rafineri sahneleri 3B render. Dronlar 3B modelden. Ses sentez.
-- **Ürün filmi:** Tanıtım filminden ayrı, fuar ekranı için 35 saniyelik sinematik ürün filmi (17 Kasım). Yazılı ve yazısız iki hâli var. Ayrıntı: `docs/URUN-FILMI.md`.
+- **Ürün filmi:** Tanıtım filminden ayrı, fuar ekranı için 35 saniyelik sinematik ürün filmi (17 Kasım). Yalnızca 3B animasyondan oluşur; gerçek fotoğraf içermez. Yazılı ve yazısız iki hâli var. Ayrıntı: `docs/URUN-FILMI.md`.
 - **Bekleyen karar:** Ortak kurgunun bundan sonraki yönü: 3B çekim beğenilirse başka sahnelere de taşınsın mı; Vitrin görüntüleri ve teknik çizimler eklensin mi.
 
 ## Ürün bilgisi
@@ -86,11 +86,11 @@ Kullanıcının 17 Kasım tarihli brifine göre yapıldı: premium fuar filmi di
 |---|---|---|
 | 0–7 sn | Ortaya çıkış | Antrasit stüdyo; kenar ışıkları sırayla açılır, kamera kulenin çevresinde döner; gövde ve sensör camı yakın planları. |
 | 7–14 sn | Tasarım ve teknoloji | Sensör ünitesi ve kule gövdesi; görüntü ve ses verisini temsil eden soyut çizgiler. |
-| 14–23 sn | Platform entegrasyonu | Pikap kasası (gerçek fotoğraf + 3B kule), sabit tesis platformu, deniz platformu. |
+| 14–23 sn | Platform entegrasyonu | Pikap kasası (3B araç, açık arazi), sabit tesis platformu, deniz platformu. |
 | 23–29 sn | Durumsal farkındalık | Geniş gökyüzü, uzakta temsilî dron, sade algılama simgesi ve soyut veri akışı. |
 | 29–35 sn | Final | Stüdyo, üç çeyrek açı, kamera geri çekilir; solda logo ve başlık için temiz boşluk. |
 
-Brife göre sapmalar: çözünürlük 4K değil 1080p; gerçek 3B kamera hareketi yalnızca açılışta, diğer çekimler yüksek çözünürlüklü tek kare üzerinde yavaş kamera; sensör ünitesi ve tripod temsilî.
+Brife göre sapmalar: çözünürlük 4K değil 1080p; gerçek 3B kamera hareketi yalnızca açılışta, diğer çekimler yüksek çözünürlüklü tek kare üzerinde yavaş kamera; sensör ünitesi ve tripod temsilî. Araç, elle kurulmuş genel bir pikap modelidir (`render/3d/pikap3b.py`); marka işareti ve plaka taşımaz.
 
 ## Kule modeli: aynalama düzeltmesi
 

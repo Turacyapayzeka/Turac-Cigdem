@@ -11,6 +11,7 @@ render/3d/sahneler.py    Gemi güvertesi ve rafineri kulesi için 3B arka plan p
 render/3d/dron3b.py      3B dron modeli: film için dron görünümleri ve 3B sahnelerde hedef dron.
 render/3d/kule_parcala.py   Kule CAD modelini parçalara ayırır, dönüş eksenlerini bulur, aynalamayı düzeltir (modeller/kule-parcalar.npz).
 render/3d/urunfilmi.py      Ürün filminin 3B çekimleri; urunfilmi_topla.py renderları kurgu sayfasına toplar.
+render/3d/pikap3b.py        Gerçekçi çift kabin pikap ve açık arazi (ürün filminin araç sahneleri).
 urunfilmi/                  Ürün filmi (35 sn): kurgu sayfası ve görüntüleri. Ayrıntı: docs/URUN-FILMI.md
 render/3d/kule3b.py      Gerçek kule CAD modeliyle stüdyo çekimi: sahne 04'teki 3B yörünge kareleri (animasyon/assets/kule3b/).
 render/3d/taret3b.py     Tamamı 3B deneme: fotoğraflardan sadeleştirilmiş taret, pikap ve arazi; pilot çekim.
