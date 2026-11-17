@@ -228,6 +228,10 @@ def acilis(cikti):
     """0–3,3 sn: karanlıkta kenar ışıkları sırayla açılır, kamera kulenin çevresinde 34 derece döner (80 kare)."""
     c, M, kok, yat, dik, L = sahne_studyo(yatay=-7, dikey=2, zemin=False)
     sc = ayar(1920, 1080, 28 if FINAL else 12, pozlama=0.15); sc.cycles.max_bounces = 4; cam = kamera(yorunge(104, 7, 3.3), HEDEF, 52, fstop=5.6)
+    # açılışın kendi ışık dengesi: üst şerit biraz daha güçlü, tripod biraz daha parlak (kare dizisi bu ayarla render edildi)
+    L['ust'].data.energy *= 180.0 / 125.0; kb = M['kaide'].node_tree.nodes['Principled BSDF']
+    kb.inputs['Base Color'].default_value = (0.012, 0.012, 0.013, 1); kb.inputs['Roughness'].default_value = 0.5
+    if 'Specular IOR Level' in kb.inputs: kb.inputs['Specular IOR Level'].default_value = 0.5
     N = 80; guc = {k: v.data.energy for k, v in L.items()}
     kareler = [int(x) for x in opt('kare', '').split(',')] if opt('kare', '') else range(int(opt('bas', 0)), int(opt('son', N - 1)) + 1)
     if not FINAL: sc.render.resolution_x, sc.render.resolution_y = 960, 540
