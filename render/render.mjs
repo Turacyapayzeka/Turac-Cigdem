@@ -5,6 +5,8 @@
  *   node render/render.mjs --stills 2,9,20,30   -> verilen saniyelerde PNG kareler (render/out/stills/)
  *   node render/render.mjs --start 34 --end 48  -> yalnızca bir aralığı render eder
  *   node render/render.mjs --sessiz             -> ses bandı eklemeden (varsayılan: animasyon/assets/ses.mp3, AAC olarak eklenir)
+ *   node render/render.mjs --sayfa urunfilmi --out surumler/urun-filmi.mp4   -> başka bir film sayfası (kare hızı sayfadan alınır)
+ *   node render/render.mjs --sayfa urunfilmi --sorgu temiz=1 ...            -> sayfaya ek sorgu parametresi
  *   node render/render.mjs --clean 1 --stills 13.5,38.2 --stillsdir docs/ai-video/kareler
  *                                               -> HUD, yazı ve renk düzeni olmadan temiz kareler (yapay zekâ videosu için başlangıç karesi)
  * Gereksinim: Playwright (Chromium) ve ffmpeg. Görseller yerel bir HTTP sunucusundan servis edilir
@@ -23,20 +25,23 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const args = process.argv.slice(2);
 const opt = (name, def) => { const i = args.indexOf('--' + name); return i >= 0 ? args[i + 1] : def; };
 const OUT = path.resolve(ROOT, opt('out', 'render/out/drone-shield.mp4'));
-const FPS = +opt('fps', 30);
+const SAYFA = opt('sayfa', 'animasyon');
+const SORGU = opt('sorgu', '');
+const KOKDIZIN = path.resolve(ROOT, SAYFA);
+let FPS = opt('fps', null);
 const START = +opt('start', 0);
 const END = opt('end', null);
 const STILLS = opt('stills', null);
 const CRF = opt('crf', '18');
 const CLEAN = opt('clean', null);
-const SES = args.includes('--sessiz') ? null : path.resolve(ROOT, opt('ses', 'animasyon/assets/ses.mp3'));
+const SES = args.includes('--sessiz') ? null : path.resolve(ROOT, opt('ses', path.join(SAYFA, 'assets/ses.mp3')));
 const STILLSDIR = opt('stillsdir', 'render/out/stills');
-const MIME = { '.html': 'text/html; charset=utf-8', '.jpg': 'image/jpeg', '.png': 'image/png', '.js': 'text/javascript', '.css': 'text/css', '.mp3': 'audio/mpeg' };
+const MIME = { '.html': 'text/html; charset=utf-8', '.jpg': 'image/jpeg', '.png': 'image/png', '.js': 'text/javascript', '.css': 'text/css', '.mp3': 'audio/mpeg', '.json': 'application/json' };
 
 const server = http.createServer((req, res) => {
   const p = decodeURIComponent(req.url.split('?')[0]);
-  const file = path.join(ROOT, 'animasyon', p === '/' ? 'index.html' : p);
-  if (!file.startsWith(path.join(ROOT, 'animasyon')) || !fs.existsSync(file)) { res.statusCode = 404; return res.end('yok'); }
+  const file = path.join(KOKDIZIN, p === '/' ? 'index.html' : p);
+  if (!file.startsWith(KOKDIZIN) || !fs.existsSync(file)) { res.statusCode = 404; return res.end('yok'); }
   res.setHeader('Content-Type', MIME[path.extname(file)] || 'application/octet-stream');
   fs.createReadStream(file).pipe(res);
 });
@@ -46,11 +51,12 @@ const port = server.address().port;
 const browser = await chromium.launch();
 const page = await browser.newPage({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1 });
 page.on('pageerror', e => console.error('sayfa hatası:', e.message));
-await page.goto(`http://127.0.0.1:${port}/index.html?render=1${CLEAN ? '&clean=1' : ''}`);
-await page.waitForFunction(() => window.__film && (window.__film.ready || window.__film.error), null, { timeout: 60000 });
-const film = await page.evaluate(() => ({ DUR: window.__film.DUR, error: window.__film.error }));
+await page.goto(`http://127.0.0.1:${port}/index.html?render=1${CLEAN ? '&clean=1' : ''}${SORGU ? '&' + SORGU : ''}`);
+await page.waitForFunction(() => window.__film && (window.__film.ready || window.__film.error), null, { timeout: 120000 });
+const film = await page.evaluate(() => ({ DUR: window.__film.DUR, FPS: window.__film.FPS, error: window.__film.error }));
 if (film.error) { console.error(film.error); process.exit(1); }
 const DUR = film.DUR;
+FPS = FPS ? +FPS : (film.FPS || 30);
 const frameAt = async t => Buffer.from((await page.evaluate(t => window.__film.renderFrame(t), t)).split(',')[1], 'base64');
 
 if (STILLS) {
