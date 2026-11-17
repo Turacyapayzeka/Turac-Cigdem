@@ -1,12 +1,13 @@
 # Dron Kalkanı · Drone Shield — Proje Özeti
 
-Son güncelleme: 13 Kasım 2026. Bu belge projeyi başka bir konuşmaya ya da ekibe taşımak için tek başına okunabilir biçimde yazıldı. İki ayrı konuşmanın çalışmasını birleştirir: bu depodaki fotoğraflı film ile "Dron kalkanı simülasyonu" konuşmasındaki filmler ve 3B vitrin.
+Son güncelleme: 17 Kasım 2026. Bu belge projeyi başka bir konuşmaya ya da ekibe taşımak için tek başına okunabilir biçimde yazıldı. İki ayrı konuşmanın çalışmasını birleştirir: bu depodaki fotoğraflı film ile "Dron kalkanı simülasyonu" konuşmasındaki filmler ve 3B vitrin.
 
 ## Tek bakışta
 
 - **Ne:** Turaç liderliğindeki **Dron Kalkanı** otonom robotik anti-dron kule sistemi için tanıtım filmi.
 - **Güncel sürüm:** v10, ortak kurgu ve gerçek kule modeliyle 3B çekim. 88 saniye, 1920×1080, 30 fps, sesli. Türkçe ekran yazıları, altında küçük İngilizce karşılıkları.
 - **Yöntem:** Gerçek saha fotoğrafları üzerine tarayıcıda çizilen animasyon katmanları. Sahne 04'te gerçek kule CAD modelinin 3B çekimi. Gemi ve rafineri sahneleri 3B render. Dronlar 3B modelden. Ses sentez.
+- **Ürün filmi:** Tanıtım filminden ayrı, fuar ekranı için 35 saniyelik sinematik ürün filmi (17 Kasım). Yazılı ve yazısız iki hâli var. Ayrıntı: `docs/URUN-FILMI.md`.
 - **Bekleyen karar:** Ortak kurgunun bundan sonraki yönü: 3B çekim beğenilirse başka sahnelere de taşınsın mı; Vitrin görüntüleri ve teknik çizimler eklensin mi.
 
 ## Ürün bilgisi
@@ -52,8 +53,9 @@ Ek olarak ürün özetine göre: sensörler pasif olduğu için "radar" sensör 
 
 | Sayfa | Adres |
 |---|---|
-| Film (oynatıcı, en güncel sürüm) | https://claude.ai/artifact/7kuDfLUJDfe4NBzaTbQuMY |
-| Bütün sürümler (galeri) | https://claude.ai/artifact/77W5miQcDH1NBn82suBKcr |
+| Ürün filmi (35 sn, oynatıcı) | https://claude.ai/artifact/Dxt1RhT3161c7jxyb3rxhN |
+| Tanıtım filmi (oynatıcı, en güncel sürüm) | https://claude.ai/artifact/7kuDfLUJDfe4NBzaTbQuMY |
+| Bütün videolar (galeri) | https://claude.ai/artifact/77W5miQcDH1NBn82suBKcr |
 | Yapay zekâ videosu için çekim listesi | https://claude.ai/artifact/AWbqj5RswtBqgpDqD2Dw7u |
 
 Sayfalar özeldir; yalnızca sahibi ve paylaşılan kişiler açabilir.
@@ -75,6 +77,24 @@ Videolar `surumler/` klasöründe durur (sürüm kontrolüne girmez). Her biri i
 | v2 | 8 Kasım | 72 sn | yok | `f0035ca` | İlk fotoğraflı film. Taret sabit, dronlar çizim. |
 | v1 | 8 Kasım | 64 sn | yok | kayıtsız | Fotoğrafsız, tamamı çizim ilk taslak. |
 | Deneme | 12 Kasım | 5 sn | yok | `c5c0a6d` | Tamamı 3B deneme çekimi (sade taret modeliyle). |
+
+## Ürün filmi (35 sn)
+
+Kullanıcının 17 Kasım tarihli brifine göre yapıldı: premium fuar filmi dili, fotogerçekçi 3B, atış ve angajman yok, doğrulanmamış performans iddiası yok. Videolar `surumler/urun-filmi-35sn.mp4` (yazılı) ve `surumler/urun-filmi-35sn-yazisiz.mp4`.
+
+| Zaman | Bölüm | İçerik |
+|---|---|---|
+| 0–7 sn | Ortaya çıkış | Antrasit stüdyo; kenar ışıkları sırayla açılır, kamera kulenin çevresinde döner; gövde ve sensör camı yakın planları. |
+| 7–14 sn | Tasarım ve teknoloji | Sensör ünitesi ve kule gövdesi; görüntü ve ses verisini temsil eden soyut çizgiler. |
+| 14–23 sn | Platform entegrasyonu | Pikap kasası (gerçek fotoğraf + 3B kule), sabit tesis platformu, deniz platformu. |
+| 23–29 sn | Durumsal farkındalık | Geniş gökyüzü, uzakta temsilî dron, sade algılama simgesi ve soyut veri akışı. |
+| 29–35 sn | Final | Stüdyo, üç çeyrek açı, kamera geri çekilir; solda logo ve başlık için temiz boşluk. |
+
+Brife göre sapmalar: çözünürlük 4K değil 1080p; gerçek 3B kamera hareketi yalnızca açılışta, diğer çekimler yüksek çözünürlüklü tek kare üzerinde yavaş kamera; sensör ünitesi ve tripod temsilî.
+
+## Kule modeli: aynalama düzeltmesi
+
+`render/3d/modeller/taret.glb` aynalı aktarılmış: tüfeklerdeki kabartma yazı ters okunuyor ve ters monte tüfek kulenin sağında duruyordu; saha fotoğraflarında solunda. `render/3d/kule_parcala.py` modeli parçalara ayırırken (sabit taban, yatay dönen gövde, dikey dönen beşik, tüfekler, namlular, vidalar) aynalamayı da düzeltir; çıktı `modeller/kule-parcalar.npz`. Ürün filmi ve tanıtım filminin sahne 04 çekimi bu düzeltilmiş modeli kullanır. Önceki konuşmadaki 3B Vitrin hâlâ aynalı modeli kullanıyor.
 
 ## Güncel filmin sahneleri (v10)
 
@@ -119,7 +139,9 @@ Komutlar ve kurulum: `README.md`.
 animasyon/index.html      Film motoru ve oynatıcı
 animasyon/assets/         Fotoğraf plakaları, kule kesmeleri, 3B plakalar, 3B kule çekimi kareleri (kule3b/), dron görünümleri, logolar, ses
 render/render.mjs         MP4 render betiği
-render/3d/                Blender betikleri ve 3B modeller (modeller/dron.npz, modeller/taret.glb)
+render/3d/                Blender betikleri ve 3B modeller (modeller/dron.npz, taret.glb, kule-parcalar.npz)
+urunfilmi/                Ürün filmi: kurgu sayfası ve render görüntüleri
+docs/URUN-FILMI.md        Ürün filminin brifi, bölümleri, üretimi ve sapmaları
 render/ses/ses.py         Ses bandı üreticisi
 render/rotus/rotus.py     Fotoğraf rötuşu
 docs/SENARYO.md           Senaryo, kurallar, seslendirme metni, üretim notları
@@ -174,7 +196,7 @@ Yalnızca bilgisayarda duran ve işe yarayacak dosyalar:
 
 ## Bilinen sınırlar
 
-- Fotoğraflı sahnelerde kule iki boyutlu kesmedir; yalnızca yukarı aşağı döner. 3B çekimde kule sabittir, kamera döner: CAD modeli yatay ve dikey dönen parçalara ayrılmadı.
+- Tanıtım filminin fotoğraflı sahnelerinde kule iki boyutlu kesmedir; yalnızca yukarı aşağı döner. CAD modeli artık yatay ve dikey dönen parçalara ayrıldı; 3B çekimlerde kule döndürülebilir.
 - Gemi ve rafineri ortamları bilgisayar üretimidir, gerçek çekim değildir.
 - Rötuş yakından bakıldığında fark edilebilir: silinen yerlerde kamuflaj deseni düzleşti, plaka boş beyaz.
 - Bu ortamda ekran kartı yok. Tamamı 3B, 1080p bir film için kare başına 2–3 dakika gerekir.

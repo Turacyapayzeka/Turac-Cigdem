@@ -21,6 +21,20 @@ git archive <commit> | tar -x -C /tmp/surum && node /tmp/surum/render/render.mjs
 | v1 | 8 Kasım | `v1-yalnizca-cizim.mp4` | 64 sn | yok | kayıtsız | Fotoğraf kullanılmadan, tamamı çizimle yapılmış ilk taslak. Kaynağı oturum kaydından kurtarıldı. |
 | Deneme | 12 Kasım | `deneme-tamami-3b.mp4` | 5 sn | yok | `c5c0a6d` | Tamamı 3B deneme çekimi: fotoğraflardan kurulmuş sade taret modeli, dönen kamera. |
 
+## Ürün filmi
+
+Tanıtım filminden ayrı, fuar ekranı için 35 saniyelik sinematik ürün filmi (17 Kasım 2026). Kaynak: `urunfilmi/`; ayrıntı: `docs/URUN-FILMI.md`.
+
+| Dosya | Süre | Ses | Açıklama |
+|---|---:|---|---|
+| `urun-filmi-35sn.mp4` | 35 sn | var | Dört kısa yazıyla. 1920×1080, 24 fps. |
+| `urun-filmi-35sn-yazisiz.mp4` | 35 sn | var | Yazısız; logo ve başlık kurguda eklenir. |
+
+```
+node render/render.mjs --sayfa urunfilmi --out surumler/urun-filmi-35sn.mp4
+node render/render.mjs --sayfa urunfilmi --sorgu temiz=1 --out surumler/urun-filmi-35sn-yazisiz.mp4
+```
+
 ## Bu yazışmadan önceki çalışmalar
 
 `ilk-calismalar/` klasöründe, "Dron kalkanı simülasyonu" başlıklı önceki konuşmada yapılmış çalışmalar durur: üç etkileşimli sayfanın kopyası ve iki filmin video dosyası. Filmler, film sayfasının kendi çizicisinden kare kare alınarak üretildi; sayfadaki Dışa Aktar düğmesinin çıktısı değildir. Videolar sürüm kontrolüne girmez.
