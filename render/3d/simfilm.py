@@ -74,30 +74,36 @@ def kareler(cikti):
     """Kulenin hedefe döndüğü kareler. Araç: sabit katman (tripod, kaide) + her poz için kasa kenarının üstündeki katman.
     Gemi ve tesis: kulesiz arka plan + her poz için saydam kule katmanı. Birleştirme: render/rotus/sim_kareler.py"""
     hangi = opt('platform', 'arac'); d = os.path.join(DEPO, 'render', 'out', 'simulasyon', hangi); os.makedirs(os.path.join(d, 'poz'), exist_ok=True); P = POZ[hangi]; ornek = int(opt('ornek', 64))
+    bas, son = int(opt('bas', 0)), int(opt('son', len(P) - 1)); tum = bas == 0 and son == len(P) - 1      # aralık verilirse yalnızca o pozlar yeniden alınır
     if hangi == 'arac':
         kok, yat, dik, G, engel, sc = urunfilmi.pikap_sahne(os.path.join(DEPO, 'render', 'out', 'urunfilmi', 'pikap'), ornek=128)
         donen = list(torun(yat))
-        for o in donen: o.hide_render = True
-        urunfilmi.kare(os.path.join(d, 'kule-sabit.png'))                           # tripod, kaide ve kasaya düşen gölgeleri
-        for o in donen: o.hide_render = False
+        if tum:
+            for o in donen: o.hide_render = True
+            urunfilmi.kare(os.path.join(d, 'kule-sabit.png'))                       # tripod, kaide ve kasaya düşen gölgeleri
+            for o in donen: o.hide_render = False
         engel.hide_render = False
         for o in G: o.hide_render = True
     else:
         urunfilmi.kare = lambda yol: None
         urunfilmi.ortam(d, 'deniz' if hangi == 'gemi' else 'tesis'); sc = bpy.context.scene; kok = bpy.data.objects['kule']; yat = bpy.data.objects['yatay']; dik = bpy.data.objects['dikey']
         kule_parcalari = set(torun(kok))
-        for o in kule_parcalari: o.hide_render = True
-        sc.render.filepath = os.path.join(d, 'bos.jpg'); bpy.ops.render.render(write_still=True); print('->', sc.render.filepath, flush=True)       # kulesiz arka plan
-        for o in kule_parcalari: o.hide_render = False
+        if tum:
+            for o in kule_parcalari: o.hide_render = True
+            sc.render.filepath = os.path.join(d, 'bos.jpg'); bpy.ops.render.render(write_still=True); print('->', sc.render.filepath, flush=True)   # kulesiz arka plan
+            for o in kule_parcalari: o.hide_render = False
         for o in bpy.data.objects:
             if o.type == 'MESH' and o not in kule_parcalari: o.visible_camera = False                                   # ışığa ve yansımaya katkısı sürer
         sc.render.film_transparent = True; sc.render.image_settings.file_format = 'PNG'; sc.render.image_settings.color_mode = 'RGBA'
     sc.cycles.samples = ornek; kutu = sinir(sc, dik.matrix_world.translation.copy(), 0.98, 0.01)
+    sc.render.use_persistent_data = False        # uzun dizilerde kalıcı veri açıkken boya malzemesi siyah çıkabiliyor
     for i, (y, e) in enumerate(P):
+        if not bas <= i <= son: continue
         yat.rotation_euler.z = R(y); dik.rotation_euler.y = -R(e); bpy.context.view_layer.update()
         sc.render.filepath = os.path.join(d, 'poz', f'p{i:02d}.png'); bpy.ops.render.render(write_still=True); print('poz', i, flush=True)
     # atış pozundaki namlu uçları ve yönü
     yat.rotation_euler.z = 0.0; dik.rotation_euler.y = -R(P[38][1]); bpy.context.view_layer.update(); uc, yon = namlu_uclari(dik)
+    if not tum: return
     json.dump({'kutu': kutu, 'poz': len(P), 'uc': [list(u) for u in uc], 'yon': list(yon), 'kule': list(dik.matrix_world.translation),
                'px': None if hangi == 'arac' else {'kule': gor(sc, dik.matrix_world.translation), 'namlu': [gor(sc, u) for u in uc], 'ileri': gor(sc, uc[0] + yon)}}, open(os.path.join(d, 'poz.json'), 'w'), indent=1)
 
