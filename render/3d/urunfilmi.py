@@ -315,12 +315,10 @@ def _arac_kare(cikti, ad, cam_loc, hedef, lens, fstop, yon, dikey, pozlama):
     bilgi = {'ad': ad, 'en': en, 'boy': boy, 'capa': {'kule': piksel(dik.matrix_world.translation), 'taban': piksel(kok.matrix_world.translation)}}
     kare(os.path.join(cikti, ad + '.jpg')); json.dump(bilgi, open(os.path.join(cikti, ad + '.json'), 'w'), indent=1)
 
-def pikap(cikti):
-    """Platform entegrasyonu, kara: kule, aracın stüdyo render'ının kasasında. Araç görüntüsünü ve kamerayı
-    render/rotus/pikap_studyo.py hazırlar (hazirla); burada kule o kamerayla (paralel izdüşüm) iki saydam katman olarak
-    render edilir: kule-tam (kule, tripod ve kasaya düşen gölge), kule-ust (yalnızca kasa kenarının üstünde kalan kısım).
-    Katmanları aynı betiğin birlestir adımı araç görüntüsüne bindirir."""
-    d = os.path.join(cikti, 'pikap'); kam = json.load(open(os.path.join(d, 'kamera.json')))
+def pikap_sahne(d, ornek=None):
+    """Aracın stüdyo render'ına oturan kule sahnesi (paralel izdüşüm). d: pikap_studyo.py'nin kamera.json'u yazdığı klasör.
+    Döner: kok, yat, dik, gölge tutucular, kasa kenarının altını gizleyen engel, sahne."""
+    kam = json.load(open(os.path.join(d, 'kamera.json')))
     reset(); c = coll('urun'); M = malzemeler(); X0 = Vector(kam['X0']); taban, kenar = kam['taban_z'], kam['kenar_z']
     kok, yat, dik = kule(c, M, 0.0, float(opt('dikey', 8))); tripod(c, M, ebeveyn=kok)
     kok.location = (X0.x, X0.y, taban + 0.95); kok.rotation_euler.z = R(float(opt('yon', 140))); bpy.context.view_layer.update()
@@ -336,13 +334,21 @@ def pikap(cikti):
         lo.location = loc; lo.rotation_euler = (X0 + Vector((0, 0, 0.6)) - Vector(loc)).to_track_quat('-Z', 'Y').to_euler(); return lo
     isik('ust', X0 + Vector((-0.6, 3.0, 6.5)), float(opt('ust', 5200)), 7.0); isik('dolgu', X0 + Vector((-5.0, -4.0, 4.0)), float(opt('dolgu', 900)), 5.0, (0.95, 0.97, 1.0))
     w = bpy.data.worlds.new('W'); bpy.context.scene.world = w; w.use_nodes = True; bg = w.node_tree.nodes['Background']; bg.inputs['Color'].default_value = (0.82, 0.82, 0.83, 1); bg.inputs['Strength'].default_value = float(opt('ortam', 0.45))
-    sc = ayar(kam['W'] * kam['kat'], kam['H'] * kam['kat'], 128 if FINAL else 24, pozlama=float(opt('pozlama', -0.4)))
+    sc = ayar(kam['W'] * kam['kat'], kam['H'] * kam['kat'], ornek or (128 if FINAL else 24), pozlama=float(opt('pozlama', -0.4)))
     sc.render.film_transparent = True; sc.render.image_settings.file_format = 'PNG'; sc.render.image_settings.color_mode = 'RGBA'; sc.render.image_settings.color_depth = '8'
     cd = bpy.data.cameras.new('cam'); co = bpy.data.objects.new('cam', cd); sc.collection.objects.link(co); sc.camera = co; cd.type = 'ORTHO'; cd.ortho_scale = kam['W'] / kam['s']; cd.clip_start = 0.1; cd.clip_end = 200
     sag, asagi, ileri = Vector(kam['sag']), Vector(kam['asagi']), Vector(kam['ileri'])
     merkez = X0 + sag * ((kam['W'] / 2 - kam['p0'][0]) / kam['s']) + asagi * ((kam['H'] / 2 - kam['p0'][1]) / kam['s']); yer = merkez - ileri * 40
     from mathutils import Matrix
     co.matrix_world = Matrix(((sag.x, -asagi.x, -ileri.x, yer.x), (sag.y, -asagi.y, -ileri.y, yer.y), (sag.z, -asagi.z, -ileri.z, yer.z), (0, 0, 0, 1))); bpy.context.view_layer.update()
+    return kok, yat, dik, G, engel, sc
+
+def pikap(cikti):
+    """Platform entegrasyonu, kara: kule, aracın stüdyo render'ının kasasında. Araç görüntüsünü ve kamerayı
+    render/rotus/pikap_studyo.py hazırlar (hazirla); burada kule o kamerayla iki saydam katman olarak render edilir:
+    kule-tam (kule, tripod ve kasaya düşen gölge), kule-ust (yalnızca kasa kenarının üstünde kalan kısım).
+    Katmanları aynı betiğin birlestir adımı araç görüntüsüne bindirir."""
+    d = os.path.join(cikti, 'pikap'); kok, yat, dik, G, engel, sc = pikap_sahne(d)
     kare(os.path.join(d, 'kule-tam.png'))
     engel.hide_render = False
     for o in G: o.hide_render = True

@@ -86,26 +86,35 @@ def hazirla(cikti):
     buyuk = rotus(cv2.imread(ham)); cv2.imwrite(os.path.join(cikti, 'plaka.png'), buyuk); kam = kamera_coz(); json.dump(kam, open(os.path.join(cikti, 'kamera.json'), 'w'), indent=1)
     print('ölçek', round(kam['s'], 1), 'piksel/m; yükseklik açısı', round(float(np.degrees(np.arcsin(-kam['ileri'][2]))), 1), 'derece; plaka', buyuk.shape)
 
-def birlestir(cikti):
-    kam = json.load(open(os.path.join(cikti, 'kamera.json'))); pl = cv2.imread(os.path.join(cikti, 'plaka.png')).astype(np.float32) / 255; H, W = pl.shape[:2]
-    tam = cv2.imread(os.path.join(cikti, 'kule-tam.png'), cv2.IMREAD_UNCHANGED).astype(np.float32) / 255; ust = cv2.imread(os.path.join(cikti, 'kule-ust.png'), cv2.IMREAD_UNCHANGED).astype(np.float32) / 255
-    agiz = np.zeros((H, W), np.float32); cv2.fillPoly(agiz, [(np.array(kam['agiz'], np.float64) * K).astype(np.int32)], 1.0); agiz = cv2.GaussianBlur(agiz, (0, 0), 1.5)
-    def bindir(alt, kat, maske=None):
-        kat = cv2.GaussianBlur(kat, (0, 0), 0.7); a = kat[..., 3:4] * (maske[..., None] if maske is not None else 1.0)
-        return alt * (1 - a) + kat[..., :3] * (a if maske is not None else 1.0) if False else alt * (1 - a) + (kat[..., :3] / np.maximum(kat[..., 3:4], 1e-4)) * a
-    sonuc = bindir(pl, tam, agiz); sonuc = bindir(sonuc, ust)          # kenarın altı yalnızca kasa ağzından görünür; üstü her yerde
-    # kadrajı 16:9'a tamamla: kenarlardaki fon uzatılır ve yumuşatılır
-    u, a, y = UST * K, ALT * K, YAN * K; genis = cv2.copyMakeBorder(sonuc, u, a, y, y, cv2.BORDER_REPLICATE)
+def bindir(alt, kat, maske=None):
+    """Saydam katmanı alttaki görüntüye bindirir; maske verilirse yalnızca onun içinde."""
+    on = np.dstack([kat[..., :3] * kat[..., 3:4], kat[..., 3:4]]); on = cv2.GaussianBlur(on, (0, 0), 0.7)      # PNG düz alfa taşır: önce alfa ile çarp
+    m = maske[..., None] if maske is not None else 1.0; return alt * (1 - on[..., 3:4] * m) + on[..., :3] * m
+
+def agiz_maskesi(kam, H, W):
+    m = np.zeros((H, W), np.float32); cv2.fillPoly(m, [(np.array(kam['agiz'], np.float64) * K).astype(np.int32)], 1.0); return cv2.GaussianBlur(m, (0, 0), 1.5)
+
+def cercevele(sonuc):
+    """Kadrajı 16:9'a tamamlar (kenarlardaki fon uzatılır ve yumuşatılır), kenarları karartır, 3840×2160'a getirir."""
+    H, W = sonuc.shape[:2]; u, a, y = UST * K, ALT * K, YAN * K; genis = cv2.copyMakeBorder(sonuc, u, a, y, y, cv2.BORDER_REPLICATE)
     yumusak = cv2.GaussianBlur(genis, (0, 0), 40); fon = np.median(sonuc[:40 * K].reshape(-1, 3), 0)
     xx = np.arange(genis.shape[1], dtype=np.float32); uzak = np.clip(np.maximum(y - xx, xx - (y + W - 1)) / y, 0, 1)[None, :, None]; yy = np.arange(genis.shape[0], dtype=np.float32); uzak_y = np.clip(np.maximum(u - yy, yy - (u + H - 1)) / max(u, a), 0, 1)[:, None, None]
     dis = np.maximum(uzak, uzak_y); kenar = (dis > 0).astype(np.float32); karisim = yumusak * (1 - dis ** 0.7) + fon * dis ** 0.7; genis = genis * (1 - kenar) + karisim * kenar
-    # hafif ton: merkez aydınlık, köşeler koyu (stüdyo spotu)
     hh, ww = genis.shape[:2]; gy, gx = np.mgrid[0:hh, 0:ww].astype(np.float32); r = np.sqrt(((gx - ww * 0.48) / (ww * 0.5)) ** 2 + ((gy - hh * 0.5) / (hh * 0.95)) ** 2)
     genis *= (1 - 0.62 * np.clip((r - 0.42) / 0.58, 0, 1) ** 1.3)[..., None]
-    cikis = cv2.resize(np.clip(genis, 0, 1), (3840, 2160), interpolation=cv2.INTER_AREA); cv2.imwrite(os.path.join(cikti, 'pikap.jpg'), (cikis * 255).round().astype(np.uint8), [cv2.IMWRITE_JPEG_QUALITY, 94])
-    def oran(X):
-        p = izdus(kam, X); return [round(float((p[0] + YAN) / (kam['W'] + 2 * YAN)), 5), round(float((p[1] + UST) / (kam['H'] + UST + ALT)), 5)]
-    json.dump({'ad': 'pikap', 'en': 3840, 'boy': 2160, 'capa': {'kule': oran((-1.86, 0, TABAN_Z + 1.17)), 'taban': oran((-1.86, 0, TABAN_Z + 0.95))}}, open(os.path.join(cikti, 'pikap.json'), 'w'), indent=1)
+    return cv2.resize(np.clip(genis, 0, 1), (3840, 2160), interpolation=cv2.INTER_AREA)
+
+def oran(kam, X):
+    """Araç koordinatındaki noktanın 16:9 kadrajdaki yeri (0–1)."""
+    p = izdus(kam, X); return [round(float((p[0] + YAN) / (kam['W'] + 2 * YAN)), 5), round(float((p[1] + UST) / (kam['H'] + UST + ALT)), 5)]
+
+def oku(yol): return cv2.imread(yol, cv2.IMREAD_UNCHANGED).astype(np.float32) / 255
+
+def birlestir(cikti):
+    kam = json.load(open(os.path.join(cikti, 'kamera.json'))); pl = oku(os.path.join(cikti, 'plaka.png')); H, W = pl.shape[:2]
+    sonuc = bindir(pl, oku(os.path.join(cikti, 'kule-tam.png')), agiz_maskesi(kam, H, W)); sonuc = bindir(sonuc, oku(os.path.join(cikti, 'kule-ust.png')))   # kenarın altı yalnızca kasa ağzından görünür; üstü her yerde
+    cv2.imwrite(os.path.join(cikti, 'pikap.jpg'), (cercevele(sonuc) * 255).round().astype(np.uint8), [cv2.IMWRITE_JPEG_QUALITY, 94])
+    json.dump({'ad': 'pikap', 'en': 3840, 'boy': 2160, 'capa': {'kule': oran(kam, (-1.86, 0, TABAN_Z + 1.17)), 'taban': oran(kam, (-1.86, 0, TABAN_Z + 0.95))}}, open(os.path.join(cikti, 'pikap.json'), 'w'), indent=1)
     print('->', os.path.join(cikti, 'pikap.jpg'))
 
 if __name__ == '__main__':

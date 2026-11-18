@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- artifact:start -->
+<title>Dron Kalkanı 3B Simülasyon</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500;600;700&family=Saira:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: tek koyu sahne. 16:9 film ortada; altında oynatma çubuğu ve bölüm çipleri. */
+:root{
+  --bg:#0a0c0f; --panel:#12161b; --line:#232a33;
+  --fg:#e9ecef; --muted:#8b949f; --brass:#d4a853;
+  --font-display:"Saira Condensed","Arial Narrow",sans-serif;
+  --font-body:"Saira",system-ui,sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,monospace;
+  color-scheme:dark;
+}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:15px;line-height:1.5}
+.wrap{max-width:1280px;margin:0 auto;padding-block:20px 28px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:14px}
+header{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:6px 18px}
+h1{margin:0;font-family:var(--font-display);font-weight:600;font-size:26px;letter-spacing:.06em;text-transform:uppercase;text-wrap:balance}
+.meta{font-family:var(--font-mono);font-size:12px;color:var(--muted);letter-spacing:.04em}
+.stage{position:relative;background:#000;border:1px solid var(--line);aspect-ratio:16/9;max-width:100%}
+canvas{display:block;width:100%;height:100%}
+.loading{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--font-mono);font-size:12px;letter-spacing:.2em;color:var(--muted)}
+.bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.btn{font:500 12px var(--font-mono);letter-spacing:.1em;color:var(--fg);background:var(--panel);border:1px solid var(--line);padding:9px 14px;cursor:pointer;min-height:38px}
+.btn:hover{border-color:var(--brass)}
+.btn[aria-pressed="true"]{border-color:var(--brass);color:var(--brass)}
+.btn:focus-visible,input[type=range]:focus-visible,.chip:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+.scrub{flex:1 1 220px;min-width:0;display:flex;align-items:center;gap:10px}
+input[type=range]{flex:1;min-width:0;accent-color:var(--brass);height:28px}
+.time{font-family:var(--font-mono);font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:400 12px var(--font-mono);letter-spacing:.06em;color:var(--muted);background:none;border:1px solid var(--line);padding:6px 10px;cursor:pointer}
+.chip[aria-current="true"]{color:var(--brass);border-color:var(--brass)}
+.note{color:var(--muted);font-size:14px;max-width:72ch;margin:0}
+.note strong{color:var(--fg);font-weight:500}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Dron Kalkanı · 3B simülasyon</h1>
+    <div class="meta">60 sn · 1920×1080 · 24 fps · sesli</div>
+  </header>
+  <div class="stage">
+    <canvas id="film" width="1920" height="1080" aria-label="Dron Kalkanı 3B simülasyon filmi"></canvas>
+    <div class="loading" id="loading">GÖRÜNTÜLER YÜKLENİYOR</div>
+  </div>
+  <div class="bar">
+    <button class="btn" id="playBtn" type="button" aria-pressed="false">OYNAT</button>
+    <div class="scrub"><input type="range" id="scrub" min="0" max="60" step="0.0417" value="0" aria-label="Zaman çubuğu"><span class="time" id="time">00:00 / 01:00</span></div>
+    <button class="btn" id="sndBtn" type="button" aria-pressed="false">SES: KAPALI</button>
+    <button class="btn" id="txtBtn" type="button" aria-pressed="true">YAZILAR: AÇIK</button>
+    <button class="btn" id="loopBtn" type="button" aria-pressed="true">DÖNGÜ: AÇIK</button>
+  </div>
+  <nav class="chips" id="chips" aria-label="Bölümler"></nav>
+  <p class="note"><strong>Altı bölüm:</strong> açılış, hava savunma katmanları, araç üstü, gemi güvertesi, rafineri, kapanış. Her platformda aynı akış izlenir: arama, tespit, takip, 150 metrede angajman. Simülasyon hızlandırılmıştır; katman kubbeleri ölçekli değildir.</p>
+  <audio id="snd" preload="none"></audio>
+</div>
+
+<script>
+(()=>{'use strict';
+const W=1920,H=1080,FPS=24,DUR=60;
+const QS=new URLSearchParams(location.search),RENDER=QS.get('render')==='1';let YAZI=QS.get('temiz')!=='1';
+const BOLUM=[{ad:'Açılış',t:0},{ad:'Katmanlar',t:5},{ad:'Araç üstü',t:17.5},{ad:'Gemi güvertesi',t:31},{ad:'Rafineri',t:43},{ad:'Kapanış',t:55}];
+const C={fg:'#eef0f2',muted:'#9aa4b0',brass:'#d4a853',tehdit:'#e8674c',temiz:'#63c794',tespit:'#8fc4ee',zemin:'#070a0e'};
+const FD='"Saira Condensed","Arial Narrow",sans-serif',FB='"Saira",system-ui,sans-serif',FM='"JetBrains Mono",ui-monospace,monospace';
+const SRC={arac:'assets/arac.jpg',gemi:'assets/gemi.jpg',tesis:'assets/tesis.jpg',dron:'assets/dron-a.png',logo:'assets/logo.png'};
+const IMG={},KARE={};let SAHNE={};
+const canvas=document.getElementById('film');const ekran=canvas.getContext('2d',{alpha:false});
+const kat=[0,1].map(()=>{const k=document.createElement('canvas');k.width=W;k.height=H;return k.getContext('2d');});
+let c=ekran;
+
+const clamp=(v,a=0,b=1)=>v<a?a:v>b?b:v,lerp=(a,b,p)=>a+(b-a)*p,P=(t,a,b)=>clamp((t-a)/(b-a));
+const yum=p=>p*p*(3-2*p),eo=p=>1-Math.pow(1-p,3),RAD=Math.PI/180;
+const NOISE=(()=>{const n=document.createElement('canvas');n.width=n.height=256;const x=n.getContext('2d'),d=x.createImageData(256,256);let s=7;
+  for(let i=0;i<d.data.length;i+=4){s=(s*1664525+1013904223)>>>0;const v=(s>>>24);d.data[i]=d.data[i+1]=d.data[i+2]=v;d.data[i+3]=255;}x.putImageData(d,0,0);return n;})();
+function rgba(hex,a){const n=parseInt(hex.slice(1),16);return `rgba(${n>>16},${(n>>8)&255},${n&255},${a})`;}
+function metin(s,x,y,o){c.save();c.globalAlpha*=o.alpha==null?1:o.alpha;c.font=`${o.w||500} ${o.size}px ${o.fam||FD}`;c.fillStyle=o.color||C.fg;c.textAlign=o.align||'left';c.textBaseline=o.base||'alphabetic';
+  if('letterSpacing' in c)c.letterSpacing=(o.ls||0)+'px';if(o.golge!==false){c.shadowColor='rgba(0,0,0,0.6)';c.shadowBlur=14;}c.fillText(s,x,y);c.restore();}
+function cizgi(x1,y1,x2,y2){c.beginPath();c.moveTo(x1,y1);c.lineTo(x2,y2);c.stroke();}
+function kutu(x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.lineTo(x+w-r,y);c.arcTo(x+w,y,x+w,y+r,r);c.lineTo(x+w,y+h-r);c.arcTo(x+w,y+h,x+w-r,y+h,r);c.lineTo(x+r,y+h);c.arcTo(x,y+h,x,y+h-r,r);c.lineTo(x,y+r);c.arcTo(x,y,x+r,y,r);c.closePath();}
+
+/* ---------- taktik görünüm: paralel izdüşümlü 3B uzay (x, y yer düzlemi; z yukarı; ölçü metre) ---------- */
+const AZ=-135*RAD,EL=34*RAD,SE=Math.sin(EL),CE=Math.cos(EL);
+const BX=[-Math.sin(AZ),SE*Math.cos(AZ)],BY=[Math.cos(AZ),SE*Math.sin(AZ)];
+function TK(cx,cy,S){return {cx,cy,S,pr:(x,y,z)=>({x:cx+S*(BX[0]*x+BY[0]*y),y:cy+S*(BX[1]*x+BY[1]*y-CE*(z||0))})};}
+function zemin(T,a,deniz,t){c.save();c.fillStyle=C.zemin;c.fillRect(0,0,W,H);
+  const g=c.createRadialGradient(T.cx,T.cy,0,T.cx,T.cy,W*0.62);g.addColorStop(0,deniz?'rgba(28,52,72,0.85)':'rgba(40,46,54,0.9)');g.addColorStop(0.55,deniz?'rgba(12,24,36,0.6)':'rgba(18,22,28,0.6)');g.addColorStop(1,'rgba(7,10,14,0)');
+  c.fillStyle=g;c.fillRect(0,0,W,H);
+  /* ızgara: ekrandaki aralığı 70 pikselin üstünde kalan en küçük adım */
+  let adim=10;for(const k of [10,50,100,500,1000,5000,10000]){adim=k;if(k*T.S>=70)break;}const E=Math.ceil(1500/T.S/adim)*adim;
+  c.lineWidth=1;for(let v=-E;v<=E;v+=adim){const ana=Math.round(v/adim)%5===0;c.strokeStyle=`rgba(190,205,220,${(ana?0.2:0.085)*a})`;
+    let p=T.pr(v,-E),q=T.pr(v,E);cizgi(p.x,p.y,q.x,q.y);p=T.pr(-E,v);q=T.pr(E,v);cizgi(p.x,p.y,q.x,q.y);}
+  if(deniz){/* dalga çizgileri */c.strokeStyle=`rgba(150,190,220,${0.16*a})`;c.lineWidth=1.2;let s=11;const r=()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296;};
+    for(let i=0;i<150;i++){const x=(r()-0.5)*2*1100/T.S*1.0,y=(r()-0.5)*2*1100/T.S,l=(14+r()*30)/T.S,k=Math.sin(t*0.9+i*1.7)*4/T.S;const p=T.pr(x+k,y-k),q=T.pr(x+k+l,y-k-l*0.25);cizgi(p.x,p.y,q.x,q.y);}}
+  const v=c.createRadialGradient(T.cx,T.cy,H*0.36,T.cx,T.cy,W*0.78);v.addColorStop(0,'rgba(7,10,14,0)');v.addColorStop(1,'rgba(7,10,14,0.88)');c.fillStyle=v;c.fillRect(0,0,W,H);c.restore();}
+/* yer düzleminde mesafe işaretleri (x ekseni boyunca) */
+function mesafeler(T,liste,a){if(a<=0)return;c.save();c.globalAlpha*=a;for(const m of liste){const p=T.pr(m,0,0);c.fillStyle='rgba(190,205,220,0.75)';c.beginPath();c.arc(p.x,p.y,2.5,0,6.2832);c.fill();metin(m+' m',p.x+8,p.y-6,{size:14,w:400,fam:FM,color:'rgba(190,205,220,0.8)',golge:false});}c.restore();}
+function halka(T,R,renk,a,o){o=o||{};c.save();c.globalAlpha*=a;c.strokeStyle=renk;c.lineWidth=o.kalin||1.6;if(o.kesik)c.setLineDash(o.kesik);c.beginPath();c.ellipse(T.cx,T.cy,T.S*R,T.S*R*SE,0,o.a0||0,o.a1==null?6.2832:o.a1);c.stroke();c.restore();}
+function bant(T,R1,R2,renk,a){c.save();c.globalAlpha*=a;c.fillStyle=renk;c.beginPath();c.ellipse(T.cx,T.cy,T.S*R2,T.S*R2*SE,0,0,6.2832);c.ellipse(T.cx,T.cy,T.S*R1,T.S*R1*SE,0,0,6.2832,true);c.fill('evenodd');c.restore();}
+/* yarım küre: üstte kürenin dış çemberi, altta yer halkasının ön yarısı; içinde enlem ve boylam çizgileri */
+function kubbe(T,R,renk,a,o){if(a<=0)return;o=o||{};const r=T.S*R,cx=T.cx,cy=T.cy;c.save();c.globalAlpha*=a;
+  c.beginPath();c.arc(cx,cy,r,Math.PI,0);c.ellipse(cx,cy,r,r*SE,0,0,Math.PI);c.closePath();
+  const g=c.createRadialGradient(cx-r*0.25,cy-r*0.55,r*0.08,cx,cy-r*0.1,r*1.05);g.addColorStop(0,rgba(renk,o.dolgu==null?0.2:o.dolgu));g.addColorStop(0.7,rgba(renk,(o.dolgu==null?0.2:o.dolgu)*0.42));g.addColorStop(1,rgba(renk,(o.dolgu==null?0.2:o.dolgu)*0.9));
+  c.fillStyle=g;c.fill();c.lineWidth=o.kalin||1.8;c.strokeStyle=rgba(renk,0.9);c.stroke();
+  c.lineWidth=1;c.strokeStyle=rgba(renk,0.26);for(const l of [25,50,72]){const rr=r*Math.cos(l*RAD);c.beginPath();c.ellipse(cx,cy-r*Math.sin(l*RAD)*CE,rr,rr*SE,0,0,6.2832);c.stroke();}
+  for(const m of [0,45,90,135]){c.beginPath();for(let i=0;i<=40;i++){const s=i/40*Math.PI,x=R*Math.cos(s)*Math.cos(m*RAD),y=R*Math.cos(s)*Math.sin(m*RAD),z=R*Math.sin(s),p=T.pr(x,y,z);i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y);}c.stroke();}
+  c.strokeStyle=rgba(renk,0.42);c.setLineDash([5,7]);c.beginPath();c.ellipse(cx,cy,r,r*SE,0,Math.PI,6.2832);c.stroke();c.restore();}
+/* çokgen tabanlı dik prizma: kameraya bakan yan yüzler, sonra üst yüz */
+function prizma(T,taban,z0,z1,renk,a){c.save();c.globalAlpha*=a;const n=taban.length,KY=[Math.cos(AZ),Math.sin(AZ)];
+  let alan=0;for(let i=0;i<n;i++){const p=taban[i],q=taban[(i+1)%n];alan+=p[0]*q[1]-q[0]*p[1];}const yon=alan>0?1:-1;
+  c.lineWidth=1;c.strokeStyle=rgba(renk,0.75);
+  for(let i=0;i<n;i++){const p=taban[i],q=taban[(i+1)%n],nx=(q[1]-p[1])*yon,ny=-(q[0]-p[0])*yon,d=(nx*KY[0]+ny*KY[1])/Math.hypot(nx,ny);if(d<=0.02)continue;
+    const A=T.pr(p[0],p[1],z0),B=T.pr(q[0],q[1],z0),D=T.pr(q[0],q[1],z1),E=T.pr(p[0],p[1],z1);c.beginPath();c.moveTo(A.x,A.y);c.lineTo(B.x,B.y);c.lineTo(D.x,D.y);c.lineTo(E.x,E.y);c.closePath();c.fillStyle=rgba(renk,0.10+0.16*d);c.fill();c.stroke();}
+  c.beginPath();taban.forEach((p,i)=>{const s=T.pr(p[0],p[1],z1);i?c.lineTo(s.x,s.y):c.moveTo(s.x,s.y);});c.closePath();c.fillStyle=rgba(renk,0.34);c.fill();c.stroke();c.restore();}
+function kutu3(T,x,y,w,d,z0,z1,renk,a,aci){const k=Math.cos((aci||0)*RAD),s=Math.sin((aci||0)*RAD);prizma(T,[[-w/2,-d/2],[w/2,-d/2],[w/2,d/2],[-w/2,d/2]].map(([u,v])=>[x+u*k-v*s,y+u*s+v*k]),z0,z1,renk,a);}
+function silindir(T,x,y,r,z0,z1,renk,a){c.save();c.globalAlpha*=a;const A=T.pr(x,y,z0),B=T.pr(x,y,z1),rr=T.S*r;c.beginPath();c.ellipse(A.x,A.y,rr,rr*SE,0,0,Math.PI);c.lineTo(B.x-rr,B.y);c.ellipse(B.x,B.y,rr,rr*SE,0,Math.PI,0,true);c.closePath();
+  c.fillStyle=rgba(renk,0.2);c.fill();c.lineWidth=1;c.strokeStyle=rgba(renk,0.75);c.stroke();c.beginPath();c.ellipse(B.x,B.y,rr,rr*SE,0,0,6.2832);c.fillStyle=rgba(renk,0.34);c.fill();c.stroke();c.restore();}
+/* korunan varlıklar (kule orijinde durur) */
+const VARLIK={
+  kara(T,a){kutu3(T,0.9,0,5.4,1.9,0,1.3,'#b9c4cf',a,20);kutu3(T,1.6,0.25,2.1,1.8,1.3,1.9,'#b9c4cf',a,20);},
+  deniz(T,a,t){const k=Math.cos(28*RAD),s=Math.sin(28*RAD),d=([u,v])=>[u*k-v*s-52*k,u*s+v*k-52*s+9];
+    /* dümen suyu */c.save();c.globalAlpha*=a*0.5;c.strokeStyle='rgba(190,220,240,0.5)';c.lineWidth=1.2;for(const y of [-1,1]){const p=T.pr(...d([-92,y*10])),q=T.pr(...d([-330,y*52]));cizgi(p.x,p.y,q.x,q.y);}c.restore();
+    prizma(T,[[-92,-14],[70,-14],[96,-7],[108,0],[96,7],[70,14],[-92,14]].map(d),0,9,'#b9c4cf',a);
+    prizma(T,[[-84,-12],[-52,-12],[-52,12],[-84,12]].map(d),9,27,'#b9c4cf',a);prizma(T,[[-76,-4],[-66,-4],[-66,4],[-76,4]].map(d),27,39,'#b9c4cf',a);
+    for(let i=0;i<5;i++)prizma(T,[[-40+i*24,-9],[-22+i*24,-9],[-22+i*24,9],[-40+i*24,9]].map(d),9,11.5,'#93a3b3',a);},
+  tesis(T,a){const g='#b9c4cf';c.save();c.globalAlpha*=a;c.strokeStyle=rgba(g,0.4);c.lineWidth=1.2;c.setLineDash([6,6]);c.beginPath();[[-150,-110],[150,-110],[150,120],[-150,120]].forEach((p,i)=>{const s=T.pr(p[0],p[1]);i?c.lineTo(s.x,s.y):c.moveTo(s.x,s.y);});c.closePath();c.stroke();c.restore();
+    const L=[['s',95,70,20,0,15],['s',48,84,20,0,15],['s',100,22,15,0,13],['k',-70,70,70,26,0,10],['s',-104,18,5,0,52],['s',-88,6,4,0,44],['s',-72,26,6,0,60],['k',-10,-52,150,7,5,7.5],['k',40,-80,7,60,5,7.5],['k',-96,-60,36,22,0,12],['s',68,-52,4,0,36],['s',-40,30,3.2,0,30],['k',0,0,7,7,0,11]];
+    L.sort((p,q)=>(BX[1]*p[1]+BY[1]*p[2])-(BX[1]*q[1]+BY[1]*q[2]));
+    for(const e of L)e[0]==='s'?silindir(T,e[1],e[2],e[3],e[4],e[5],g,a):kutu3(T,e[1],e[2],e[3],e[4],e[5],e[6],g,a);}};
+/* dron işareti: yerdeki izdüşümü, yükseklik çizgisi ve dört pervaneli simge */
+function dronIsareti(T,X,renk,a,boy){const p=T.pr(X[0],X[1],X[2]),y=T.pr(X[0],X[1],0);boy=boy||13;c.save();c.globalAlpha*=a;c.strokeStyle=rgba(renk,0.5);c.lineWidth=1;c.setLineDash([3,4]);cizgi(p.x,p.y,y.x,y.y);c.setLineDash([]);
+  c.fillStyle=rgba(renk,0.5);c.beginPath();c.ellipse(y.x,y.y,4,4*SE,0,0,6.2832);c.fill();c.strokeStyle=renk;c.lineWidth=2;cizgi(p.x-boy,p.y-boy*0.5,p.x+boy,p.y+boy*0.5);cizgi(p.x-boy,p.y+boy*0.5,p.x+boy,p.y-boy*0.5);
+  c.lineWidth=1.5;for(const [sx,sy] of [[-1,-0.5],[1,0.5],[-1,0.5],[1,-0.5]]){c.beginPath();c.ellipse(p.x+sx*boy,p.y+sy*boy,boy*0.42,boy*0.2,0,0,6.2832);c.stroke();}c.fillStyle=renk;c.fillRect(p.x-3,p.y-3,6,6);c.restore();return p;}
+function hedefKutusu(p,r,renk,a){c.save();c.globalAlpha*=a;c.strokeStyle=renk;c.lineWidth=2;for(const [sx,sy] of [[-1,-1],[1,-1],[-1,1],[1,1]]){c.beginPath();c.moveTo(p.x+sx*r,p.y+sy*(r-10));c.lineTo(p.x+sx*r,p.y+sy*r);c.lineTo(p.x+sx*(r-10),p.y+sy*r);c.stroke();}c.restore();}
+function etiket(p,ust,alt,renk,a,yan){if(a<=0||!YAZI)return;const x=p.x+(yan||1)*16,hz=(yan||1)>0?'left':'right';c.save();c.globalAlpha*=a;c.strokeStyle=rgba(renk,0.8);c.lineWidth=1.2;cizgi(p.x,p.y,x,p.y);c.restore();
+  metin(ust,x+(yan||1)*6,p.y+7,{size:25,w:600,ls:1,color:renk,alpha:a,align:hz});if(alt)metin(alt,x+(yan||1)*6,p.y+29,{size:15,w:400,fam:FB,color:C.muted,alpha:a*0.9,align:hz});}
+
+/* ---------- görüntüyü dikdörtgene yerleştirme: (cx, cy) merkezde, z kat yakınlık; kenar kadraja girmez ---------- */
+function resim(img,f,x,y,w,h,filtre){const sw=img.width/f[2],sh=img.height/f[2],sx=clamp(f[0]*img.width-sw/2,0,img.width-sw),sy=clamp(f[1]*img.height-sh/2,0,img.height-sh);
+  c.save();if(filtre)c.filter=filtre;c.drawImage(img,sx,sy,sw,sh,x,y,w,h);c.restore();return {m:(nx,ny)=>({x:x+(nx*img.width-sx)/sw*w,y:y+(ny*img.height-sy)/sh*h}),olcek:w/sw*img.width};}
+function kar(a,b,p){return [lerp(a[0],b[0],p),lerp(a[1],b[1],p),lerp(a[2],b[2],p)];}
+function namluAtesi(G,S,k,guc){const n=S.namlu[k],p=G.m(n[0],n[1]),u=S.ates,L=G.olcek*0.05*guc;c.save();c.globalCompositeOperation='lighter';c.translate(p.x,p.y);c.rotate(Math.atan2(u[1],u[0]));
+  const g=c.createRadialGradient(L*0.3,0,0,L*0.3,0,L);g.addColorStop(0,`rgba(255,244,214,${0.95*guc})`);g.addColorStop(0.35,`rgba(255,190,96,${0.6*guc})`);g.addColorStop(1,'rgba(255,150,60,0)');c.fillStyle=g;
+  c.beginPath();c.ellipse(L*0.45,0,L,L*0.36,0,0,6.2832);c.fill();c.beginPath();c.ellipse(L*0.1,0,L*0.3,L*0.5,0,0,6.2832);c.fill();c.restore();}
+
+/* kulenin hareketi: önceden render edilmiş pozlar. 0 bekleme; 1–22 hedefe dönüş; 23–38 takip; 39–40 geri tepme */
+function poz(s,dronlar){if(s<1.05)return [0,0,0];if(s<1.95){const i=Math.min(22,1+Math.floor((s-1.05)/0.9*22));return [i,i,0];}
+  if(s<4.6){const f=23+(s-1.95)/2.65*15,i=Math.floor(f);return [i,Math.min(38,i+1),f-i];}
+  for(const D of dronlar)for(let k=0;k<3;k++){const g=s-D.gec-4.6-k*0.2;if(g>=0&&g<0.045)return [39,39,0];if(g>=0.045&&g<0.1)return [40,40,0];}
+  return [38,38,0];}
+function kuleKaresi(G,S,ad,p,r,filtre){const L=KARE[ad];if(!L||!S.kutu)return;const k=S.kutu,a=G.m(k[0],k[1]),b=G.m(k[2],k[3]);c.save();c.beginPath();c.rect(r[0],r[1],r[2],r[3]);c.clip();if(filtre)c.filter=filtre;
+  c.drawImage(L[p[0]],a.x,a.y,b.x-a.x,b.y-a.y);if(p[2]>0.01){c.globalAlpha=p[2];c.drawImage(L[p[1]],a.x,a.y,b.x-a.x,b.y-a.y);}c.restore();}
+
+/* ---------- gösterge paneli, menzil çubuğu, elektro-optik pencere ---------- */
+const DURUM={arama:['ARAMA','Searching',C.muted],tespit:['TESPİT · KİLİTLENİYOR','Detected · locking',C.brass],takip:['TAKİP · KİLİTLİ','Tracking · locked',C.tespit],angajman:['ANGAJMAN','Engaging',C.tehdit],etkisiz:['ETKİSİZ','Neutralised',C.temiz],temiz:['SAHA TEMİZ','Area clear',C.temiz]};
+function panel(a,ad,adEn,durum,menzil,irtifa,az,el){if(a<=0)return;const x=64,y=58,w=440,h=280;c.save();c.globalAlpha*=a;kutu(x,y,w,h,6);c.fillStyle='rgba(9,12,16,0.78)';c.fill();c.strokeStyle='rgba(238,240,242,0.16)';c.lineWidth=1;c.stroke();c.fillStyle=C.brass;c.fillRect(x,y,4,h);
+  metin('DRON KALKANI',x+24,y+42,{size:30,w:700,ls:4,golge:false});metin(ad,x+24,y+70,{size:19,w:500,fam:FB,color:C.fg,golge:false});metin(adEn,x+w-20,y+70,{size:14,w:400,fam:FB,color:C.muted,align:'right',golge:false});
+  const D=DURUM[durum];kutu(x+24,y+88,w-48,48,4);c.fillStyle=rgba(D[2],0.14);c.fill();c.strokeStyle=rgba(D[2],0.85);c.stroke();metin(D[0],x+w/2,y+120,{size:25,w:600,ls:3,color:D[2],align:'center',golge:false});metin(D[1],x+w/2,y+156,{size:13,w:400,fam:FB,color:C.muted,align:'center',golge:false});
+  const satir=(i,k,v)=>{metin(k,x+24,y+192+i*30,{size:14,w:400,fam:FM,color:C.muted,ls:1,golge:false});metin(v,x+w-24,y+192+i*30,{size:19,w:500,fam:FM,align:'right',golge:false});};
+  satir(0,'MENZİL',menzil==null?'—':Math.round(menzil)+' m');satir(1,'İRTİFA',irtifa==null?'—':Math.round(irtifa)+' m');satir(2,'KULE AZ / EL',az==null?'—':Math.round(az)+'° / '+el.toFixed(1)+'°');c.restore();}
+function menzilCubugu(a,menzil,durum){if(a<=0)return;const x0=470,x1=1110,y=H-86,X=m=>lerp(x1,x0,clamp(m/850));c.save();c.globalAlpha*=a;c.fillStyle='rgba(9,12,16,0.7)';kutu(x0-26,y-44,x1-x0+52,84,6);c.fill();
+  c.strokeStyle='rgba(238,240,242,0.3)';c.lineWidth=2;cizgi(x0,y,x1,y);c.strokeStyle=rgba(C.tespit,0.9);c.lineWidth=5;cizgi(X(800),y,X(600),y);c.strokeStyle=rgba(C.tehdit,0.95);cizgi(X(150),y,X(0),y);
+  metin('600–800 m · TESPİT',X(700),y-16,{size:15,w:500,fam:FM,color:C.tespit,align:'center',golge:false});metin('150 m · ANGAJMAN',X(75),y-16,{size:15,w:500,fam:FM,color:C.tehdit,align:'center',golge:false});metin('KULE',x1,y+26,{size:11,w:400,fam:FM,color:C.muted,align:'right',golge:false});
+  if(menzil!=null){const mx=X(menzil),r=DURUM[durum][2];c.fillStyle=r;c.beginPath();c.moveTo(mx,y-9);c.lineTo(mx+8,y);c.lineTo(mx,y+9);c.lineTo(mx-8,y);c.closePath();c.fill();metin(Math.round(menzil)+' m',mx,y+30,{size:17,w:500,fam:FM,color:r,align:'center',golge:false});}c.restore();}
+function eoPencere(a,t,menzil,vurus,deniz){if(a<=0)return;const w=440,h=262,x=W-64-w,y=H-64-h;c.save();c.globalAlpha*=a;kutu(x,y,w,h,6);c.save();c.clip();
+  const g=c.createLinearGradient(0,y,0,y+h);g.addColorStop(0,'#5f7f9f');g.addColorStop(0.75,'#a9bccb');g.addColorStop(1,deniz?'#33475a':'#8f9aa0');c.fillStyle=g;c.fillRect(x,y,w,h);
+  const cx=x+w/2+Math.sin(t*3.1)*3,cy=y+h/2+Math.cos(t*2.3)*2;
+  if(menzil!=null){const dw=clamp(46+11000/menzil,50,150),dh=dw*IMG.dron.height/IMG.dron.width,d=vurus==null?0:vurus;c.save();c.translate(cx+d*26,cy+d*d*120);c.rotate(d*1.9);c.globalAlpha*=1-clamp(d*0.9);c.filter='saturate(0.5) contrast(1.1)';c.drawImage(IMG.dron,-dw/2,-dh/2,dw,dh);c.restore();
+    if(vurus!=null&&vurus<0.25){c.fillStyle=`rgba(255,236,200,${0.85*(1-vurus/0.25)})`;c.beginPath();c.arc(cx,cy,26+vurus*160,0,6.2832);c.fill();}}
+  c.restore();c.strokeStyle='rgba(238,240,242,0.5)';c.lineWidth=1;cizgi(x+w/2-34,y+h/2,x+w/2-10,y+h/2);cizgi(x+w/2+10,y+h/2,x+w/2+34,y+h/2);cizgi(x+w/2,y+h/2-34,x+w/2,y+h/2-10);cizgi(x+w/2,y+h/2+10,x+w/2,y+h/2+34);
+  kutu(x,y,w,h,6);c.strokeStyle='rgba(238,240,242,0.22)';c.stroke();c.fillStyle='rgba(9,12,16,0.72)';c.fillRect(x,y,w,26);metin('ELEKTRO-OPTİK · PASİF',x+12,y+18,{size:12,w:500,fam:FM,ls:1,golge:false});
+  if(menzil!=null&&vurus==null)hedefKutusu({x:x+w/2,y:y+h/2},56,C.brass,1);c.restore();}
+
+/* ---------- alt yazı: Türkçe büyük, İngilizce küçük ---------- */
+function yazi(t,t0,t1,tr,en,o){o=o||{};const a=yum(P(t,t0,t0+0.6))*(1-yum(P(t,t1-0.5,t1)));if(a<=0||!YAZI)return;const x=o.x==null?110:o.x,y=o.y==null?H-140:o.y,size=o.size||54,k=eo(P(t,t0,t0+0.9));
+  c.save();c.globalAlpha=a;c.fillStyle=C.brass;c.fillRect(x,y-size-16,64*k,3);c.restore();metin(tr,x-(1-k)*16,y,{size,w:600,ls:o.ls==null?1.5:o.ls,alpha:a});if(en)metin(en,x-(1-k)*16,y+34,{size:21,w:300,fam:FB,color:C.muted,alpha:a*0.92});}
+
+/* ---------- bölümler ---------- */
+const KATMAN=[
+  {R:760,sol:'Uzun menzil hava savunma',solEn:'Long-range air defence',thr:'Uçak, seyir füzesi',thrEn:'Aircraft, cruise missiles',renk:'#8aa3bd'},
+  {R:622,sol:'Orta menzil hava savunma',solEn:'Medium-range air defence',thr:'Uçak, helikopter, büyük İHA',thrEn:'Aircraft, helicopters, large UAVs',renk:'#8aa3bd'},
+  {R:484,sol:'Kısa menzil hava savunma',solEn:'Short-range air defence',thr:'Alçak uçan hedefler, İHA',thrEn:'Low-flying targets, UAVs',renk:'#8aa3bd'},
+  {R:347,sol:'Elektronik harp · karıştırıcı',solEn:'Electronic warfare · jamming',thr:'Telsizle yönetilen dronlar',thrEn:'Radio-controlled drones',renk:'#c9a9e6'},
+  {R:204,sol:'DRON KALKANI',solEn:'600–800 m detection · 150 m engagement',thr:'FPV, fiber optik ve otonom dronlar',thrEn:'FPV, fibre-optic and autonomous drones',renk:C.brass,biz:1}];
+const KY=i=>214+i*100,KT=i=>6.0+i*0.75,TEH=i=>10.6+i*0.72;      /* satır yüksekliği, kubbenin belirişi, tehdidin yola çıkışı */
+function acilis(u,d){const T=TK(W/2,H*0.6,lerp(0.9,1.25,yum(P(u,0,d+2))));zemin(T,1,false,u);
+  /* yaklaşan dronlar */for(let i=0;i<7;i++){const a=(i*51+20)*RAD,r=lerp(980,330+i*24,yum(P(u,0.4+i*0.25,d+3)));dronIsareti(T,[r*Math.cos(a),r*Math.sin(a),70+i*9+Math.sin(u*1.4+i)*4],C.tehdit,0.85*yum(P(u,0.5+i*0.25,1.4+i*0.25)),11);}
+  halka(T,150,C.brass,0.5*yum(P(u,1.2,2.4)),{kesik:[4,6]});
+  if(YAZI){const a=yum(P(u,0.6,1.6))*(1-yum(P(u,d-0.9,d-0.2)));c.save();c.globalAlpha=a;c.fillStyle=C.brass;c.fillRect(W/2-48*eo(P(u,0.6,1.8)),H*0.33,96*eo(P(u,0.6,1.8)),3);c.restore();
+    metin('DRON KALKANI',W/2,H*0.33+112,{size:128,w:700,ls:16,alpha:a,align:'center'});metin('Katmanlı hava savunma  ·  3B simülasyon',W/2,H*0.33+170,{size:34,w:300,fam:FB,ls:2,color:C.muted,alpha:yum(P(u,1.4,2.4))*(1-yum(P(u,d-0.9,d-0.2))),align:'center'});}}
+function katmanlar(u,d,t){const cx=W/2,cy=H*0.69,T=TK(cx,cy,1);zemin(T,1,false,t);const son=yum(P(t,14.3,15.3));
+  for(let i=0;i<5;i++){const K=KATMAN[i],p=eo(P(t,KT(i),KT(i)+0.9));if(p<=0)continue;const T2=TK(cx,cy,p),vur=K.biz?1:1-0.55*son,par=1+0.5*Math.max(0,1-Math.abs(t-(TEH(i)+1.25))/0.35);
+    kubbe(T2,K.R,K.renk,p*vur,{dolgu:(K.biz?0.26:0.13)*par,kalin:K.biz?2.8:2});}
+  /* korunan varlık */c.save();c.fillStyle=C.fg;c.beginPath();c.arc(cx,cy,5,0,6.2832);c.fill();c.strokeStyle=rgba(C.brass,0.9);c.lineWidth=1.5;c.beginPath();c.ellipse(cx,cy,16,16*SE,0,0,6.2832);c.stroke();c.restore();
+  /* iki yanda etiketler: solda tehdit, sağda çözüm */
+  if(YAZI){const b=yum(P(t,5.6,6.4));metin('TEHDİT',70,118,{size:26,w:600,ls:7,color:C.tehdit,alpha:b});metin('Threat',70,144,{size:16,w:300,fam:FB,color:C.muted,alpha:b});metin('ÇÖZÜM',W-70,118,{size:26,w:600,ls:7,color:C.brass,alpha:b,align:'right'});metin('Solution',W-70,144,{size:16,w:300,fam:FB,color:C.muted,alpha:b,align:'right'});}
+  for(let i=0;i<5;i++){const K=KATMAN[i],p=yum(P(t,KT(i)+0.3,KT(i)+1.0));if(p<=0)continue;const y=KY(i),dx=Math.sqrt(K.R*K.R-(cy-y)*(cy-y)),sol=K.biz?1:1-0.5*son;
+    c.save();c.globalAlpha=p*0.6*sol;c.strokeStyle=K.renk;c.lineWidth=1.2;c.setLineDash([2,5]);cizgi(70,y+16,cx-dx,y+16);cizgi(W-70,y+16,cx+dx,y+16);c.restore();
+    if(YAZI){metin(K.thr,70,y,{size:34,w:500,color:C.fg,alpha:p*sol});metin(K.thrEn,70,y+44,{size:17,w:300,fam:FB,color:C.muted,alpha:p*sol});
+      metin(K.sol,W-70,y,{size:K.biz?42:34,w:K.biz?700:500,ls:K.biz?3:0,color:K.biz?C.brass:C.fg,alpha:p*sol,align:'right'});metin(K.solEn,W-70,y+44,{size:17,w:300,fam:FB,color:C.muted,alpha:p*sol,align:'right'});}
+    /* tehdit simgesi: kendi katmanına kadar gelir, orada durdurulur */
+    const q=P(t,TEH(i),TEH(i)+1.25),x=lerp(40,cx-dx-6,eo(q)),biter=P(t,TEH(i)+1.25,TEH(i)+1.9);
+    if(q>0&&biter<1){c.save();c.globalAlpha=yum(P(q,0,0.15))*(1-biter);c.fillStyle=C.tehdit;c.beginPath();c.moveTo(x+18,y+16);c.lineTo(x-12,y+5);c.lineTo(x-4,y+16);c.lineTo(x-12,y+27);c.closePath();c.fill();
+      c.strokeStyle=rgba(C.tehdit,0.55);c.lineWidth=2;cizgi(x-14,y+16,Math.max(40,x-130),y+16);c.restore();}
+    if(biter>0&&biter<1){c.save();c.globalAlpha=1-biter;c.strokeStyle=K.biz?C.brass:C.fg;c.lineWidth=2;c.beginPath();c.arc(cx-dx,y+16,8+biter*34,0,6.2832);c.stroke();c.restore();}}
+  yazi(t,6.0,10.2,'Hava savunması katmanlıdır.','Air defence is layered.');yazi(t,10.5,14.1,'Karıştırıcı her dronu durduramaz.','Jamming cannot stop every drone.');
+  yazi(t,14.4,17.6,'Son katman: Dron Kalkanı.','The last layer: 600–800 m detection, 150 m engagement.');
+  if(YAZI)metin('Kubbeler ölçekli değildir · Domes are not to scale',W-70,H-56,{size:14,w:300,fam:FB,color:C.muted,alpha:0.8*yum(P(t,6.5,7.5)),align:'right'});}
+
+/* platform simülasyonu: yakın plan → (yakın plan köşe penceresine küçülür) taktik görünüm → yakın plan */
+const PLATFORM={
+  arac:{no:'1 / 3',ad:'ARAÇ ÜSTÜ',en:'Vehicle-mounted',alt:'Pikap kasasında, tripod üstünde.',altEn:'On a tripod in the pickup bed.',img:'arac',zemin:'kara',giris:3.0,a:[0.5,0.5,1.0],b:[0.47,0.47,1.16],kose:[0.39,0.43,2.3],filtre:'brightness(0.93) contrast(1.06)',dron:[{az:158,h:[90,34],gec:0}],kuleZ:2.1},
+  gemi:{no:'2 / 3',ad:'GEMİ GÜVERTESİ',en:'On deck',alt:'Kargo gemisi ve tanker güvertesinde.',altEn:'On the deck of cargo ships and tankers.',img:'gemi',zemin:'deniz',giris:2.2,a:[0.58,0.5,1.0],b:[0.62,0.48,1.1],kose:[0.62,0.44,1.9],dron:[{az:118,h:[45,16],gec:0}],kuleZ:13},
+  tesis:{no:'3 / 3',ad:'RAFİNERİ',en:'Refinery · fixed site',alt:'Rafinerilerde ve kritik tesislerde sabit kurulum.',altEn:'Fixed installation at refineries and critical sites.',img:'tesis',zemin:'tesis',giris:2.2,a:[0.58,0.5,1.0],b:[0.62,0.48,1.1],kose:[0.62,0.44,1.9],dron:[{az:150,h:[110,40],gec:0},{az:171,h:[80,36],gec:0.95}],kuleZ:11}};
+const TAM=[0,0,W,H],KOSE=[W-64-688,58,688,387];
+function dronDurumu(D,tau){/* tau: simülasyon saati (sn). Menzil 830 m'den başlar; 150 m'de angajman; kısa süre sonra vurulur ve düşer. */
+  const s=tau-D.gec,gel=P(s,0.6,4.6),R=lerp(830,150,gel)-(s>4.6?(Math.min(s,5.15)-4.6)*40:0),vur=s>=5.15?s-5.15:null,a=D.az*RAD;
+  let h=lerp(D.h[0],D.h[1],yum(P(s,0.6,5.0))),r=R;if(vur!=null){h=Math.max(0,h-vur*vur*150);r=R-vur*14;}
+  return {s,var:s>=0.6,R:r,h,X:[r*Math.cos(a),r*Math.sin(a),h],vur,yerde:vur!=null&&h<=0,
+    durum:s<0.6?'arama':R>760?'arama':s<1.9?'tespit':s<4.6?'takip':vur==null?'angajman':'etkisiz'};}
+function platform(u,d,K){const S=SAHNE[K.img],img=IMG[K.img],t1=K.giris,t2=K.giris+7.55,q=yum(P(u,t1,t1+0.9))*(1-yum(P(u,t2,t2+0.9))),tau=u-(t1+0.5);
+  const dr=K.dron.map(D=>dronDurumu(D,tau)),sure=5.15+K.dron[K.dron.length-1].gec,temiz=tau>sure+1.0;
+  let hedef=dr.find(x=>x.var&&x.vur==null&&x.durum!=='arama')||null;const sonVurulan=[...dr].reverse().find(x=>x.vur!=null&&x.vur<0.9);
+  const durum=temiz?'temiz':hedef?hedef.durum:sonVurulan?'etkisiz':'arama';
+  /* taktik görünüm */
+  if(q>0){const Sg=lerp(0.58,2.15,yum(P(tau,1.6,4.3))),T=TK(W*0.41,H*0.62,Sg);zemin(T,1,K.zemin==='deniz',u);
+    bant(T,600,800,rgba(C.tespit,0.07),1);halka(T,800,C.tespit,0.75,{kalin:1.4});halka(T,600,C.tespit,0.5,{kalin:1,kesik:[5,7]});
+    if(durum==='arama'&&!temiz){/* arama taraması */const a0=tau*1.7;c.save();c.globalAlpha=0.5;const g=c.createConicGradient?null:null;c.fillStyle=rgba(C.tespit,0.1);c.beginPath();c.moveTo(T.cx,T.cy);c.ellipse(T.cx,T.cy,T.S*800,T.S*800*SE,0,a0,a0+0.5);c.closePath();c.fill();c.restore();}
+    mesafeler(T,Sg<1?[200,400,600,800]:[50,100,150],0.8);VARLIK[K.zemin](T,1,u);
+    kubbe(T,150,C.tehdit,1,{dolgu:durum==='angajman'?0.26:0.15,kalin:2});
+    const kule=[0,0,K.kuleZ];c.save();const kp=T.pr(...kule);c.fillStyle=C.brass;c.beginPath();c.arc(kp.x,kp.y,4.5,0,6.2832);c.fill();c.restore();
+    etiket(T.pr(150*Math.cos(20*RAD),150*Math.sin(20*RAD),0),'150 m','Angajman · Engagement',C.tehdit,yum(P(tau,2.2,3.0)),1);
+    etiket(T.pr(800*Math.cos(-28*RAD),800*Math.sin(-28*RAD),0),'600–800 m','Tespit · Detection',C.tespit,yum(P(tau,-0.2,0.6))*(1-yum(P(tau,2.6,3.6))),1);
+    dr.forEach((x,i)=>{if(!x.var)return;const D=K.dron[i],a=D.az*RAD,renk=x.vur!=null?C.muted:C.tehdit;
+      /* iz */c.save();c.strokeStyle=rgba(C.tehdit,0.38);c.lineWidth=1.3;c.setLineDash([6,6]);const p0=T.pr(830*Math.cos(a),830*Math.sin(a),D.h[0]),p1=T.pr(...x.X);cizgi(p0.x,p0.y,p1.x,p1.y);c.restore();
+      if(x.yerde){const y=T.pr(x.X[0],x.X[1],0);c.save();c.strokeStyle=C.muted;c.lineWidth=2;cizgi(y.x-7,y.y-4,y.x+7,y.y+4);cizgi(y.x-7,y.y+4,y.x+7,y.y-4);c.restore();return;}
+      const p=dronIsareti(T,x.X,renk,1,12);
+      if(x.durum==='tespit'){hedefKutusu(p,30+26*(1-P(x.s,1.0,1.9)),C.brass,1);}else if(x.durum==='takip'||x.durum==='angajman'){hedefKutusu(p,28,x.durum==='angajman'?C.tehdit:C.tespit,1);c.save();c.strokeStyle=rgba(C.tespit,0.45);c.lineWidth=1;cizgi(kp.x,kp.y,p.x,p.y);c.restore();}
+      if(x.durum==='angajman'){/* atış: kuleden hedefe ilerleyen kısa izler */for(let k=0;k<3;k++){const f=((x.s-4.6)/0.24-k*0.33);if(f<0)continue;const g=f%1,a1=lerp(0.05,1,g),a0=Math.max(0,a1-0.16);c.save();c.strokeStyle='rgba(255,226,170,0.95)';c.lineWidth=2.2;cizgi(lerp(kp.x,p.x,a0),lerp(kp.y,p.y,a0),lerp(kp.x,p.x,a1),lerp(kp.y,p.y,a1));c.restore();}}
+      if(x.vur!=null&&x.vur<0.5){c.save();c.globalAlpha=1-x.vur/0.5;c.strokeStyle='rgba(255,226,170,0.95)';c.lineWidth=2;c.beginPath();c.arc(p.x,p.y,8+x.vur*70,0,6.2832);c.stroke();c.restore();}});
+    if(q<1){c.fillStyle=`rgba(7,10,14,${1-q})`;c.fillRect(0,0,W,H);}}
+  /* yakın plan: tam ekrandan köşe penceresine */
+  const r=[0,1,2,3].map(i=>lerp(TAM[i],KOSE[i],q)),f=kar(kar(K.a,K.b,yum(P(u,0,d))),K.kose,q);
+  if(q>0){c.save();c.shadowColor='rgba(0,0,0,0.6)';c.shadowBlur=30*q;c.fillStyle='#000';c.fillRect(r[0],r[1],r[2],r[3]);c.restore();}
+  const G=resim(img,f,r[0],r[1],r[2],r[3],K.filtre);kuleKaresi(G,S,K.img,poz(tau,K.dron),r,K.filtre);
+  K.dron.forEach((D,i)=>{const s=tau-D.gec;for(let k=0;k<3;k++){const g=(s-4.6-k*0.2)/0.09;if(g>=0&&g<1)namluAtesi(G,S,k%2,1-g*0.6);}});
+  if(q>0.02){c.save();c.globalAlpha=q;c.strokeStyle='rgba(238,240,242,0.4)';c.lineWidth=1.5;c.strokeRect(r[0]+0.5,r[1]+0.5,r[2]-1,r[3]-1);c.fillStyle='rgba(9,12,16,0.72)';c.fillRect(r[0],r[1],r[2],26);
+    metin('KAMERA · KULE',r[0]+12,r[1]+18,{size:12,w:500,fam:FM,ls:1,golge:false});c.fillStyle=C.tehdit;c.beginPath();c.arc(r[0]+r[2]-16,r[1]+13,4,0,6.2832);c.fill();c.restore();}
+  else{/* tam ekranda alt karartma (yazı için) */const g=c.createLinearGradient(0,H*0.55,0,H);g.addColorStop(0,'rgba(7,10,14,0)');g.addColorStop(1,'rgba(7,10,14,0.72)');c.fillStyle=g;c.fillRect(0,H*0.55,W,H*0.45);}
+  /* göstergeler */
+  const az=hedef?((450-K.dron[dr.indexOf(hedef)].az)%360):null,el=hedef?Math.atan2(hedef.h-K.kuleZ,hedef.R)/RAD:null;
+  panel(q,K.ad.charAt(0)+K.ad.slice(1).toLocaleLowerCase('tr'),K.en,durum,hedef?hedef.R:null,hedef?hedef.h:null,az,el);
+  menzilCubugu(q,hedef?hedef.R:sonVurulan?sonVurulan.R:null,durum);
+  const eoD=hedef||sonVurulan;eoPencere(q*(eoD?yum(P(eoD.s,1.0,1.5)):0)*(temiz?1-yum(P(tau,sure+1.0,sure+1.6)):1),u,eoD?eoD.R:null,eoD&&eoD.vur!=null?eoD.vur:null,K.zemin==='deniz');
+  if(q>0&&YAZI)metin('Hızlandırılmış simülasyon · Accelerated simulation',W*0.41,H-150,{size:13,w:300,fam:FB,color:C.muted,alpha:0.75*q,align:'center'});
+  /* başlık ve alt yazı (tam ekran bölümlerinde) */
+  if(YAZI){const a=yum(P(u,0.3,1.0))*(1-yum(P(u,t1-0.2,t1+0.4)));if(a>0){metin('PLATFORM '+K.no,110,H-236,{size:20,w:600,ls:6,color:C.brass,alpha:a});metin(K.ad,108,H-150,{size:92,w:700,ls:4,alpha:a});metin(K.en,112,H-108,{size:24,w:300,fam:FB,color:C.muted,alpha:a});}
+    const b=yum(P(u,t2+0.7,t2+1.4))*(1-yum(P(u,d-0.5,d)));if(b>0){c.save();c.globalAlpha=b;c.fillStyle=C.temiz;c.fillRect(110,H-212,64,3);c.restore();metin('SAHA TEMİZ',110,H-166,{size:22,w:600,ls:6,color:C.temiz,alpha:b});metin(K.alt,110,H-110,{size:50,w:600,ls:1,alpha:b});metin(K.altEn,112,H-76,{size:21,w:300,fam:FB,color:C.muted,alpha:b});}}}
+function kapanis(u,d){const T=TK(W/2,H*0.62,lerp(1.5,1.2,yum(P(u,0,d))));zemin(T,1,false,u);kubbe(T,150,C.brass,yum(P(u,0.2,1.4)),{dolgu:0.16,kalin:2.2});
+  c.save();const p=T.pr(0,0,0);c.fillStyle=C.fg;c.beginPath();c.arc(p.x,p.y,4,0,6.2832);c.fill();c.restore();
+  if(!YAZI)return;const a=yum(P(u,0.5,1.5));metin('Son 150 metre bizim.',W/2,H*0.30,{size:112,w:700,ls:3,alpha:a,align:'center'});metin('The last 150 metres are ours.',W/2,H*0.30+48,{size:26,w:300,fam:FB,color:C.muted,alpha:yum(P(u,1.0,2.0)),align:'center'});
+  const b=yum(P(u,1.6,2.6)),lw=190,lh=lw*IMG.logo.height/IMG.logo.width;c.save();c.globalAlpha=b;c.drawImage(IMG.logo,W/2-lw/2,H*0.62-lh-40,lw,lh);c.restore();
+  metin('dronkalkani.com.tr',W/2,H-118,{size:30,w:500,fam:FM,ls:2,color:C.brass,alpha:b,align:'center'});
+  metin('Turaç · Derya Arms · Lasersan · Urban Savunma · yapay zekâ: İTÜ ARC',W/2,H-72,{size:17,w:300,fam:FB,color:C.muted,alpha:yum(P(u,2.2,3.2)),align:'center'});}
+
+/* ---------- kurgu ---------- */
+const KURGU=[{ad:'acilis',t0:0,g:0},{ad:'katman',t0:5,g:0.8},{ad:'arac',t0:17.5,g:0.8},{ad:'gemi',t0:31,g:0.7},{ad:'tesis',t0:43,g:0.7},{ad:'kapanis',t0:55,g:0.9}];
+KURGU.forEach((k,i)=>{const n=KURGU[i+1];k.d=(n?n.t0+n.g:DUR)-k.t0;});
+const CEKIM={acilis:(u,d)=>acilis(u,d),katman:(u,d,t)=>katmanlar(u,d,t),arac:(u,d)=>platform(u,d,PLATFORM.arac),gemi:(u,d)=>platform(u,d,PLATFORM.gemi),tesis:(u,d)=>platform(u,d,PLATFORM.tesis),kapanis:(u,d)=>kapanis(u,d)};
+function cek(k,t,hedef){c=hedef;c.setTransform(1,0,0,1,0,0);c.globalAlpha=1;c.filter='none';c.globalCompositeOperation='source-over';c.fillStyle='#000';c.fillRect(0,0,W,H);CEKIM[k.ad](t-k.t0,k.d,t);}
+function draw(t){t=clamp(t,0,DUR-1e-4);let i=0;for(let j=0;j<KURGU.length;j++)if(t>=KURGU[j].t0)i=j;const k=KURGU[i],onceki=KURGU[i-1],p=k.g>0?P(t,k.t0,k.t0+k.g):1;
+  c=ekran;c.setTransform(1,0,0,1,0,0);c.globalAlpha=1;c.filter='none';
+  if(p>=1||!onceki){cek(k,t,kat[0]);c=ekran;c.drawImage(kat[0].canvas,0,0);}
+  else{cek(onceki,t,kat[0]);cek(k,t,kat[1]);c=ekran;c.drawImage(kat[0].canvas,0,0);c.globalAlpha=yum(p);c.drawImage(kat[1].canvas,0,0);c.globalAlpha=1;}
+  const v=c.createRadialGradient(W/2,H/2,H*0.5,W/2,H/2,W*0.78);v.addColorStop(0,'rgba(0,0,0,0)');v.addColorStop(1,'rgba(0,0,0,0.36)');c.fillStyle=v;c.fillRect(0,0,W,H);
+  c.save();c.globalCompositeOperation='overlay';c.globalAlpha=0.05;const f=Math.floor(t*FPS);c.translate(-((f*71)%256),-((f*113)%256));c.fillStyle=c.createPattern(NOISE,'repeat');c.fillRect(0,0,W+256,H+256);c.restore();
+  if(t<0.6){c.fillStyle=`rgba(0,0,0,${1-yum(P(t,0,0.6))})`;c.fillRect(0,0,W,H);}if(t>DUR-0.7){c.fillStyle=`rgba(0,0,0,${yum(P(t,DUR-0.7,DUR-0.05))})`;c.fillRect(0,0,W,H);}}
+
+/* ---------- oynatıcı ---------- */
+const $=id=>document.getElementById(id),loading=$('loading'),scrub=$('scrub'),timeEl=$('time'),playBtn=$('playBtn'),sndBtn=$('sndBtn'),txtBtn=$('txtBtn'),loopBtn=$('loopBtn'),snd=$('snd'),chips=$('chips');
+let cur=0,playing=false,loop=true,last=0,sound=false;
+const fmt=t=>`${String(Math.floor(t/60)).padStart(2,'0')}:${String(Math.floor(t%60)).padStart(2,'0')}`;
+function ui(){if(document.activeElement!==scrub)scrub.value=cur.toFixed(3);timeEl.textContent=`${fmt(cur)} / ${fmt(DUR)}`;
+  let b=0;BOLUM.forEach((x,i)=>{if(cur>=x.t)b=i;});[...chips.children].forEach((e,i)=>e.setAttribute('aria-current',String(i===b)));}
+function sesEsle(zorla){if(!sound||!playing){if(!snd.paused)snd.pause();return;}if(zorla||Math.abs(snd.currentTime-cur)>0.25)try{snd.currentTime=cur;}catch(e){}if(snd.paused)snd.play().catch(()=>{});}
+function oynat(p){playing=p;playBtn.setAttribute('aria-pressed',String(p));playBtn.textContent=p?'DURAKLAT':'OYNAT';last=performance.now();sesEsle(true);}
+function git(t){cur=clamp(t,0,DUR-0.001);draw(cur);ui();sesEsle(true);}
+function tik(ts){if(playing){cur+=Math.min(0.1,(ts-last)/1000);if(cur>=DUR){if(loop){cur=0;sesEsle(true);}else{cur=DUR-0.001;oynat(false);}}draw(cur);ui();}last=ts;requestAnimationFrame(tik);}
+BOLUM.forEach(b=>{const e=document.createElement('button');e.className='chip';e.type='button';e.textContent=b.ad;e.addEventListener('click',()=>git(b.t));chips.appendChild(e);});
+playBtn.addEventListener('click',()=>oynat(!playing));
+scrub.addEventListener('input',()=>git(+scrub.value));
+loopBtn.addEventListener('click',()=>{loop=!loop;loopBtn.setAttribute('aria-pressed',String(loop));loopBtn.textContent='DÖNGÜ: '+(loop?'AÇIK':'KAPALI');});
+txtBtn.addEventListener('click',()=>{YAZI=!YAZI;txtBtn.setAttribute('aria-pressed',String(YAZI));txtBtn.textContent='YAZILAR: '+(YAZI?'AÇIK':'KAPALI');draw(cur);});
+sndBtn.addEventListener('click',()=>{sound=!sound;sndBtn.setAttribute('aria-pressed',String(sound));sndBtn.textContent='SES: '+(sound?'AÇIK':'KAPALI');
+  if(sound&&!snd.src){fetch('assets/ses.mp3').then(r=>r.blob()).then(b=>{snd.src=URL.createObjectURL(b);sesEsle(true);}).catch(()=>{sound=false;sndBtn.textContent='SES YÜKLENEMEDİ';});}else sesEsle(true);});
+document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;if(e.code==='Space'){e.preventDefault();oynat(!playing);}if(e.code==='ArrowRight')git(cur+2);if(e.code==='ArrowLeft')git(cur-2);});
+
+const yukle=src=>new Promise((res,rej)=>{const im=new Image();im.onload=()=>res(im);im.onerror=()=>rej(new Error(src));im.src=src;});
+const hepsi=[fetch('assets/sahne.json').then(r=>r.json()).then(j=>{SAHNE=j;return Promise.all(Object.entries(j).filter(([,v])=>v.poz).map(([ad,v])=>{KARE[ad]=[];
+    return Promise.all(Array.from({length:v.poz},(_,i)=>yukle(`assets/kare/${ad}/p${String(i).padStart(2,'0')}.jpg`).then(im=>{KARE[ad][i]=im;})));}));}),...Object.entries(SRC).map(([k,s])=>yukle(s).then(im=>{IMG[k]=im;})),
+  Promise.race([Promise.allSettled([document.fonts.load('700 100px "Saira Condensed"'),document.fonts.load('600 60px "Saira Condensed"'),document.fonts.load('500 60px "Saira Condensed"'),document.fonts.load('300 34px "Saira"'),document.fonts.load('400 34px "Saira"'),document.fonts.load('500 34px "Saira"'),document.fonts.load('500 16px "JetBrains Mono"'),document.fonts.load('400 16px "JetBrains Mono"')]),new Promise(r=>setTimeout(r,5000))])];
+function basla(durum){loading.hidden=true;if(RENDER){window.__film={DUR,FPS,renderFrame(t){draw(t);return canvas.toDataURL('image/png');},ready:true};return;}
+  cur=durum&&typeof durum.cur==='number'?durum.cur:0;draw(cur);ui();requestAnimationFrame(tik);if(!matchMedia('(prefers-reduced-motion: reduce)').matches)oynat(true);}
+window.claude?.hot?.snapshot?.(()=>({cur}));
+Promise.all(hepsi).then(()=>{window.claude?.hot?.ready?window.claude.hot.ready(basla):basla(window.claude?.hot?.data??{});})
+  .catch(err=>{loading.textContent='GÖRÜNTÜ YÜKLENEMEDİ: '+err.message;if(RENDER)window.__film={error:String(err)};});
+})();
+</script>
+<!-- artifact:end -->
+</body>
+</html>
