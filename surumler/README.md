@@ -21,6 +21,20 @@ git archive <commit> | tar -x -C /tmp/surum && node /tmp/surum/render/render.mjs
 | v1 | 8 Kasım | `v1-yalnizca-cizim.mp4` | 64 sn | yok | kayıtsız | Fotoğraf kullanılmadan, tamamı çizimle yapılmış ilk taslak. Kaynağı oturum kaydından kurtarıldı. |
 | Deneme | 12 Kasım | `deneme-tamami-3b.mp4` | 5 sn | yok | `c5c0a6d` | Tamamı 3B deneme çekimi: fotoğraflardan kurulmuş sade taret modeli, dönen kamera. |
 
+## 3B simülasyon filmi
+
+18 Kasım 2026'da sıfırdan kurulan film: hava savunma katmanları ve üç platformda (araç üstü, gemi güvertesi, rafineri) tespit, takip ve angajman simülasyonu. Kaynak: `simulasyon/`; ayrıntı: `docs/SIMULASYON-FILMI.md`.
+
+| Dosya | Süre | Ses | Açıklama |
+|---|---:|---|---|
+| `simulasyon-filmi-60sn.mp4` | 60 sn | var | Yazılı. 1920×1080, 24 fps. |
+| `simulasyon-filmi-60sn-yazisiz.mp4` | 60 sn | var | Anlatım yazıları kapalı; göstergeler durur. |
+
+```
+node render/render.mjs --sayfa simulasyon --out surumler/simulasyon-filmi-60sn.mp4
+node render/render.mjs --sayfa simulasyon --sorgu temiz=1 --out surumler/simulasyon-filmi-60sn-yazisiz.mp4
+```
+
 ## Ürün filmi
 
 Tanıtım filminden ayrı, fuar ekranı için 35 saniyelik sinematik ürün filmi (17 Kasım 2026). Kaynak: `urunfilmi/`; ayrıntı: `docs/URUN-FILMI.md`. 18 Kasım'da araç çekimi yenilendi: araç artık kullanıcının stüdyo render'ı, kule kasaya 3B olarak yerleştirildi.

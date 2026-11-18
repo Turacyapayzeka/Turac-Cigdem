@@ -14,6 +14,10 @@ render/3d/urunfilmi.py      Ürün filminin 3B çekimleri; urunfilmi_topla.py re
 render/3d/pikap3b.py        Kodla kurulan çift kabin pikap ve açık arazi (ürün filminin gökyüzü çekimi).
 render/rotus/pikap_studyo.py   Ürün filminin araç çekimi: aracın stüdyo render'ını temizler, kamerasını çözer, 3B kule katmanlarını bindirir.
 urunfilmi/                  Ürün filmi (35 sn): kurgu sayfası ve görüntüleri. Ayrıntı: docs/URUN-FILMI.md
+simulasyon/                 3B simülasyon filmi (60 sn): katmanlı hava savunma; araç, gemi, rafineri. Ayrıntı: docs/SIMULASYON-FILMI.md
+render/3d/simfilm.py        Simülasyon filminin Blender tarafı: kule ve namlu konumları, kulenin dönüş kareleri.
+render/rotus/sim_kareler.py Kule dönüş karelerini arka plana bindirir.
+render/ses/simulasyon_ses.py   Simülasyon filminin sentez ses bandı.
 render/3d/kule3b.py      Gerçek kule CAD modeliyle stüdyo çekimi: sahne 04'teki 3B yörünge kareleri (animasyon/assets/kule3b/).
 render/3d/taret3b.py     Tamamı 3B deneme: fotoğraflardan sadeleştirilmiş taret, pikap ve arazi; pilot çekim.
 render/3d/ucmf.py        Bambu Studio 3MF proje dosyalarını okur (parça ağları ve yerleşimleri).
