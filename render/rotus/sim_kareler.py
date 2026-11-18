@@ -31,8 +31,9 @@ def platform(ad):
         def kare(i):
             return ps.bindir(bos, ps.oku(os.path.join(d, 'poz', f'p{i:02d}.png')))
         kutu = P['kutu']; bilgi = {'kule': P['px']['kule'], 'namlu': P['px']['namlu'], 'ates': yon_vektoru(P['px']['namlu'][0], P['px']['ileri'])}
+    var = [i for i in range(P['poz']) if os.path.exists(os.path.join(d, 'poz', f'p{i:02d}.png'))]      # render edilmeyen pozun yerine en yakın önceki poz kullanılır
     for i in range(P['poz']):
-        im = kare(i); h, w = im.shape[:2]
+        im = kare(max(v for v in var if v <= i)); h, w = im.shape[:2]
         if i == 0: cv2.imwrite(os.path.join(HEDEF, ad + '.jpg'), (np.clip(im, 0, 1) * 255).round().astype(np.uint8), [cv2.IMWRITE_JPEG_QUALITY, 93])
         x0, y0, x1, y1 = int(kutu[0] * w), int(kutu[1] * h), int(np.ceil(kutu[2] * w)), int(np.ceil(kutu[3] * h)); kes = im[y0:y1, x0:x1]
         cv2.imwrite(os.path.join(HEDEF, 'kare', ad, f'p{i:02d}.jpg'), (np.clip(kes, 0, 1) * 255).round().astype(np.uint8), [cv2.IMWRITE_JPEG_QUALITY, 92])
