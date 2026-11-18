@@ -12,6 +12,7 @@ hedef = sys.argv[2] if len(sys.argv) > 2 else os.path.join(KOK, 'urunfilmi', 'as
 os.makedirs(os.path.join(hedef, 'acilis'), exist_ok=True); capa = {}; eksik = []
 for ad in ('yuzey', 'cam', 'sensor', 'govde', 'final', 'pikap', 'tesis', 'deniz', 'gok'):
     j = os.path.join(kaynak, ad + '.json'); g = os.path.join(kaynak, ad + '.jpg')
+    if ad == 'pikap' and os.path.exists(os.path.join(kaynak, 'pikap', 'pikap.jpg')): j = os.path.join(kaynak, 'pikap', 'pikap.json'); g = os.path.join(kaynak, 'pikap', 'pikap.jpg')   # stüdyo bileşimi
     if not os.path.exists(g): eksik.append(ad + '.jpg'); continue
     shutil.copyfile(g, os.path.join(hedef, ad + '.jpg'))
     if os.path.exists(j): capa[ad] = json.load(open(j))

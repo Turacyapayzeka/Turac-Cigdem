@@ -303,8 +303,9 @@ def arac_sahnesi(yon=48.0, dikey=5.0):
     import pikap3b
     reset(); c = coll('urun'); M = malzemeler(); taban = pikap3b.pikap(c); pikap3b.arazi(c)
     kok, yat, dik = kule(c, M, 0.0, dikey); tripod(c, M, ebeveyn=kok)
-    kok.location = (-1.83, 0.0, taban + 0.95); kok.rotation_euler.z = R(yon); bpy.context.view_layer.update()
+    kok.location = (-1.86, 0.0, taban + 0.95); kok.rotation_euler.z = R(yon); bpy.context.view_layer.update()
     sahneler.sky(elev_deg=float(opt('gunes', 11)), rot_deg=float(opt('gunes-yon', 295)), strength=float(opt('gok', 0.5)), aerosol=1.3, sun_intensity=0.42)
+    if opt('bulut', '1') == '1': pikap3b.bulutlar()
     return c, kok, yat, dik
 
 def _arac_kare(cikti, ad, cam_loc, hedef, lens, fstop, yon, dikey, pozlama):
@@ -315,8 +316,37 @@ def _arac_kare(cikti, ad, cam_loc, hedef, lens, fstop, yon, dikey, pozlama):
     kare(os.path.join(cikti, ad + '.jpg')); json.dump(bilgi, open(os.path.join(cikti, ad + '.json'), 'w'), indent=1)
 
 def pikap(cikti):
-    """Platform entegrasyonu, kara: kamera aracın sol arka çaprazında; kule kasada, ürün kadrajın üst ortasında."""
-    _arac_kare(cikti, 'pikap', (-5.0, 3.15, 2.3), (-1.7, 0.1, 2.0), 55, 4.0, yon=48, dikey=5, pozlama=-0.95)
+    """Platform entegrasyonu, kara: kule, aracın stüdyo render'ının kasasında. Araç görüntüsünü ve kamerayı
+    render/rotus/pikap_studyo.py hazırlar (hazirla); burada kule o kamerayla (paralel izdüşüm) iki saydam katman olarak
+    render edilir: kule-tam (kule, tripod ve kasaya düşen gölge), kule-ust (yalnızca kasa kenarının üstünde kalan kısım).
+    Katmanları aynı betiğin birlestir adımı araç görüntüsüne bindirir."""
+    d = os.path.join(cikti, 'pikap'); kam = json.load(open(os.path.join(d, 'kamera.json')))
+    reset(); c = coll('urun'); M = malzemeler(); X0 = Vector(kam['X0']); taban, kenar = kam['taban_z'], kam['kenar_z']
+    kok, yat, dik = kule(c, M, 0.0, float(opt('dikey', 8))); tripod(c, M, ebeveyn=kok)
+    kok.location = (X0.x, X0.y, taban + 0.95); kok.rotation_euler.z = R(float(opt('yon', 140))); bpy.context.view_layer.update()
+    # gölge tutucular: kasa tabanı, ön ve sol iç duvar
+    boy, en = kam['kasa_boy'], kam['kasa_en']; tut = pbr('golge-tutucu', (0.02, 0.02, 0.02), 0.8, kenar=0.0); G = []
+    G.append(box((boy, en, 0.02), (X0.x, 0, taban - 0.01), tut, c, bevel=0, name='taban')); G.append(box((0.02, en, kenar - taban), (X0.x + boy / 2 + 0.01, 0, (kenar + taban) / 2), tut, c, bevel=0, name='on-duvar'))
+    G.append(box((boy, 0.02, kenar - taban), (X0.x, en / 2 + 0.01, (kenar + taban) / 2), tut, c, bevel=0, name='sol-duvar'))
+    for o in G: o.is_shadow_catcher = True
+    engel = box((30, 30, 10), (0, 0, kenar - 5.0), tut, c, bevel=0, name='kenar-alti'); engel.is_holdout = True; engel.hide_render = True
+    # stüdyo ışığı: üstte, aracın soluna kaymış büyük yumuşak kaynak; kameranın yanından hafif dolgu; düz gri ortam
+    def isik(ad, loc, guc, boyut, renk=(1, 1, 1)):
+        ld = bpy.data.lights.new(ad, 'AREA'); ld.energy = guc; ld.size = boyut; ld.color = renk; lo = bpy.data.objects.new(ad, ld); c.objects.link(lo)
+        lo.location = loc; lo.rotation_euler = (X0 + Vector((0, 0, 0.6)) - Vector(loc)).to_track_quat('-Z', 'Y').to_euler(); return lo
+    isik('ust', X0 + Vector((-0.6, 3.0, 6.5)), float(opt('ust', 5200)), 7.0); isik('dolgu', X0 + Vector((-5.0, -4.0, 4.0)), float(opt('dolgu', 900)), 5.0, (0.95, 0.97, 1.0))
+    w = bpy.data.worlds.new('W'); bpy.context.scene.world = w; w.use_nodes = True; bg = w.node_tree.nodes['Background']; bg.inputs['Color'].default_value = (0.82, 0.82, 0.83, 1); bg.inputs['Strength'].default_value = float(opt('ortam', 0.45))
+    sc = ayar(kam['W'] * kam['kat'], kam['H'] * kam['kat'], 128 if FINAL else 24, pozlama=float(opt('pozlama', -0.4)))
+    sc.render.film_transparent = True; sc.render.image_settings.file_format = 'PNG'; sc.render.image_settings.color_mode = 'RGBA'; sc.render.image_settings.color_depth = '8'
+    cd = bpy.data.cameras.new('cam'); co = bpy.data.objects.new('cam', cd); sc.collection.objects.link(co); sc.camera = co; cd.type = 'ORTHO'; cd.ortho_scale = kam['W'] / kam['s']; cd.clip_start = 0.1; cd.clip_end = 200
+    sag, asagi, ileri = Vector(kam['sag']), Vector(kam['asagi']), Vector(kam['ileri'])
+    merkez = X0 + sag * ((kam['W'] / 2 - kam['p0'][0]) / kam['s']) + asagi * ((kam['H'] / 2 - kam['p0'][1]) / kam['s']); yer = merkez - ileri * 40
+    from mathutils import Matrix
+    co.matrix_world = Matrix(((sag.x, -asagi.x, -ileri.x, yer.x), (sag.y, -asagi.y, -ileri.y, yer.y), (sag.z, -asagi.z, -ileri.z, yer.z), (0, 0, 0, 1))); bpy.context.view_layer.update()
+    kare(os.path.join(d, 'kule-tam.png'))
+    engel.hide_render = False
+    for o in G: o.hide_render = True
+    kare(os.path.join(d, 'kule-ust.png'))
 
 def gok(cikti):
     """Durumsal farkındalık: alçak ve geniş açı; kule sağ altta, kadrajın çoğu gökyüzü."""
