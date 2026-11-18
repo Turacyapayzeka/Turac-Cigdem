@@ -23,7 +23,7 @@ git archive <commit> | tar -x -C /tmp/surum && node /tmp/surum/render/render.mjs
 
 ## Ürün filmi
 
-Tanıtım filminden ayrı, fuar ekranı için 35 saniyelik sinematik ürün filmi (17 Kasım 2026). Kaynak: `urunfilmi/`; ayrıntı: `docs/URUN-FILMI.md`.
+Tanıtım filminden ayrı, fuar ekranı için 35 saniyelik sinematik ürün filmi (17 Kasım 2026). Kaynak: `urunfilmi/`; ayrıntı: `docs/URUN-FILMI.md`. 18 Kasım'da araç çekimi yenilendi: araç artık kullanıcının stüdyo render'ı, kule kasaya 3B olarak yerleştirildi.
 
 | Dosya | Süre | Ses | Açıklama |
 |---|---:|---|---|
