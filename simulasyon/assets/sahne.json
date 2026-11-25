@@ -146,5 +146,8 @@
  "dron": {
   "ust": 17,
   "karsi": 19
+ },
+ "arac_uzak": {
+  "kat": 4
  }
 }

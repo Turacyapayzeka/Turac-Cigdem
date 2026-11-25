@@ -11,6 +11,7 @@ Girdi (render/out/):
     arac-genis.jpg + kare/arac-genis/     geniş plan: aynı araç, 25 m'lik kadrajda
     ufuk-arac.jpg, ufuk-gemi.jpg, ufuk-tesis.jpg   sensör görüntüsünün arka planları
     dron/ustNN.webp, dron/karsiNN.webp    dron kareleri
+    arac-uzak.jpg                         açılıştaki dalış çekimi: 100 m'lik arazi karesi, ortasında araç
     sahne.json (arac, arac_genis güncellenir)
 
 Araç, stüdyo zemininden alfa maskesiyle ayrılır; stüdyo zeminine düşen gölgesi arazi görüntüsüne çarpılarak taşınır.
@@ -72,6 +73,38 @@ def arac():
                        'A': [[round(float(v) / Gn['en'], 7) for v in A3[0]], [round(float(v) / Gn['boy'], 7) for v in A3[1]]], 'pm': pm, 'alev': 0.45}       # alev: namlu alevinin yakın plana göre ölçeği
     return S
 
+UZAK = dict(kat=4, en=3200, boy=1800)                                  # açılıştaki dalış çekimi: geniş planın 4 katı (100 m) genişliğinde kare
+
+def uzak():
+    """Açılıştaki dalış çekiminin 100 metrelik arazi karesi. Araçsız geniş arazi görüntüsünün iz ve taş olmayan üst bölümünden
+    alınan parçalar yumuşak kenarlarla örülür; ortasına araçlı geniş plan oturtulur, aracın tekerlek izi kenara kadar uzatılır."""
+    U = UZAK; W, H = U['en'], U['boy']; w, h = W // U['kat'], H // U['kat']; rng = np.random.default_rng(8)
+    kaynak = cv2.resize(ps.oku(os.path.join(ARAZI, 'genis.jpg')), (w, h), interpolation=cv2.INTER_AREA); ust = kaynak[:int(h * 0.46)].copy()
+    tx, ty = int(0.475 * w), int(0.305 * h); ust[ty - 9:ty + 9, tx - 11:tx + 11] = ust[ty - 9:ty + 9, tx + 29:tx + 51]            # üst bölümdeki tek iri taş komşu zeminle örtülür
+    isik = np.maximum(cv2.GaussianBlur(kaynak, (0, 0), 40), 1e-3); ort = ust.mean((0, 1)); ust = ust / isik[:ust.shape[0]] * ort - ort                    # ışık geçişi düzlenir; parçalar ortalamadan sapma olarak örülür
+    pw, ph, kenar = 260, 110, 30; toplam = np.zeros((H, W, 3), np.float32); agirlik = np.zeros((H, W, 1), np.float32)
+    ex = np.clip(np.minimum(np.arange(pw), pw - 1 - np.arange(pw)) / kenar, 0, 1); ey = np.clip(np.minimum(np.arange(ph), ph - 1 - np.arange(ph)) / kenar, 0, 1)
+    maske = (np.outer(ey * ey * (3 - 2 * ey), ex * ex * (3 - 2 * ex)) + 1e-4)[..., None].astype(np.float32)
+    for gy in range(-1, H // (ph - kenar) + 2):
+        for gx in range(-1, W // (pw - kenar) + 2):
+            x = gx * (pw - kenar) + int(rng.integers(-12, 12)); y = gy * (ph - kenar) + int(rng.integers(-10, 10)); sx = int(rng.integers(0, ust.shape[1] - pw + 1)); sy = int(rng.integers(0, ust.shape[0] - ph + 1))
+            parca = ust[sy:sy + ph, sx:sx + pw]; parca = parca[:, ::-1] if rng.random() < 0.5 else parca
+            x0, y0, x1, y1 = max(x, 0), max(y, 0), min(x + pw, W), min(y + ph, H)
+            if x1 <= x0 or y1 <= y0: continue
+            toplam[y0:y1, x0:x1] += parca[y0 - y:y1 - y, x0 - x:x1 - x] * maske[y0 - y:y1 - y, x0 - x:x1 - x]; agirlik[y0:y1, x0:x1] += maske[y0 - y:y1 - y, x0 - x:x1 - x] ** 2
+    im = ort + toplam / np.sqrt(np.maximum(agirlik, 1e-8))               # üst üste binen yerlerde doku karşıtlığı korunur
+    # tekerlek izi: geniş plandaki izin doğrultusunda, karenin alt kenarına kadar iki koyu şerit
+    yy, xx = np.mgrid[0:H, 0:W].astype(np.float32); a = np.array([W / 2 + (0.335 - 0.5) * w, H / 2 + 0.5 * h]); yon = np.array([-0.36 * 16, 0.45 * 9]); yon /= np.linalg.norm(yon); dik = np.array([-yon[1], yon[0]])
+    boyunca = (xx - a[0]) * yon[0] + (yy - a[1]) * yon[1]; enine = (xx - a[0]) * dik[0] + (yy - a[1]) * dik[1]; pm = W / (GENIS['olcek'] * U['kat'])
+    iz = sum(np.exp(-((enine - o * pm) / (0.16 * pm)) ** 2) for o in (-0.8, 0.8)) * np.clip(boyunca / 40 + 0.5, 0, 1); im *= (1 - 0.13 * iz)[..., None]
+    # ortaya araçlı geniş plan
+    arac = cv2.resize(ps.oku(os.path.join(HEDEF, 'arac-genis.jpg')), (w, h), interpolation=cv2.INTER_AREA) / isik * ort; x0, y0 = (W - w) // 2, (H - h) // 2      # aynı ışık düzeltmesi: kenarı belli olmaz
+    kx = np.clip(np.minimum(np.arange(w), w - 1 - np.arange(w)) / 70, 0, 1); ky = np.clip(np.minimum(np.arange(h), h - 1 - np.arange(h)) / 70, 0, 1); m = np.outer(ky * ky * (3 - 2 * ky), kx * kx * (3 - 2 * kx))[..., None]
+    im[y0:y0 + h, x0:x0 + w] = im[y0:y0 + h, x0:x0 + w] * (1 - m) + arac * m
+    ton = cv2.resize(rng.random((7, 12)).astype(np.float32), (W, H), interpolation=cv2.INTER_CUBIC) - 0.5; im *= (1 + 0.16 * ton)[..., None]; im += ton[..., None] * np.array([-0.012, 0.0, 0.012], np.float32)    # iri ton farkları: yer yer daha koyu ve daha sarı toprak
+    yaz(os.path.join(HEDEF, 'arac-uzak.jpg'), im, 88)
+    return {'kat': U['kat']}
+
 def ufuklar():
     yaz(os.path.join(HEDEF, 'ufuk-arac.jpg'), ps.oku(os.path.join(ARAZI, 'ufuk.jpg')), 92)
     for ad, (x, y, w) in {'gemi': (0.02, 0.08, 0.60), 'tesis': (0.33, 0.05, 0.50)}.items():
@@ -88,5 +121,10 @@ def dronlar():
     return n
 
 if __name__ == '__main__':
+    adim = sys.argv[1:] or ['arac', 'ufuk', 'dron', 'uzak']               # yalnızca bir adımı yenilemek için: python3 sim_arazi.py uzak
     yol = os.path.join(HEDEF, 'sahne.json'); S = json.load(open(yol)) if os.path.exists(yol) else {}
-    S.update(arac()); ufuklar(); S['dron'] = dronlar(); json.dump(S, open(yol, 'w'), indent=1); print({k: (v if k == 'dron' else {a: v[a] for a in ('kule', 'kutu')}) for k, v in S.items() if k in ('arac', 'arac_genis', 'dron')})
+    if 'arac' in adim: S.update(arac())
+    if 'ufuk' in adim: ufuklar()
+    if 'dron' in adim: S['dron'] = dronlar()
+    if 'uzak' in adim: S['arac_uzak'] = uzak()
+    json.dump(S, open(yol, 'w'), indent=1); print({k: (v if k in ('dron', 'arac_uzak') else {a: v[a] for a in ('kule', 'kutu')}) for k, v in S.items() if k in ('arac', 'arac_genis', 'dron', 'arac_uzak')})

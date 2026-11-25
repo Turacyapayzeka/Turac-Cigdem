@@ -23,17 +23,18 @@ git archive <commit> | tar -x -C /tmp/surum && node /tmp/surum/render/render.mjs
 
 ## 3B simülasyon filmi
 
-18 Kasım 2026'da sıfırdan kurulan, 25 Kasım'da daha gerçekçi görüntülerle yeniden kurgulanan film: 6 saniyelik tehdit, hava savunma katmanları, arazide araç üstünden dronun vurulması, kulenin tanıtımı, gemi güvertesi ve rafineri. Kaynak: `simulasyon/`; ayrıntı: `docs/SIMULASYON-FILMI.md`.
+18 Kasım 2026'da sıfırdan kurulan, 25 Kasım'da daha gerçekçi görüntülerle yeniden kurgulanan film: dronun kamerasından araca dalışla açılış, logolu başlık, hava savunma katmanları, arazide araç üstünden tek atışla dronun vurulması, kulenin tanıtımı, gemi güvertesi ve rafineri, logolu ve dört firmalı kapanış. Kaynak: `simulasyon/`; ayrıntı: `docs/SIMULASYON-FILMI.md`.
 
 | Dosya | Süre | Ses | Açıklama |
 |---|---:|---|---|
-| `simulasyon-filmi-66sn.mp4` | 66 sn | var | Yazılı. 1920×1080, 24 fps. Güncel kurgu (25 Kasım). |
-| `simulasyon-filmi-66sn-yazisiz.mp4` | 66 sn | var | Anlatım yazıları kapalı; göstergeler durur. |
+| `simulasyon-filmi-70sn.mp4` | 70 sn | var | Yazılı. 1920×1080, 24 fps. Güncel kurgu (25 Kasım): yeni açılış, logolar, tek atış, dört firma. |
+| `simulasyon-filmi-70sn-yazisiz.mp4` | 70 sn | var | Anlatım yazıları kapalı; göstergeler ve logolar durur. |
+| `simulasyon-filmi-66sn.mp4`, `simulasyon-filmi-66sn-yazisiz.mp4` | 66 sn | var | 25 Kasım'ın ilk kurgusu: iki atış, logosuz, eski açılış. Kaynağı git geçmişindedir (`53337c8`). |
 | `simulasyon-filmi-60sn.mp4`, `simulasyon-filmi-60sn-yazisiz.mp4` | 60 sn | var | 18 Kasım'daki ilk kurgu (taktik şema ağırlıklı). Kaynağı git geçmişindedir (`394572f`). |
 
 ```
-node render/render.mjs --sayfa simulasyon --crf 21 --out surumler/simulasyon-filmi-66sn.mp4
-node render/render.mjs --sayfa simulasyon --sorgu temiz=1 --crf 21 --out surumler/simulasyon-filmi-66sn-yazisiz.mp4
+node render/render.mjs --sayfa simulasyon --crf 21 --out surumler/simulasyon-filmi-70sn.mp4
+node render/render.mjs --sayfa simulasyon --sorgu temiz=1 --crf 21 --out surumler/simulasyon-filmi-70sn-yazisiz.mp4
 ```
 
 ## Ürün filmi
