@@ -587,20 +587,31 @@ def _toprak(uzak=False):
     m = bpy.data.materials.new('toprak-uzak' if uzak else 'toprak'); m.use_nodes = True; nt = m.node_tree; N = nt.nodes; L = nt.links.new; b = N['Principled BSDF']; b.inputs['Roughness'].default_value = 0.95
     P = N.new('ShaderNodeTexCoord').outputs['Object']
     buyuk = _gurultu(nt, P, 0.18, 8, 0.6); cr = N.new('ShaderNodeValToRGB'); e = cr.color_ramp.elements
-    e[0].position = 0.34; e[0].color = (0.125, 0.098, 0.07, 1); e[1].position = 0.68; e[1].color = (0.29, 0.24, 0.18, 1)
+    e[0].position = 0.34; e[0].color = (0.19, 0.145, 0.10, 1); e[1].position = 0.68; e[1].color = (0.40, 0.32, 0.225, 1)
     L(buyuk.outputs['Fac'], cr.inputs['Fac']); renk = cr.outputs['Color']
     if uzak:
         orta = _gurultu(nt, P, 0.035, 6, 0.6); renk = _karistir(nt, orta.outputs['Fac'], renk, (0.16, 0.15, 0.085))                  # uzakta kuru ot lekeleri
         cd = N.new('ShaderNodeCameraData'); pus = _esle(nt, cd.outputs['View Distance'], 90, 520, 0.0, 0.62)
         L(_karistir(nt, pus, renk, (0.42, 0.47, 0.55)), b.inputs['Base Color']); return m                                           # hava perspektifi
-    cakil = N.new('ShaderNodeTexVoronoi'); cakil.inputs['Scale'].default_value = 95; L(P, cakil.inputs['Vector']); ince = _gurultu(nt, P, 60, 6, 0.6)
-    tas = N.new('ShaderNodeValToRGB'); t = tas.color_ramp.elements; t[0].position = 0.0; t[0].color = (0.5, 0.5, 0.5, 1); t[1].position = 1.0; t[1].color = (1.0, 0.97, 0.92, 1); L(cakil.outputs['Color'], tas.inputs['Fac'])
-    renk = _karistir(nt, 0.85, renk, tas.outputs['Color'], 'MULTIPLY'); renk = _karistir(nt, 0.35, renk, ince.outputs['Color'], 'OVERLAY')
-    sp = N.new('ShaderNodeSeparateXYZ'); L(P, sp.inputs['Vector'])                                                                    # teker izleri: aracın arkasında iki koyu şerit
+    # çakıl: her hücre ayrı bir taş tonu (koyu kahve, bej, açık gri); iri taşlar seyrek
+    orta = _gurultu(nt, P, 1.4, 5, 0.6); renk = _karistir(nt, _esle(nt, orta.outputs['Fac'], 0.42, 0.68, 0.0, 0.55), renk, (0.30, 0.285, 0.26))          # yer yer grileşen çakıl öbekleri
+    cakil = N.new('ShaderNodeTexVoronoi'); cakil.inputs['Scale'].default_value = 72; L(P, cakil.inputs['Vector']); ince = _gurultu(nt, P, 60, 6, 0.6)
+    ton = N.new('ShaderNodeSeparateColor'); L(cakil.outputs['Color'], ton.inputs['Color'])
+    tas = N.new('ShaderNodeValToRGB'); t = tas.color_ramp.elements; t[0].position = 0.0; t[0].color = (0.10, 0.075, 0.055, 1); t[1].position = 1.0; t[1].color = (0.66, 0.64, 0.60, 1)
+    for pos, col in ((0.3, (0.27, 0.21, 0.15)), (0.55, (0.40, 0.33, 0.24)), (0.8, (0.47, 0.45, 0.42))):
+        el = t.new(pos); el.color = (*col, 1)
+    L(ton.outputs[0], tas.inputs['Fac']); renk = _karistir(nt, _esle(nt, ton.outputs[1], 0.25, 0.75, 0.25, 0.7), renk, tas.outputs['Color'])
+    iri = N.new('ShaderNodeTexVoronoi'); iri.inputs['Scale'].default_value = 21; L(P, iri.inputs['Vector']); iton = N.new('ShaderNodeSeparateColor'); L(iri.outputs['Color'], iton.inputs['Color'])
+    iri_var = _islem(nt, 'MULTIPLY', _esle(nt, iton.outputs[0], 0.82, 0.86), _esle(nt, iri.outputs['Distance'], 0.34, 0.22))                                  # hücrelerin yaklaşık altıda biri, ortası
+    renk = _karistir(nt, iri_var, renk, _karistir(nt, iton.outputs[1], (0.30, 0.27, 0.23), (0.58, 0.56, 0.53)))
+    renk = _karistir(nt, 0.3, renk, ince.outputs['Color'], 'OVERLAY')
+    sp = N.new('ShaderNodeSeparateXYZ'); L(P, sp.inputs['Vector'])                                                                    # teker izleri: aracın arkasında iki koyu, sıkışmış şerit
     iz = _islem(nt, 'MULTIPLY', _esle(nt, _islem(nt, 'ABSOLUTE', _islem(nt, 'SUBTRACT', _islem(nt, 'ABSOLUTE', sp.outputs['Y']), TEKER_Y)), 0.21, 0.10), _esle(nt, sp.outputs['X'], 2.3, 1.6))
-    L(_karistir(nt, _islem(nt, 'MULTIPLY', iz, 0.5), renk, (0.52, 0.5, 0.48), 'MULTIPLY'), b.inputs['Base Color'])
-    yuk = _islem(nt, 'ADD', _islem(nt, 'MULTIPLY', cakil.outputs['Distance'], 0.8), ince.outputs['Fac'])
-    bp = N.new('ShaderNodeBump'); bp.inputs['Strength'].default_value = 1.0; bp.inputs['Distance'].default_value = 0.022; L(yuk, bp.inputs['Height']); L(bp.outputs['Normal'], b.inputs['Normal'])
+    dis = N.new('ShaderNodeTexWave'); dis.inputs['Scale'].default_value = 26; dis.inputs['Distortion'].default_value = 0.6; L(P, dis.inputs['Vector'])           # lastik dişinin bıraktığı enine çizgiler
+    L(_karistir(nt, _islem(nt, 'MULTIPLY', iz, _islem(nt, 'ADD', 0.34, _islem(nt, 'MULTIPLY', dis.outputs['Fac'], 0.22))), renk, (0.50, 0.47, 0.44), 'MULTIPLY'), b.inputs['Base Color'])
+    engebe = _gurultu(nt, P, 2.3, 5, 0.6)
+    yuk = _islem(nt, 'ADD', _islem(nt, 'ADD', _islem(nt, 'MULTIPLY', _islem(nt, 'SUBTRACT', 1.0, cakil.outputs['Distance']), 0.35), _islem(nt, 'MULTIPLY', iri_var, 0.9)), _islem(nt, 'MULTIPLY', engebe.outputs['Fac'], 2.2))
+    bp = N.new('ShaderNodeBump'); bp.inputs['Strength'].default_value = 1.0; bp.inputs['Distance'].default_value = 0.02; L(yuk, bp.inputs['Height']); L(bp.outputs['Normal'], b.inputs['Normal'])
     return m
 
 def _rastgele_renk(ad, renkler, rough=0.9):

@@ -23,16 +23,17 @@ git archive <commit> | tar -x -C /tmp/surum && node /tmp/surum/render/render.mjs
 
 ## 3B simülasyon filmi
 
-18 Kasım 2026'da sıfırdan kurulan film: hava savunma katmanları ve üç platformda (araç üstü, gemi güvertesi, rafineri) tespit, takip ve angajman simülasyonu. Kaynak: `simulasyon/`; ayrıntı: `docs/SIMULASYON-FILMI.md`.
+18 Kasım 2026'da sıfırdan kurulan, 25 Kasım'da daha gerçekçi görüntülerle yeniden kurgulanan film: 6 saniyelik tehdit, hava savunma katmanları, arazide araç üstünden dronun vurulması, kulenin tanıtımı, gemi güvertesi ve rafineri. Kaynak: `simulasyon/`; ayrıntı: `docs/SIMULASYON-FILMI.md`.
 
 | Dosya | Süre | Ses | Açıklama |
 |---|---:|---|---|
-| `simulasyon-filmi-60sn.mp4` | 60 sn | var | Yazılı. 1920×1080, 24 fps. |
-| `simulasyon-filmi-60sn-yazisiz.mp4` | 60 sn | var | Anlatım yazıları kapalı; göstergeler durur. |
+| `simulasyon-filmi-66sn.mp4` | 66 sn | var | Yazılı. 1920×1080, 24 fps. Güncel kurgu (25 Kasım). |
+| `simulasyon-filmi-66sn-yazisiz.mp4` | 66 sn | var | Anlatım yazıları kapalı; göstergeler durur. |
+| `simulasyon-filmi-60sn.mp4`, `simulasyon-filmi-60sn-yazisiz.mp4` | 60 sn | var | 18 Kasım'daki ilk kurgu (taktik şema ağırlıklı). Kaynağı git geçmişindedir (`394572f`). |
 
 ```
-node render/render.mjs --sayfa simulasyon --out surumler/simulasyon-filmi-60sn.mp4
-node render/render.mjs --sayfa simulasyon --sorgu temiz=1 --out surumler/simulasyon-filmi-60sn-yazisiz.mp4
+node render/render.mjs --sayfa simulasyon --crf 21 --out surumler/simulasyon-filmi-66sn.mp4
+node render/render.mjs --sayfa simulasyon --sorgu temiz=1 --crf 21 --out surumler/simulasyon-filmi-66sn-yazisiz.mp4
 ```
 
 ## Ürün filmi

@@ -14,7 +14,7 @@ render/3d/urunfilmi.py      Ürün filminin 3B çekimleri; urunfilmi_topla.py re
 render/3d/pikap3b.py        Kodla kurulan çift kabin pikap ve açık arazi (ürün filminin gökyüzü çekimi).
 render/rotus/pikap_studyo.py   Ürün filminin araç çekimi: aracın stüdyo render'ını temizler, kamerasını çözer, 3B kule katmanlarını bindirir.
 urunfilmi/                  Ürün filmi (35 sn): kurgu sayfası ve görüntüleri. Ayrıntı: docs/URUN-FILMI.md
-simulasyon/                 3B simülasyon filmi (60 sn): katmanlı hava savunma; araç, gemi, rafineri. Ayrıntı: docs/SIMULASYON-FILMI.md
+simulasyon/                 3B simülasyon filmi (66 sn): tehdit, katmanlar; arazide araç, gemi, rafineri. Ayrıntı: docs/SIMULASYON-FILMI.md
 render/3d/simfilm.py        Simülasyon filminin Blender tarafı: kule ve namlu konumları, kulenin dönüş kareleri.
 render/rotus/sim_kareler.py Kule dönüş karelerini arka plana bindirir.
 render/ses/simulasyon_ses.py   Simülasyon filminin sentez ses bandı.

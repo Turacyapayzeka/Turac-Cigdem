@@ -7,7 +7,7 @@ Son güncelleme: 18 Kasım 2026. Bu belge projeyi başka bir konuşmaya ya da ek
 - **Ne:** Turaç liderliğindeki **Dron Kalkanı** otonom robotik anti-dron kule sistemi için tanıtım filmi.
 - **Güncel sürüm:** v10, ortak kurgu ve gerçek kule modeliyle 3B çekim. 88 saniye, 1920×1080, 30 fps, sesli. Türkçe ekran yazıları, altında küçük İngilizce karşılıkları.
 - **Yöntem:** Gerçek saha fotoğrafları üzerine tarayıcıda çizilen animasyon katmanları. Sahne 04'te gerçek kule CAD modelinin 3B çekimi. Gemi ve rafineri sahneleri 3B render. Dronlar 3B modelden. Ses sentez.
-- **3B simülasyon filmi (en yeni çalışma):** 18 Kasım'da sıfırdan kurulan 60 saniyelik film: hava savunma katmanları ve üç platformda (araç üstü, gemi güvertesi, rafineri) arama, tespit, takip, 150 metrede angajman. Yakın planlar fotoğraf gerçekliğinde 3B, taktik görünüm 3B şema. Kaynak: `simulasyon/`; ayrıntı: `docs/SIMULASYON-FILMI.md`.
+- **3B simülasyon filmi (en yeni çalışma):** 18 Kasım'da sıfırdan kuruldu; 25 Kasım'da daha gerçekçi görüntülerle yeniden kurgulandı (66 saniye). Açılışta 6 saniyelik tehdit, hava savunma katmanları, arazide araç üstünden dronun vurulması, kulenin tanıtımı, gemi güvertesi ve rafineri. Araç, stüdyo render'ından ayrılıp 3B arazi görüntüsüne yerleştirildi. Anlatım, Anadolu Ajansı haberinin basın metnine dayanır; kullanıcının gönderdiği iki YouTube videosu bu ortamdan açılamadığı için dinlenemedi. Kaynak: `simulasyon/`; ayrıntı: `docs/SIMULASYON-FILMI.md`.
 - **Ürün filmi:** Tanıtım filminden ayrı, fuar ekranı için 35 saniyelik sinematik ürün filmi (17 Kasım). Yalnızca bilgisayar üretimi görüntülerden oluşur; gerçek fotoğraf içermez. Araç çekiminde kullanıcının stüdyo render'ı kullanılır, kule ona 3B olarak yerleştirilir. Yazılı ve yazısız iki hâli var. Ayrıntı: `docs/URUN-FILMI.md`.
 - **Bekleyen karar:** Ortak kurgunun bundan sonraki yönü: 3B çekim beğenilirse başka sahnelere de taşınsın mı; Vitrin görüntüleri ve teknik çizimler eklensin mi.
 
@@ -54,7 +54,7 @@ Ek olarak ürün özetine göre: sensörler pasif olduğu için "radar" sensör 
 
 | Sayfa | Adres |
 |---|---|
-| 3B simülasyon filmi (60 sn, oynatıcı) | https://claude.ai/artifact/XBr2VTgTfW4m1upF4PJBAQ |
+| 3B simülasyon filmi (66 sn, oynatıcı) | https://claude.ai/artifact/XBr2VTgTfW4m1upF4PJBAQ |
 | Ürün filmi (35 sn, oynatıcı) | https://claude.ai/artifact/Dxt1RhT3161c7jxyb3rxhN |
 | Tanıtım filmi (oynatıcı, en güncel sürüm) | https://claude.ai/artifact/7kuDfLUJDfe4NBzaTbQuMY |
 | Bütün videolar (galeri) | https://claude.ai/artifact/77W5miQcDH1NBn82suBKcr |
@@ -142,7 +142,7 @@ animasyon/index.html      Film motoru ve oynatıcı
 animasyon/assets/         Fotoğraf plakaları, kule kesmeleri, 3B plakalar, 3B kule çekimi kareleri (kule3b/), dron görünümleri, logolar, ses
 render/render.mjs         MP4 render betiği
 render/3d/                Blender betikleri ve 3B modeller (modeller/dron.npz, taret.glb, kule-parcalar.npz)
-simulasyon/               3B simülasyon filmi: kurgu sayfası, yakın plan görüntüleri ve kule hareketi kareleri
+simulasyon/               3B simülasyon filmi: kurgu sayfası, arazi, gemi ve tesis görüntüleri, kule hareketi ve dron kareleri
 docs/SIMULASYON-FILMI.md  Simülasyon filminin isteği, bölümleri, üretimi ve bilinmesi gerekenler
 urunfilmi/                Ürün filmi: kurgu sayfası ve render görüntüleri
 docs/URUN-FILMI.md        Ürün filminin brifi, bölümleri, üretimi ve sapmaları

@@ -3,8 +3,12 @@
     capa     Yakın plan çekimlerinde kulenin ve namlu uçlarının görüntüdeki yerlerini hesaplar (render almaz):
              araç (stüdyo render'ı üstündeki kule), gemi güvertesi, tesis platformu. Çıktı: sahne.json
     kareler  Kulenin hedefe döndüğü kareleri render eder (--platform arac | gemi | tesis). Çıktı: render/out/simulasyon/<platform>/
+    zemin    Araç sahnesinin arazi görüntüleri (--hangi yakin | genis). Çıktı: render/out/simulasyon/arazi/
+    dron     Dronun saydam zeminli kareleri: üstten ve karşıdan, uçuş ve takla. Çıktı: render/out/simulasyon/dron/
     /root/bpyenv/bin/python render/3d/simfilm.py capa --cikti simulasyon/assets
     /root/bpyenv/bin/python render/3d/simfilm.py kareler --platform arac
+    /root/bpyenv/bin/python render/3d/simfilm.py zemin --hangi yakin --ornek 40 --pozlama -0.5
+    /root/bpyenv/bin/python render/3d/simfilm.py dron
 
 Koordinatlar görüntünün oranıdır (0–1; x soldan, y üstten). 'ates' namlunun görüntüdeki yönüdür (birim vektör).
 """
@@ -109,6 +113,60 @@ def kareler(cikti):
 def gor(sc, X):
     w = world_to_camera_view(sc, sc.camera, Vector(X)); return [round(w.x, 5), round(1 - w.y, 5)]
 
+# ------------------------------------------------------------------ arazi ve dron (gerçekçi araç sahnesi)
+ATIS_YONU = 140.0          # kulenin araç çekimindeki nişan yönü (derece; aracın önü 0, solu 90)
+GENIS = dict(olcek=25.0, en=3840, boy=2160, kule=(0.60, 0.60))      # geniş arazi karesi: kadrajın eni (m) ve kulenin kadrajdaki yeri
+
+def studyo_kamerasi():
+    return json.load(open(os.path.join(DEPO, 'render', 'out', 'urunfilmi', 'pikap', 'kamera.json')))
+
+def paralel_kamera(sc, kam, merkez, olcek):
+    """Aracın stüdyo render'ıyla aynı yönden bakan paralel izdüşüm kamerası; merkez kadrajın ortasına düşer."""
+    from mathutils import Matrix
+    cd = bpy.data.cameras.new('cam'); co = bpy.data.objects.new('cam', cd); sc.collection.objects.link(co); sc.camera = co; cd.type = 'ORTHO'; cd.ortho_scale = olcek; cd.clip_start = 0.1; cd.clip_end = 400
+    sag, asagi, ileri = Vector(kam['sag']), Vector(kam['asagi']), Vector(kam['ileri']); yer = Vector(merkez) - ileri * 120
+    co.matrix_world = Matrix(((sag.x, -asagi.x, -ileri.x, yer.x), (sag.y, -asagi.y, -ileri.y, yer.y), (sag.z, -asagi.z, -ileri.z, yer.z), (0, 0, 0, 1))); bpy.context.view_layer.update(); return co
+
+def kapali_hava(c, guc=5.0):
+    """Kapalıya yakın gün ışığı: açık gri gökyüzü ve geniş, yumuşak güneş. Işık aracın solundan gelir (stüdyo render'ındaki gölgeyle aynı yön)."""
+    sahneler.sky(elev_deg=48, rot_deg=0, strength=float(opt('gok', 0.07)), aerosol=4.5, sun_intensity=0.0); nt = bpy.context.scene.world.node_tree
+    for n in nt.nodes:
+        if n.bl_idname == 'ShaderNodeTexSky': n.sun_disc = False
+    ld = bpy.data.lights.new('gunes', 'SUN'); ld.energy = float(opt('gunes', guc)); ld.angle = R(28); ld.color = (1.0, 0.97, 0.93); lo = bpy.data.objects.new('gunes', ld); c.objects.link(lo)
+    lo.rotation_euler = Vector((-0.12, -0.62, -0.78)).to_track_quat('-Z', 'Y').to_euler()
+
+def zemin(cikti):
+    """Araç sahnesinin arazi görüntüleri: aracın stüdyo render'ıyla aynı yönden paralel izdüşüm (araç sonradan bindirilir).
+    yakin: aracın yakın plan kadrajı; genis: 25 metrelik kadraj. Ufuk görüntüsü burada üretilmez (render/rotus/sim_ufuk.py)."""
+    import pikap3b
+    hangi = opt('hangi', 'yakin'); d = os.path.join(DEPO, 'render', 'out', 'simulasyon', 'arazi'); os.makedirs(d, exist_ok=True); kam = studyo_kamerasi()
+    sahneler.reset(); c = sahneler.coll('arazi'); pikap3b.arazi(c); kapali_hava(c); X0 = Vector(kam['X0']); sag, asagi = Vector(kam['sag']), Vector(kam['asagi']); s = kam['s']
+    if hangi == 'yakin':
+        YAN, UST, ALT = 348, 70, 50; en, boy = (kam['W'] + 2 * YAN) * kam['kat'], (kam['H'] + UST + ALT) * kam['kat']
+        sc = urunfilmi.ayar(en, boy, int(opt('ornek', 64)), pozlama=float(opt('pozlama', -0.9)))
+        merkez = X0 + sag * ((kam['W'] / 2 - kam['p0'][0]) / s) + asagi * (((kam['H'] + ALT - UST) / 2 - kam['p0'][1]) / s); paralel_kamera(sc, kam, merkez, (kam['W'] + 2 * YAN) / s)
+    elif hangi == 'genis':
+        G = GENIS; sc = urunfilmi.ayar(G['en'], G['boy'], int(opt('ornek', 64)), pozlama=float(opt('pozlama', -0.9)))
+        pm = G['en'] / G['olcek']; merkez = X0 - sag * ((G['kule'][0] - 0.5) * G['en'] / pm) - asagi * ((G['kule'][1] - 0.5) * G['boy'] / pm); paralel_kamera(sc, kam, merkez, G['olcek'])
+    else: raise SystemExit('--hangi yakin|genis')
+    sc.render.resolution_percentage = int(opt('yuzde', 100)); sc.render.image_settings.file_format = 'JPEG'; sc.render.image_settings.quality = 95; urunfilmi.kare(os.path.join(d, hangi + ('-deneme' if opt('yuzde', '100') != '100' else '') + '.jpg'))
+
+def dron(cikti):
+    """Dronun saydam zeminli kareleri. ust: araç sahnesinin paralel kamerasından (uçuş + vurulduktan sonra takla);
+    karsi: kulenin gözünden, yaklaşan dron (uçuş + takla). Işık kapalı havadır; alacakaranlık sahnelerinde kurguda koyulaştırılır."""
+    import dron3b
+    d = os.path.join(DEPO, 'render', 'out', 'simulasyon', 'dron'); os.makedirs(d, exist_ok=True); kam = studyo_kamerasi(); rnd = np.random.default_rng(5)
+    for tur in ('ust', 'karsi'):
+        sahneler.reset(); c = sahneler.coll('dron'); kok, ledler = dron3b.dron_yukle(c); kapali_hava(c, 3.0)
+        sc = urunfilmi.ayar(384, 384, int(opt('ornek', 48)), pozlama=float(opt('pozlama', -0.6))); sc.render.film_transparent = True; sc.render.image_settings.file_format = 'PNG'; sc.render.image_settings.color_mode = 'RGBA'
+        if tur == 'ust': paralel_kamera(sc, kam, (0, 0, 0), 0.9); bas = R(ATIS_YONU + 180)            # dron kuleye doğru uçar
+        else: sc.render.resolution_x = sc.render.resolution_y = 512; urunfilmi.kamera((2.3, 0.0, -0.42), (0, 0, 0.0), 105); bas = R(9)     # burun kameraya dönük, hafif yandan
+        pozlar = [(0.0, R(-17), bas)] + [(R(40 * i + 15 * rnd.random()), R(-17 + 33 * i), bas + R(24 * i)) for i in range(1, 17)]
+        if tur == 'karsi': pozlar = [(R(-7), R(-17), bas), (0.0, R(-17), bas), (R(7), R(-17), bas)] + pozlar[1:]
+        for i, e in enumerate(pozlar):
+            kok.rotation_euler = e; bpy.context.view_layer.update(); sc.render.filepath = os.path.join(d, f'{tur}{i:02d}.png'); bpy.ops.render.render(write_still=True)
+        print(tur, len(pozlar), flush=True)
+
 if __name__ == '__main__':
     cikti = opt('cikti', os.path.join(DEPO, 'simulasyon', 'assets')); os.makedirs(cikti, exist_ok=True); os.makedirs(os.path.join(DEPO, 'render', 'out', 'simulasyon'), exist_ok=True)
-    {'capa': capa, 'kareler': kareler}[ARGS[0]](cikti)
+    {'capa': capa, 'kareler': kareler, 'zemin': zemin, 'dron': dron}[ARGS[0]](cikti)
